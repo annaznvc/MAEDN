@@ -17,10 +17,6 @@
   println(output)
 
 
-<<<<<<< HEAD
 // Kommentar von Layth
 //Anna hat keine Ahnung
-=======
-// Kommentar von Anna #2
-//Anna hat keine Ahnung
->>>>>>> aba679e1e2e98c3a83db5417deef309ff7e2f991
+
