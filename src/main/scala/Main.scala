@@ -18,5 +18,5 @@
 
 
 // Kommentar von Layth
-//Anna hat keine Ahnungggg
+//Anna hat Ahnung
 
