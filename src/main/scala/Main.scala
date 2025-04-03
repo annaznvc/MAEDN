@@ -15,3 +15,6 @@
 
   val output = board.map(_.mkString(" ")).mkString("\n")
   println(output)
+
+
+// Kommentar von Anna
