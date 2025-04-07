@@ -99,4 +99,32 @@ class PlayerTest extends AnyWordSpec with Matchers:
 
       player1.id shouldBe player2.id // Demonstration: gleiche ID => evtl. Fehler im Spielkontext
     }
+
+        "fail if name is empty" in {
+      val figures = (1 to 4).map(i => Figure(i, Color.Red, Home)).toList
+      val ex = intercept[IllegalArgumentException] {
+        Player(100, "", Color.Red, figures)
+      }
+      ex.getMessage should include ("Name must not be empty")
+    }
+
+    "fail if not exactly 4 figures are provided" in {
+      val figures = List(
+        Figure(1, Color.Red, Home),
+        Figure(2, Color.Red, Home)
+      ) // nur 2 Figuren
+      val ex = intercept[IllegalArgumentException] {
+        Player(101, "TooFew", Color.Red, figures)
+      }
+      ex.getMessage should include ("Player must have exactly 4 figures")
+    }
+
+    "find a figure by ID" in {
+      val figures = (1 to 4).map(i => Figure(i, Color.Green, Home)).toList
+      val player = Player(102, "FindMe", Color.Green, figures)
+
+      player.figureById(2) shouldBe Some(Figure(2, Color.Green, Home))
+      player.figureById(99) shouldBe None
+    }
+
   }
