@@ -4,10 +4,14 @@ lazy val root = project
   .in(file("."))
   .settings(
 <<<<<<< HEAD
+<<<<<<< HEAD
     name := "MAEDN",
 =======
     name := "M DN",
 >>>>>>> 0958b78cdb4c16440efa67c47e73c3f7dd0ab913
+=======
+    name := "MAEDN",
+>>>>>>> 0ac73132a789c8d55234bdad6bbf51f76aec9c08
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
     coverageEnabled := true,
