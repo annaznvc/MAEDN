@@ -3,69 +3,70 @@ package test
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import model._
+import org.scalatest.OptionValues.convertOptionToValuable
 
 class BoardSpec extends AnyWordSpec with Matchers {
 
   "A Board" should {
 
-    "contain exactly 40 fields" in {
-      val board = new Board
+    val board = new Board
+
+    "have 40 fields" in {
       board.fields.size shouldBe 40
     }
 
-    "initialize all fields with FieldType.Board" in {
-      val board = new Board
-      all(board.fields.map(_.fieldType)) shouldBe FieldType.Board
+    "initialize all fields as FieldType.Board" in {
+      board.fields.forall(_.fieldType == FieldType.Board) shouldBe true
     }
 
     "initialize all fields with Position.y = 0" in {
-      val board = new Board
-      all(board.fields.map(_.position.y)) shouldBe 0
+      board.fields.forall(_.position.y == 0) shouldBe true
     }
 
-    "contain fields with x positions from 0 to 39" in {
-      val board = new Board
-      board.fields.map(_.position.x) shouldBe (0 until 40).toList
+    "have consecutive x positions from 0 to 39" in {
+      board.fields.map(_.position.x) shouldBe (0 to 39).toList
     }
 
-    "return a field with getFieldAt for valid index" in {
-      val board = new Board
-      val fieldOpt = board.getFieldAt(10)
-      fieldOpt should not be None
-      fieldOpt.get.position shouldBe Position(10, 0)
-      fieldOpt.get.fieldType shouldBe FieldType.Board
+    "return correct field for valid x in getFieldAt" in {
+      board.getFieldAt(0).value.position shouldBe Position(0, 0)
+      board.getFieldAt(39).value.position shouldBe Position(39, 0)
+      board.getFieldAt(10).value.position shouldBe Position(10, 0)
     }
 
-    "return None from getFieldAt when index is too small or too large" in {
-      val board = new Board
+    "return None for invalid x in getFieldAt" in {
       board.getFieldAt(-1) shouldBe None
-      board.getFieldAt(100) shouldBe None
+      board.getFieldAt(40) shouldBe None
     }
 
-    "validate correct indices using isValidIndex" in {
-      val board = new Board
+    "validate indices correctly" in {
       board.isValidIndex(0) shouldBe true
       board.isValidIndex(39) shouldBe true
-    }
-
-    "invalidate incorrect indices using isValidIndex" in {
-      val board = new Board
       board.isValidIndex(-1) shouldBe false
       board.isValidIndex(40) shouldBe false
     }
 
-    "return all positions with expected coordinates using allPositions" in {
-      val board = new Board
-      val positions = board.allPositions
-      positions.size shouldBe 40
-      positions.head shouldBe Position(0, 0)
-      positions.last shouldBe Position(39, 0)
-      all(positions.map(_.y)) shouldBe 0
+    "return all positions via allPositions" in {
+      board.allPositions should contain theSameElementsAs (0 to 39).map(Position(_, 0)).toList
     }
 
-    "force generation of fields through generateFields" in {
-      val board = new Board
-      board.fields.exists(_.position == Position(5, 0)) shouldBe true
+    "correctly generate fields from (0 until 40) range" in {
+      val expectedFields = (0 until 40).map(i => Field(Position(i, 0), FieldType.Board)).toList
+      board.fields should contain theSameElementsAs expectedFields
     }
+
+    // 🆕 Direkter Test der Map-Transformation zur Sicherheit
+    "explicitly test the structure of generated fields" in {
+      val generated = board.fields
+      generated.head shouldBe Field(Position(0, 0), FieldType.Board)
+      generated.last shouldBe Field(Position(39, 0), FieldType.Board)
+    }
+    "generate exactly 40 fields using the correct range" in {
+    val board = new Board
+    val expectedXPositions = (0 until 40).toList
+    val actualXPositions = board.fields.map(_.position.x)
+    
+    actualXPositions shouldBe expectedXPositions
+    }
+
   }
 }
