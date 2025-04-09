@@ -3,7 +3,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import model._
 
-class PlayerStatusTest extends AnyWordSpec with Matchers:
+class PlayerStatusSpec extends AnyWordSpec with Matchers:
 
   "PlayerStatus" should {
 

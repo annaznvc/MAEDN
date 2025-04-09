@@ -1,47 +1,97 @@
-package model
+package test
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import model.Main.*
+import model.Main
 
-class BoardSpec extends AnyWordSpec with Matchers:
+class MainSpec extends AnyWordSpec with Matchers {
 
-  "The predefined board" should {
-    "have 11 rows" in {
-      board.length shouldBe 11
-    }
+  "Das Spielbrett" should {
 
-    "have 11 columns in each row" in {
-      all(board.map(_.length)) shouldBe 11
-    }
-
-    "contain the center field '**'" in {
-      board.flatten should contain ("**")
-    }
-
-    "contain all four player colors" in {
-      val flat = board.flatten
-      flat should contain allOf ("RR", "BB", "YY", "GG")
-    }
-
-    "contain empty fields and path markers" in {
-      val flat = board.flatten
-      flat should contain ("  ")
-      flat should contain ("..")
-    }
+    "der gesamte Board-Vektor sollte exakt mit der erwarteten Struktur übereinstimmen" in {
+    val expected = Vector(
+      Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
+      Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
+      Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
+      Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
+      Vector("RR", "..", "..", "..", "..", "BB", "..", "..", "..", "..", ".."),
+      Vector("..", "RR", "RR", "RR", "RR", "**", "GG", "GG", "GG", "GG", ".."),
+      Vector("..", "..", "..", "..", "..", "YY", "..", "..", "..", "..", "GG"),
+      Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
+      Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
+      Vector("YY", "YY", "  ", "  ", "..", "YY", "..", "  ", "  ", "GG", "GG"),
+      Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
+    )
+  
+    Main.board shouldBe expected
   }
 
-  "runGame" should {
-    "return the start confirmation message" in {
-      runGame() shouldBe "Spielbrett geladen."
+
+    "korrekte Dimensionen haben" in {
+      Main.board.size shouldBe 11
+      Main.board.foreach(row => row.size shouldBe 11)
     }
 
-      "all cells in the board" should {
-    "match allowed field patterns" in {
-      for row <- board do
+    "die Board-Struktur korrekt als Vector von Vectors anlegen" in {
+      Main.board shouldBe a [Vector[?]]
+      all(Main.board) shouldBe a [Vector[?]]
+    }
+
+
+    "aus Vektoren bestehen" in {
+      Main.board shouldBe a [Vector[?]]
+      all(Main.board) shouldBe a [Vector[?]]
+    }
+
+    "spezifische Zellenwerte korrekt enthalten" when {
+
+      "Ecken überprüft werden" in {
+        Main.board(0)(0) shouldBe "RR"     // Obere linke Ecke
+        Main.board(10)(10) shouldBe "GG"   // Untere rechte Ecke
+      }
+
+      "das Zentrum überprüft wird" in {
+        Main.board(5)(5) shouldBe "**"
+      }
+    }
+
+    "Pfad- und Leerfelder korrekt darstellen" in {
+      Main.board(2)(2) shouldBe "  "     // Leeres Feld
+      Main.board(4)(1) shouldBe ".."     // Pfad
+      Main.board(9)(3) shouldBe "  "     // Leeres Feld
+    }
+
+    "nur gültige Zellwerte enthalten" in {
+      val allowedPattern = """[A-Z]{2}|\.\.|  |\*\*""".r
+      for row <- Main.board do
         for cell <- row do
-          cell should fullyMatch regex """[A-Z]{2}|\.\.|  |\*\*"""
+          cell should fullyMatch regex allowedPattern
     }
   }
 
+  "Die runGame-Methode" should {
+    "den korrekten Lade-Status zurückgeben" in {
+      Main.runGame() shouldBe "Spielbrett geladen."
+    }
   }
+
+  "Die Startpositionen" should {
+    "für alle Farben korrekt sein" in {
+      // Rote Basis
+      Main.board(0)(0) shouldBe "RR"
+      Main.board(1)(0) shouldBe "RR"
+
+      // Blaue Basis
+      Main.board(0)(9) shouldBe "BB"
+      Main.board(1)(5) shouldBe "BB"
+
+      // Gelbe Basis
+      Main.board(10)(4) shouldBe "YY"
+      Main.board(9)(5) shouldBe "YY"
+
+      // Grüne Basis
+      Main.board(6)(10) shouldBe "GG"
+      Main.board(10)(10) shouldBe "GG"
+    }
+  }
+}

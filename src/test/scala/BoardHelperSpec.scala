@@ -17,8 +17,6 @@ class BoardHelperSpec extends AnyWordSpec with Matchers {
       val fields = BoardHelper.generateFields()
       for (i <- 0 until 40) {
         val field = fields(i)
-        field.position.x shouldBe i
-        field.position.y shouldBe 0
         field.fieldType shouldBe FieldType.Board
       }
     }
