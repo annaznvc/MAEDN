@@ -10,29 +10,62 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     "contain exactly 40 fields" in {
       val board = new Board
-      board.fields.length shouldBe 40
+      board.fields.size shouldBe 40
     }
 
-    "initialize all fields to None" in {
+    "initialize all fields with FieldType.Board" in {
       val board = new Board
-      all(board.fields) shouldBe None
+      all(board.fields.map(_.fieldType)) shouldBe FieldType.Board
     }
 
-    "allow setting and getting a figure in a specific field" in {
+    "initialize all fields with Position.y = 0" in {
       val board = new Board
-      val figure = Figure(1, Color.Red, Home)
-      board.fields(10) = Some(figure)
-
-      board.fields(10) shouldBe Some(figure)
+      all(board.fields.map(_.position.y)) shouldBe 0
     }
 
-    "still have other fields as None after setting one" in {
+    "contain fields with x positions from 0 to 39" in {
       val board = new Board
-      val figure = Figure(1, Color.Blue, Home)
-      board.fields(5) = Some(figure)
+      board.fields.map(_.position.x) shouldBe (0 until 40).toList
+    }
 
-      board.fields(4) shouldBe None
-      board.fields(6) shouldBe None
+    "return a field with getFieldAt for valid index" in {
+      val board = new Board
+      val fieldOpt = board.getFieldAt(10)
+      fieldOpt should not be None
+      fieldOpt.get.position shouldBe Position(10, 0)
+      fieldOpt.get.fieldType shouldBe FieldType.Board
+    }
+
+    "return None from getFieldAt when index is too small or too large" in {
+      val board = new Board
+      board.getFieldAt(-1) shouldBe None
+      board.getFieldAt(100) shouldBe None
+    }
+
+    "validate correct indices using isValidIndex" in {
+      val board = new Board
+      board.isValidIndex(0) shouldBe true
+      board.isValidIndex(39) shouldBe true
+    }
+
+    "invalidate incorrect indices using isValidIndex" in {
+      val board = new Board
+      board.isValidIndex(-1) shouldBe false
+      board.isValidIndex(40) shouldBe false
+    }
+
+    "return all positions with expected coordinates using allPositions" in {
+      val board = new Board
+      val positions = board.allPositions
+      positions.size shouldBe 40
+      positions.head shouldBe Position(0, 0)
+      positions.last shouldBe Position(39, 0)
+      all(positions.map(_.y)) shouldBe 0
+    }
+
+    "force generation of fields through generateFields" in {
+      val board = new Board
+      board.fields.exists(_.position == Position(5, 0)) shouldBe true
     }
   }
 }
