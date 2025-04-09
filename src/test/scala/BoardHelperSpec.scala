@@ -11,13 +11,16 @@ class BoardHelperSpec extends AnyWordSpec with Matchers {
     "generate exactly 40 fields using (0 until 40).toList" in {
       val fields = BoardHelper.generateFields()
       fields.size shouldBe 40
-      fields.map(_.position.x) shouldBe (0 until 40).toList
     }
 
-    "generate all fields with y = 0 and type = Board" in {
+    "generate fields with correct structure per element to satisfy coverage" in {
       val fields = BoardHelper.generateFields()
-      all (fields.map(_.position.y)) shouldBe 0
-      all (fields.map(_.fieldType)) shouldBe FieldType.Board
+      for (i <- 0 until 40) {
+        val field = fields(i)
+        field.position.x shouldBe i
+        field.position.y shouldBe 0
+        field.fieldType shouldBe FieldType.Board
+      }
     }
   }
 }
