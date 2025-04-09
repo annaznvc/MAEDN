@@ -1,6 +1,6 @@
-// BoardHelper.scala
 package model
 
 object BoardHelper:
   def generateFields(): List[Field] =
-    (0 until 40).toList.map(i => Field(Position(i, 0), FieldType.Board))
+    val indices = (0 until 40).toList
+    indices.map(i => Field(Position(i, 0), FieldType.Board))
