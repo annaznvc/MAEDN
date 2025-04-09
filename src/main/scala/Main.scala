@@ -1,5 +1,8 @@
-@main def run(): Unit =
-  val board = Vector(
+package model
+
+object Main:
+
+  val board: Vector[Vector[String]] = Vector(
     Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
     Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
     Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
@@ -13,10 +16,5 @@
     Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
   )
 
-  val output = board.map(_.mkString(" ")).mkString("\n")
-  println(output)
-
-
-// Kommentar von Layth
-//Anna hat Ahnung
-
+  def runGame(): String =
+    "Spielbrett geladen."
