@@ -14,29 +14,29 @@ class BoardHelperSpec extends AnyWordSpec with Matchers {
     }
 
     "match the full expected board layout exactly" in {
-    val board = Main.board
-    val expectedBoard = Vector(
-      Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
-      Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
-      Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
-      Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
-      Vector("RR", "..", "..", "..", "..", "BB", "..", "..", "..", "..", ".."),
-      Vector("..", "RR", "RR", "RR", "RR", "**", "GG", "GG", "GG", "GG", ".."),
-      Vector("..", "..", "..", "..", "..", "YY", "..", "..", "..", "..", "GG"),
-      Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
-      Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
-      Vector("YY", "YY", "  ", "  ", "..", "YY", "..", "  ", "  ", "GG", "GG"),
-      Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
-    )
+      val board = Main.board
+      val expectedBoard = Vector(
+        Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
+        Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
+        Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
+        Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
+        Vector("RR", "..", "..", "..", "..", "BB", "..", "..", "..", "..", ".."),
+        Vector("..", "RR", "RR", "RR", "RR", "**", "GG", "GG", "GG", "GG", ".."),
+        Vector("..", "..", "..", "..", "..", "YY", "..", "..", "..", "..", "GG"),
+        Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
+        Vector("  ", "  ", "  ", "  ", "..", "YY", "..", "  ", "  ", "  ", "  "),
+        Vector("YY", "YY", "  ", "  ", "..", "YY", "..", "  ", "  ", "GG", "GG"),
+        Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
+      )
 
-    board.length shouldBe 11
-    all(board.map(_.length)) shouldBe 11
+      board.length shouldBe 11
+      all(board.map(_.length)) shouldBe 11
 
-    for (y <- 0 until 11; x <- 0 until 11) {
-      withClue(s"at position ($y,$x): ") {
-        board(y)(x) shouldBe expectedBoard(y)(x)
+      for (y <- 0 until 11; x <- 0 until 11) {
+        withClue(s"at position ($y,$x): ") {
+          board(y)(x) shouldBe expectedBoard(y)(x)
+        }
       }
-    }
     }
 
   }

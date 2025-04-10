@@ -3,7 +3,7 @@ import org.scalatest.matchers.should.Matchers
 import controller._
 import model._
 
-class GameControllerTest extends AnyWordSpec with Matchers:
+class GameControllerSpec extends AnyWordSpec with Matchers:
 
   "A GameController" should {
 

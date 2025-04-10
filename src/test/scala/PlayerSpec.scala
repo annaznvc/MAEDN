@@ -22,7 +22,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import model._
 
-class PlayerTest extends AnyWordSpec with Matchers:
+class PlayerSpec extends AnyWordSpec with Matchers:
 
   "A Player" should {
 
