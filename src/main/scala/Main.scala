@@ -2,7 +2,7 @@ package model
 
 object Main:
 
-  val board: Vector[Vector[String]] = Vector(
+  def board: Vector[Vector[String]] = Vector(
     Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
     Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
     Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
@@ -16,5 +16,4 @@ object Main:
     Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
   )
 
-  def runGame(): String =
-    "Spielbrett geladen."
+  def runGame(): String = "Spielbrett geladen."
