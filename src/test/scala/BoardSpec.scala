@@ -3,7 +3,7 @@ package test
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import model._
-import org.scalatest.OptionValues.convertOptionToValuable
+import org.scalatest.OptionValues._
 
 class BoardSpec extends AnyWordSpec with Matchers {
 
@@ -11,62 +11,61 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     val board = new Board
 
-    "have 40 fields" in {
+    "have 40 fields (8x5)" in {
       board.fields.size shouldBe 40
     }
 
-    "initialize all fields as FieldType.Board" in {
-      board.fields.forall(_.fieldType == FieldType.Board) shouldBe true
+    "cover all x positions from 0 to 7" in {
+      board.fields.map(_.position.x).distinct.sorted shouldBe (0 to 7).toList
     }
 
-    "initialize all fields with Position.y = 0" in {
-      board.fields.forall(_.position.y == 0) shouldBe true
+    "cover all y positions from 0 to 4" in {
+      board.fields.map(_.position.y).distinct.sorted shouldBe (0 to 4).toList
     }
 
-    "have consecutive x positions from 0 to 39" in {
-      board.fields.map(_.position.x) shouldBe (0 to 39).toList
+    "have every field with FieldType.Board" in {
+      board.fields.map(_.fieldType).distinct shouldBe List(FieldType.Board)
     }
 
-    "return correct field for valid x in getFieldAt" in {
-      board.getFieldAt(0).value.position shouldBe Position(0, 0)
-      board.getFieldAt(39).value.position shouldBe Position(39, 0)
-      board.getFieldAt(10).value.position shouldBe Position(10, 0)
+    "return correct field for valid coordinates in getFieldAt" in {
+      board.getFieldAt(0, 0).value.position shouldBe Position(0, 0)
+      board.getFieldAt(7, 4).value.position shouldBe Position(7, 4)
+      board.getFieldAt(3, 2).value.position shouldBe Position(3, 2)
     }
 
-    "return None for invalid x in getFieldAt" in {
-      board.getFieldAt(-1) shouldBe None
-      board.getFieldAt(40) shouldBe None
+    "return None for invalid coordinates in getFieldAt" in {
+      board.getFieldAt(-1, 0) shouldBe None
+      board.getFieldAt(0, -1) shouldBe None
+      board.getFieldAt(8, 0) shouldBe None
+      board.getFieldAt(0, 5) shouldBe None
     }
 
     "validate indices correctly" in {
-      board.isValidIndex(0) shouldBe true
-      board.isValidIndex(39) shouldBe true
-      board.isValidIndex(-1) shouldBe false
-      board.isValidIndex(40) shouldBe false
+      board.isValidIndex(0, 0) shouldBe true
+      board.isValidIndex(7, 4) shouldBe true
+      board.isValidIndex(-1, 0) shouldBe false
+      board.isValidIndex(0, 5) shouldBe false
     }
 
-    "return all positions via allPositions" in {
-      board.allPositions should contain theSameElementsAs (0 to 39).map(Position(_, 0)).toList
-    }
+    "generate correct field at each (x, y) coordinate using until" in {
+      val board = new Board
 
-    "correctly generate fields from (0 until 40) range" in {
-      val expectedFields = (0 until 40).map(i => Field(Position(i, 0), FieldType.Board)).toList
-      board.fields should contain theSameElementsAs expectedFields
+      for (x <- 0 until board.width; y <- 0 until board.height) {
+        withClue(s"Missing field at ($x, $y): ") {
+          val fieldOpt = board.getFieldAt(x, y)
+          fieldOpt.isDefined shouldBe true
+          fieldOpt.get.position shouldBe Position(x, y)
+          fieldOpt.get.fieldType shouldBe FieldType.Board
+        }
+      }
     }
-
-    // 🆕 Direkter Test der Map-Transformation zur Sicherheit
-    "explicitly test the structure of generated fields" in {
-      val generated = board.fields
-      generated.head shouldBe Field(Position(0, 0), FieldType.Board)
-      generated.last shouldBe Field(Position(39, 0), FieldType.Board)
-    }
-    "generate exactly 40 fields using the correct range" in {
-    val board = new Board
-    val expectedXPositions = (0 until 40).toList
-    val actualXPositions = board.fields.map(_.position.x)
     
-    actualXPositions shouldBe expectedXPositions
+    "return all positions via allPositions" in {
+      val expected = for {
+        x <- 0 to 7
+        y <- 0 to 4
+      } yield Position(x, y)
+      board.allPositions should contain theSameElementsAs expected
     }
-
   }
 }
