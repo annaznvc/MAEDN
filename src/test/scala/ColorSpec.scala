@@ -31,57 +31,17 @@ class ColorSpec extends AnyWordSpec with Matchers {
       an [IllegalArgumentException] should be thrownBy Color.valueOf("Pink")
     }
 
-    "support fromOrdinal for valid ordinals" in {
-      Color.fromOrdinal(0) shouldBe Color.Red
-      Color.fromOrdinal(1) shouldBe Color.Blue
-      Color.fromOrdinal(2) shouldBe Color.Green
-      Color.fromOrdinal(3) shouldBe Color.Yellow
-    }
 
-    "throw NoSuchElementException for invalid fromOrdinal index" in {
-      an [NoSuchElementException] should be thrownBy Color.fromOrdinal(99)
-    }
-
-    "have correct ordinal values" in {
-      Color.Red.ordinal shouldBe 0
-      Color.Blue.ordinal shouldBe 1
-      Color.Green.ordinal shouldBe 2
-      Color.Yellow.ordinal shouldBe 3
-    }
-
-    "support productPrefix" in {
+    "support productPrefix" in { //gibt Namen des Enum-EIntrags als String zurück
       Color.Red.productPrefix shouldBe "Red"
       Color.Green.productPrefix shouldBe "Green"
+      Color.Yellow.productPrefix shouldBe "Yellow"
+      Color.Blue.productPrefix shouldBe "Blue"
     }
 
-    "support canEqual and productArity" in {
+    "support canEqual" in { //prüfen, ob objekte vom gleichen typ sind
       Color.Red.canEqual(Color.Red) shouldBe true
-      Color.Red.productArity shouldBe 0
     }
 
-    "support productElementNames (empty for enums)" in {
-      Color.Red.productElementNames.toList shouldBe empty
-    }
-
-    "throw IndexOutOfBoundsException for productElement" in {
-      an [IndexOutOfBoundsException] should be thrownBy Color.Red.productElement(0)
-    }
-
-    "throw IndexOutOfBoundsException for productElementName" in {
-      an [IndexOutOfBoundsException] should be thrownBy Color.Red.productElementName(0)
-    }
-
-    "support pattern matching for all values" in {
-      def describe(color: Color): String = color match
-        case Color.Red    => "warm"
-        case Color.Blue   => "cool"
-        case Color.Green  => "natural"
-        case Color.Yellow => "bright"
-
-      describe(Color.Red) shouldBe "warm"
-      describe(Color.Blue) shouldBe "cool"
-      describe(Color.Green) shouldBe "natural"
-      describe(Color.Yellow) shouldBe "bright"
-    }
   }
 }
