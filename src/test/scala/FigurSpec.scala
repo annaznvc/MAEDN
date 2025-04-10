@@ -22,19 +22,22 @@ class FigureTest extends AnyWordSpec with Matchers:
       moved.state shouldBe OnBoard(Position(3, 4))
     }
 
-    "support copying with a new id" in {
-      val original = Figure(3, Color.Green, Start(Position(0, 0)))
-      val renamed = original.copy(id = 99)
-
-      renamed.id shouldBe 99
-      renamed.color shouldBe Color.Green
-      renamed.state shouldBe Start(Position(0, 0))
-    }
-
     "fail if the figure ID is negative" in {
       val ex = intercept[IllegalArgumentException] {
         Figure(-5, Color.Yellow, Home)
       }
-      ex.getMessage should include ("Figure ID must be non-negative")
+      ex.getMessage should include ("Figure ID must be between 0 and 15")
+    }
+
+    "only allow IDs between 0 and 15" in {
+      val validIDs = 0 to 15
+
+      for (id <- validIDs) {
+        noException should be thrownBy Figure(id, Color.Red, Home)
+      }
+
+      an [IllegalArgumentException] should be thrownBy Figure(-1, Color.Red, Home)
+      an [IllegalArgumentException] should be thrownBy Figure(16, Color.Red, Home)
+      an [IllegalArgumentException] should be thrownBy Figure(99, Color.Red, Home)
     }
   }
