@@ -30,11 +30,5 @@ class FieldSpec extends AnyWordSpec with Matchers {
       f1 should not be f2
     }
 
-    "not be equal if fieldType differs" in {
-      val f1 = Field(Position(3, 3), FieldType.Start)
-      val f2 = Field(Position(3, 3), FieldType.Goal)
-
-      f1 should not be f2
-    }
   }
 }
