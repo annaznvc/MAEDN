@@ -16,4 +16,6 @@ object Main:
     Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
   )
 
+  val fields: List[Field] = BoardHelper.generateFields()
+
   def runGame(): String = "Spielbrett geladen."
