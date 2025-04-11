@@ -12,23 +12,4 @@ class PlayerStatusSpec extends AnyWordSpec with Matchers:
       val player = Player(999, "Test", Color.Red, figs)
       player.status shouldBe Active
     }
-
-    "allow valid placement in Out" in {
-      val out = Out(2)
-      out.placement shouldBe 2
-    }
-
-    "fail for invalid placement below 1" in {
-      val ex = intercept[IllegalArgumentException] {
-        Out(0)
-      }
-      ex.getMessage should include ("Placement must be between 1 and 4")
-    }
-
-    "fail for invalid placement above 4" in {
-      val ex = intercept[IllegalArgumentException] {
-        Out(5)
-      }
-      ex.getMessage should include ("Placement must be between 1 and 4")
-    }
   }

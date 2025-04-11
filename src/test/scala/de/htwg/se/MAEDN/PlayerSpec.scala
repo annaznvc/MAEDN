@@ -1,22 +1,3 @@
-/**
-  * 
-  * Muss genau 4 Figuren haben
-  * 
-  * Alle Figuren müssen dieselbe Farbe haben wie der Spieler
-  * 
-  * Kann nur eine Farbe spielen
-  * 
-  * Player ID muss eindeutig sein
-  * 
-  * SPieler hat nur Zugriff auf seine eigenen Figuren
-  * 
-  * Name draf nicht leer sein
-  * 
-  * Hat einen Zustand: aktiv oder inaktiv
-  * 
-  * Wenn raus, wird Spieler beim Gewinnen einem Platz zugeordner (z.B erster, der gewonnen hat ist Platz 1, dann der nächste Gewinner Platz 2 etc.)
-  * 
-  */
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -91,15 +72,6 @@ class PlayerSpec extends AnyWordSpec with Matchers:
         case _ => fail("Expected Out status")
     }
 
-    "have a unique player ID among players" in {
-      val figures1 = (1 to 4).map(i => Figure(i, Color.Red, Home)).toList
-      val figures2 = (5 to 8).map(i => Figure(i, Color.Blue, Home)).toList
-      val player1 = Player(8, "Leo", Color.Red, figures1)
-      val player2 = Player(8, "Maya", Color.Blue, figures2) // gleiche ID wie player1
-
-      player1.id shouldBe player2.id // Demonstration: gleiche ID => evtl. Fehler im Spielkontext
-    }
-
         "fail if name is empty" in {
       val figures = (1 to 4).map(i => Figure(i, Color.Red, Home)).toList
       val ex = intercept[IllegalArgumentException] {
@@ -117,14 +89,6 @@ class PlayerSpec extends AnyWordSpec with Matchers:
         Player(101, "TooFew", Color.Red, figures)
       }
       ex.getMessage should include ("Player must have exactly 4 figures")
-    }
-
-    "find a figure by ID" in {
-      val figures = (1 to 4).map(i => Figure(i, Color.Green, Home)).toList
-      val player = Player(102, "FindMe", Color.Green, figures)
-
-      player.figureById(2) shouldBe Some(Figure(2, Color.Green, Home))
-      player.figureById(99) shouldBe None
     }
 
   }

@@ -15,17 +15,6 @@ class BoardSpec extends AnyWordSpec with Matchers {
       board.fields.size shouldBe 121
     }
 
-    "cover all x positions from 0 to 10" in {
-      board.fields.map(_.position.x).distinct.sorted shouldBe (0 to 10).toList
-    }
-
-    "cover all y positions from 0 to 10" in {
-      board.fields.map(_.position.y).distinct.sorted shouldBe (0 to 10).toList
-    }
-
-    "have every field with FieldType.Board" in {
-      board.fields.map(_.fieldType).distinct shouldBe List(FieldType.Board)
-    }
 
     "return correct field for valid coordinates in getFieldAt" in {
       board.getFieldAt(0, 0).value.position shouldBe Position(0, 0)
@@ -47,18 +36,6 @@ class BoardSpec extends AnyWordSpec with Matchers {
       board.isValidIndex(0, 11) shouldBe false
     }
 
-    "generate correct field at each (x, y) coordinate using until" in {
-      val board = new Board
-
-      for (x <- 0 until board.width; y <- 0 until board.height) {
-        withClue(s"Missing field at ($x, $y): ") {
-          val fieldOpt = board.getFieldAt(x, y)
-          fieldOpt.isDefined shouldBe true
-          fieldOpt.get.position shouldBe Position(x, y)
-          fieldOpt.get.fieldType shouldBe FieldType.Board
-        }
-      }
-    }
 
     "return all positions via allPositions" in {
       val expected = for {

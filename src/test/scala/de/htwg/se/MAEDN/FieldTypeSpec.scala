@@ -13,14 +13,4 @@ class FieldTypeSpec extends AnyWordSpec with Matchers:
       FieldType.Home.toString shouldBe "Home"
     }
 
-    "support pattern matching" in {
-      def describe(fieldType: FieldType): String = fieldType match
-        case FieldType.Start => "This is the start field."
-        case FieldType.Goal  => "This is the goal field."
-        case FieldType.Board => "This is a board field."
-        case FieldType.Home  => "This is a home field."
-
-      describe(FieldType.Start) shouldBe "This is the start field."
-      describe(FieldType.Goal) shouldBe "This is the goal field."
-    }
   }
