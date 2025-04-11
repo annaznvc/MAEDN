@@ -3,8 +3,8 @@ package model
 import model._
 
 class Board:
-  val width = 8
-  val height = 5
+  val width = 11
+  val height = 11
 
   private val xRange = 0 until width
   private val yRange = 0 until height

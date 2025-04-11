@@ -11,16 +11,16 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     val board = new Board
 
-    "have 40 fields (8x5)" in {
-      board.fields.size shouldBe 40
+    "have 121 fields (11x11)" in {
+      board.fields.size shouldBe 121
     }
 
-    "cover all x positions from 0 to 7" in {
-      board.fields.map(_.position.x).distinct.sorted shouldBe (0 to 7).toList
+    "cover all x positions from 0 to 10" in {
+      board.fields.map(_.position.x).distinct.sorted shouldBe (0 to 10).toList
     }
 
-    "cover all y positions from 0 to 4" in {
-      board.fields.map(_.position.y).distinct.sorted shouldBe (0 to 4).toList
+    "cover all y positions from 0 to 10" in {
+      board.fields.map(_.position.y).distinct.sorted shouldBe (0 to 10).toList
     }
 
     "have every field with FieldType.Board" in {
@@ -29,22 +29,22 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     "return correct field for valid coordinates in getFieldAt" in {
       board.getFieldAt(0, 0).value.position shouldBe Position(0, 0)
-      board.getFieldAt(7, 4).value.position shouldBe Position(7, 4)
-      board.getFieldAt(3, 2).value.position shouldBe Position(3, 2)
+      board.getFieldAt(10, 10).value.position shouldBe Position(10, 10)
+      board.getFieldAt(5, 5).value.position shouldBe Position(5, 5)
     }
 
     "return None for invalid coordinates in getFieldAt" in {
       board.getFieldAt(-1, 0) shouldBe None
       board.getFieldAt(0, -1) shouldBe None
-      board.getFieldAt(8, 0) shouldBe None
-      board.getFieldAt(0, 5) shouldBe None
+      board.getFieldAt(11, 0) shouldBe None
+      board.getFieldAt(0, 11) shouldBe None
     }
 
     "validate indices correctly" in {
       board.isValidIndex(0, 0) shouldBe true
-      board.isValidIndex(7, 4) shouldBe true
+      board.isValidIndex(10, 10) shouldBe true
       board.isValidIndex(-1, 0) shouldBe false
-      board.isValidIndex(0, 5) shouldBe false
+      board.isValidIndex(0, 11) shouldBe false
     }
 
     "generate correct field at each (x, y) coordinate using until" in {
@@ -59,13 +59,14 @@ class BoardSpec extends AnyWordSpec with Matchers {
         }
       }
     }
-    
+
     "return all positions via allPositions" in {
       val expected = for {
-        x <- 0 to 7
-        y <- 0 to 4
+        x <- 0 until board.width
+        y <- 0 until board.height
       } yield Position(x, y)
       board.allPositions should contain theSameElementsAs expected
     }
+
   }
 }
