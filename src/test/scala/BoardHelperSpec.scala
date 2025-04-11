@@ -95,4 +95,6 @@ class BoardHelperSpec extends AnyWordSpec with Matchers:
       }
     }
 
+    
+
   }
