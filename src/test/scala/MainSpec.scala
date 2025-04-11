@@ -62,4 +62,16 @@ class MainSpec extends AnyWordSpec with Matchers:
     "return the game start message" in {
       Main.runGame() shouldBe "Spielbrett geladen."
     }
+
+    "explicitly evaluate all Vector(...) constructor calls in Main.board" in {
+  // Zugriff auf jede einzelne Zeile, damit Vector(...) ausgeführt wird
+  val rows = Main.board
+
+  rows.foreach { row =>
+    row.foreach { cell =>
+      cell.length should (be >= 1 and be <= 2)
+    }
+  }
+}
+
   }
