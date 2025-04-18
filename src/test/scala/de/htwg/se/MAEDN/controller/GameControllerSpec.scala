@@ -1,7 +1,9 @@
+package de.htwg.se.MAEDN.controller
+
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import controller._
-import model._
+import de.htwg.se.MAEDN.controller._
+import de.htwg.se.MAEDN.model._
 
 class GameControllerSpec extends AnyWordSpec with Matchers:
 

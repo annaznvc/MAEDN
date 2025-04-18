@@ -1,8 +1,10 @@
-package test
+package de.htwg.se.MAEDN.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import model.Color
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.controller._
+import de.htwg.se.MAEDN.util._
 
 class ColorSpec extends AnyWordSpec with Matchers {
 

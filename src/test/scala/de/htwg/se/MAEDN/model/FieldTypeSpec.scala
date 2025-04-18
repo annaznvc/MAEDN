@@ -1,4 +1,4 @@
-package model
+package de.htwg.se.MAEDN.model
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers

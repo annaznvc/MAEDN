@@ -1,8 +1,11 @@
+package de.htwg.se.MAEDN.controller
+
+
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import model._
-import controller._
-import util.Dice
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.controller._
+import de.htwg.se.MAEDN.util._
 
 class GameTest extends AnyWordSpec with Matchers:
 

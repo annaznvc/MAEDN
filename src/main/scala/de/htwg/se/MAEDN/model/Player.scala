@@ -1,4 +1,4 @@
-package model
+package de.htwg.se.MAEDN.model
 
 case class Player(
   id: Int,
@@ -13,3 +13,27 @@ case class Player(
 
   def figureById(figureId: Int): Option[Figure] =
     figures.find(_.id == figureId)
+
+  // 🆕 New helper: get all figures that are OnBoard
+  def figuresOnBoard: List[Figure] =
+    figures.filter(_.isOnBoard)
+
+  // 🆕 New helper: get all figures that are in Goal
+  def figuresInGoal: List[Figure] =
+    figures.filter(_.isInGoal)
+
+  // 🆕 New helper: check if player has a figure at a given position
+  def hasFigureAt(pos: Position): Boolean =
+    figures.exists {
+      case Figure(_, _, OnBoard(p)) if p == pos => true
+      case Figure(_, _, Goal(p)) if p == pos => true
+      case _ => false
+    }
+
+  // 🆕 New helper: get a figure at a given position (if any)
+  def figureAt(pos: Position): Option[Figure] =
+    figures.find {
+      case Figure(_, _, OnBoard(p)) if p == pos => true
+      case Figure(_, _, Goal(p)) if p == pos => true
+      case _ => false
+    }

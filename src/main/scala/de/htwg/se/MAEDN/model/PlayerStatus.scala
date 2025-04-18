@@ -1,4 +1,4 @@
-package model
+package de.htwg.se.MAEDN.model
 
 sealed trait PlayerStatus
 case object Active extends PlayerStatus

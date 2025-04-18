@@ -1,8 +1,7 @@
-package model
+package de.htwg.se.MAEDN.model
 
-object Main:
-
-  def board: Vector[Vector[String]] = Vector(
+object BoardLayout:
+  def layout: Vector[Vector[String]] = Vector(
     Vector("RR", "RR", "  ", "  ", "..", "..", "BB", "  ", "  ", "BB", "BB"),
     Vector("RR", "RR", "  ", "  ", "..", "BB", "..", "  ", "  ", "BB", "BB"),
     Vector("  ", "  ", "  ", "  ", "..", "BB", "..", "  ", "  ", "  ", "  "),
@@ -15,7 +14,3 @@ object Main:
     Vector("YY", "YY", "  ", "  ", "..", "YY", "..", "  ", "  ", "GG", "GG"),
     Vector("YY", "YY", "  ", "  ", "YY", "..", "..", "  ", "  ", "GG", "GG")
   )
-
-  val fields: List[Field] = BoardHelper.generateFields()
-
-  def runGame(): String = "Spielbrett geladen."
