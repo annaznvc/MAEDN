@@ -20,22 +20,40 @@ class Game(initialPlayers: List[Player]):
   def rollDice(): Int =
     Dice.roll()
 
-  def moveFigure(player: Player, figureId: Int, steps: Int): Player =
+  def moveFigure(player: Player, figureId: Int, steps: Int): Player = {
     val figureOpt = player.figureById(figureId)
     if figureOpt.isEmpty then return player
 
     val figure = figureOpt.get
 
-    figure.state match
+    figure.state match {
       case Home =>
         if steps == 6 then
           val startPos = board.startPosition(player.color)
-          if players.exists(_.hasFigureAt(startPos)) then return player // Blocked
+          val blocked = players.exists(_.hasFigureAt(startPos))
+          println(s"\n> ${player.name} is trying to enter the board.")
+          println(s"> Start position: $startPos")
+          println(s"> Blocked: $blocked")
+          println("> All figures on the board:")
+          
+          players.foreach { p =>
+            p.figures.foreach {
+              case Figure(id, _, OnBoard(pos)) => println(s"  ${p.name}'s figure $id is at $pos (OnBoard)")
+              case Figure(id, _, Goal(pos))    => println(s"  ${p.name}'s figure $id is at $pos (Goal)")
+              case _ => // ignore
+            }
+          }
+
+          if blocked then
+            player
           else
-            val updated = figure.copy(state = OnBoard(startPos))
-            val updatedPlayer = player.copy(figures = player.figures.updated(player.figures.indexOf(figure), updated))
-            return checkForFinish(updatedPlayer)
-        else return player
+            val updatedFigure = figure.copy(state = OnBoard(startPos))
+            val updatedPlayer = player.copy(
+              figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
+            )
+            checkForFinish(updatedPlayer)
+        else
+          player
 
       case OnBoard(pos) =>
         val goalEntry = board.goalEntryPosition(player.color)
@@ -44,7 +62,7 @@ class Game(initialPlayers: List[Player]):
           val firstGoal = goalPath.head
           val updatedFigure = figure.copy(state = Goal(firstGoal))
           val updatedPlayer = player.copy(figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure))
-          return checkForFinish(updatedPlayer)
+          checkForFinish(updatedPlayer)
         else
           val path = board.boardPath
           val currentIndex = path.indexOf(pos)
@@ -53,7 +71,7 @@ class Game(initialPlayers: List[Player]):
           val newIndex = (currentIndex + steps) % path.length
           val newPos = path(newIndex)
 
-          if player.hasFigureAt(newPos) then return player // blocked by own figure
+          if player.hasFigureAt(newPos) then return player
 
           players = players.map { p =>
             if p != player && p.hasFigureAt(newPos) then
@@ -65,17 +83,16 @@ class Game(initialPlayers: List[Player]):
 
           val updatedFigure = figure.copy(state = OnBoard(newPos))
           val updatedPlayer = player.copy(figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure))
-          return checkForFinish(updatedPlayer)
+          checkForFinish(updatedPlayer)
 
       case Goal(pos) =>
         val goalPath = board.goalPath(player.color)
         val currentIndex = goalPath.indexOf(pos)
 
         if currentIndex == -1 || currentIndex + steps >= goalPath.length then
-          return player // can't move beyond goal
+          player
         else
           val newPos = goalPath(currentIndex + steps)
-
           val updatedFigure =
             if currentIndex + steps == goalPath.length - 1 then
               figure.copy(state = Finished)
@@ -83,10 +100,13 @@ class Game(initialPlayers: List[Player]):
               figure.copy(state = Goal(newPos))
 
           val updatedPlayer = player.copy(figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure))
-          return checkForFinish(updatedPlayer)
+          checkForFinish(updatedPlayer)
 
       case Finished =>
         player
+    }
+  }
+
 
   private def checkForFinish(updatedPlayer: Player): Player =
     val allFinished = updatedPlayer.figures.forall(_.isFinished)

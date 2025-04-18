@@ -13,8 +13,10 @@ class TextUI(controller: GameController):
     while !controller.isGameOver do
       val player = controller.currentPlayer
       println(s"\n${player.name}'s turn (${player.color})")
+      readLine(s"${player.name}, press ENTER to roll the dice...")
       val roll = controller.roll()
       println(s"${player.name} rolled a $roll")
+
 
       println("Current Board:")
       println(renderBoard())
