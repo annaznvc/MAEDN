@@ -75,44 +75,61 @@ class Game(initialPlayers: List[Player]):
 
         if currentIndex == -1 then return player
 
+        val goalEntryIndex = path.indexOf(goalEntry)
         val newIndex = currentIndex + steps
 
-        // Check if the figure would enter the goal path
-        if currentIndex < path.indexOf(goalEntry) && newIndex > path.indexOf(goalEntry) then
-          val stepsIntoGoal = newIndex - path.indexOf(goalEntry) - 1
-          if stepsIntoGoal < goalPath.length then
-            val newPos = goalPath(stepsIntoGoal)
-            val updatedFigure =
-              if stepsIntoGoal == goalPath.length - 1 then
-                figure.copy(state = Finished)
-              else
-                figure.copy(state = Goal(newPos))
-            val updatedPlayer = player.copy(
-              figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
-            )
-            checkForFinish(updatedPlayer)
+        val crossesGoalEntry =
+          (currentIndex <= goalEntryIndex && newIndex > goalEntryIndex) ||
+          (goalEntryIndex < currentIndex && (newIndex % path.length) > goalEntryIndex)
+
+        println(s"[DEBUG] currentIndex=$currentIndex, goalEntryIndex=$goalEntryIndex, newIndex=$newIndex")
+        println(s"[DEBUG] crossesGoalEntry=$crossesGoalEntry")
+
+        if crossesGoalEntry then
+          val distanceToEntry = (path.length + goalEntryIndex - currentIndex) % path.length
+          println(s"[DEBUG] distanceToEntry=$distanceToEntry")
+
+          if steps > distanceToEntry then
+            val stepsIntoGoal = steps - distanceToEntry - 1
+            println(s"[DEBUG] stepsIntoGoal=$stepsIntoGoal")
+
+            if stepsIntoGoal >= 0 && stepsIntoGoal < goalPath.length then
+              val newPos = goalPath(stepsIntoGoal)
+              val updatedFigure =
+                if stepsIntoGoal == goalPath.length - 1 then
+                  figure.copy(state = Finished)
+                else
+                  figure.copy(state = Goal(newPos))
+              val updatedPlayer = player.copy(
+                figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
+              )
+              return checkForFinish(updatedPlayer)
+            else
+              println("[DEBUG] Invalid: stepsIntoGoal out of bounds.")
+              return player
           else
-            player // can't enter beyond last goal
-        else
-          val nextIndex = (currentIndex + steps) % path.length
-          val newPos = path(nextIndex)
+            println("[DEBUG] Not enough steps to reach goal entry.")
+            // fall through to regular movement
 
-          if player.hasFigureAt(newPos) then return player
+        val nextIndex = (currentIndex + steps) % path.length
+        val newPos = path(nextIndex)
 
-          // Handle hit
-          players = players.map { p =>
-            if p != player && p.hasFigureAt(newPos) then
-              val kicked = p.figureAt(newPos).get
-              val updated = p.figures.updated(p.figures.indexOf(kicked), kicked.copy(state = Home))
-              p.copy(figures = updated)
-            else p
-          }
+        if player.hasFigureAt(newPos) then return player
 
-          val updatedFigure = figure.copy(state = OnBoard(newPos))
-          val updatedPlayer = player.copy(
-            figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
-          )
-          checkForFinish(updatedPlayer)
+        // Handle hit
+        players = players.map { p =>
+          if p != player && p.hasFigureAt(newPos) then
+            val kicked = p.figureAt(newPos).get
+            val updated = p.figures.updated(p.figures.indexOf(kicked), kicked.copy(state = Home))
+            p.copy(figures = updated)
+          else p
+        }
+
+        val updatedFigure = figure.copy(state = OnBoard(newPos))
+        val updatedPlayer = player.copy(
+          figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
+        )
+        checkForFinish(updatedPlayer)
 
       case Goal(pos) =>
         val goalPath = board.goalPath(player.color)

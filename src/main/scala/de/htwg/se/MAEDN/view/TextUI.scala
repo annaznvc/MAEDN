@@ -24,11 +24,19 @@ class TextUI(controller: GameController):
       for (figure, i) <- player.figures.zipWithIndex do
         println(s"  [$i] ${figure.state}")
 
-      val validFigures = player.figures.zipWithIndex.collect {
-        case (Figure(_, _, Home), i) if roll == 6 => i
-        case (Figure(_, _, OnBoard(_)), i) => i
-        case (Figure(_, _, Goal(_)), i) => i
+      val validFigures = player.figures.zipWithIndex.flatMap {
+        case (Figure(_, _, Home), i) if roll == 6 => Some(i)
+        case (Figure(_, _, OnBoard(_)), i) => Some(i)
+        case (Figure(_, _, Goal(pos)), i) =>
+          val goalPath = controller.game.board.goalPath(player.color)
+          val idx = goalPath.indexOf(pos)
+          if idx != -1 && idx + roll < goalPath.length then Some(i)
+          else None
+        case _ => None
       }
+
+
+      
 
       if validFigures.isEmpty then
         println("No valid moves. Turn skipped.")
@@ -95,7 +103,12 @@ class TextUI(controller: GameController):
             layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
           case Goal(pos) =>
             layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
-          case _ => // do not render Home or Finished
+          case Finished =>
+           val goalPath = controller.game.board.goalPath(player.color)
+           val pos = goalPath.last
+           layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+          case _ => // Home not shown
+
 
     layout
   }
