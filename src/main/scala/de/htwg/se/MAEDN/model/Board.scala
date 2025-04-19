@@ -33,10 +33,10 @@ class Board:
 
   // 🆕 Goal entry positions (just before entering goal path)
   def goalEntryPosition(color: Color): Position = color match
-    case Color.Yellow    => Position(1, 5)
-    case Color.Green   => Position(5, 1)
-    case Color.Red  => Position(9, 5)
-    case Color.Blue => Position(5, 9)
+    case Color.Yellow    => Position(0, 5)
+    case Color.Green   => Position(5, 0)
+    case Color.Red  => Position(10, 5)
+    case Color.Blue => Position(5, 10)
 
   def goalPath(color: Color): List[Position] = color match
     case Color.Yellow    => List(Position(1, 5), Position(2, 5), Position(3, 5), Position(4, 5))
@@ -89,7 +89,6 @@ class Board:
     // Finish loop
     Position(6, 0)
   )
-  
-  
-  
-  
+
+
+

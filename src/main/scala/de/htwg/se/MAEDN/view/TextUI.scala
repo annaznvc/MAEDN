@@ -77,11 +77,12 @@ class TextUI(controller: GameController):
     blueGoals.foreach(p => layout(p.y)(p.x) = " B ")
     yellowGoals.foreach(p => layout(p.y)(p.x) = " Y ")
 
-    // Homes
-    layout(0)(0) = " Y "; layout(0)(1) = " Y "; layout(1)(0) = " Y "; layout(1)(1) = " Y "
-    layout(0)(9) = " B "; layout(0)(10) = " B "; layout(1)(9) = " B "; layout(1)(10) = " B "
-    layout(9)(0) = " G "; layout(9)(1) = " G "; layout(10)(0) = " G "; layout(10)(1) = " G "
-    layout(9)(9) = " R "; layout(9)(10) = " R "; layout(10)(9) = " R "; layout(10)(10) = " R "
+    // Home fields
+    layout(0)(9) = " G "; layout(0)(10) = " G "; layout(1)(9) = " G "; layout(1)(10) = " G " // Green top right
+    layout(9)(0) = " B "; layout(9)(1) = " B "; layout(10)(0) = " B "; layout(10)(1) = " B " // Blue bottom left
+    layout(0)(0) = " Y "; layout(0)(1) = " Y "; layout(1)(0) = " Y "; layout(1)(1) = " Y "   // Yellow top left
+    layout(9)(9) = " R "; layout(9)(10) = " R "; layout(10)(9) = " R "; layout(10)(10) = " R " // Red bottom right
+
 
     // Center
     layout(5)(5) = " X "
