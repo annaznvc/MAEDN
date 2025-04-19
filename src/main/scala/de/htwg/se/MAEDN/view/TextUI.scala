@@ -89,13 +89,17 @@ class TextUI(controller: GameController):
 
     // Player figures
     for player <- controller.game.players do
-      for figure <- player.figures do
-        figure.state match
-          case OnBoard(pos) =>
-            layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
-          case Goal(pos) =>
-            layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
-          case _ => // do not render Home or Finished
+  for figure <- player.figures do
+    figure.state match
+      case OnBoard(pos) =>
+        layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+      case Goal(pos) =>
+        layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+      case Finished =>
+        val goalPath = controller.game.board.goalPath(player.color)
+        val finalPos = goalPath.last
+        layout(finalPos.y)(finalPos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+      case _ => // do not render Home
 
     layout
   }
