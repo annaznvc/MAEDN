@@ -20,60 +20,65 @@ class Game(initialPlayers: List[Player]):
   def rollDice(): Int =
     Dice.roll()
 
+
+
+
+
+
   def moveFigure(player: Player, figureId: Int, steps: Int): Player = {
-    println(s"[DEBUG] moveFigure: Player ${player.name}, figureId=$figureId, steps=$steps")
+  println(s"[DEBUG] moveFigure: Player ${player.name}, figureId=$figureId, steps=$steps")
 
-    val figureOpt = player.figureById(figureId)
-    if figureOpt.isEmpty then
-      println("[DEBUG] No figure found.")
-      return player
+  val figureOpt = player.figureById(figureId)
+  if figureOpt.isEmpty then
+    println("[DEBUG] No figure found.")
+    return player
 
-    val figure = figureOpt.get
-    println(s"[DEBUG] Found figure with state: ${figure.state}")
+  val figure = figureOpt.get
+  println(s"[DEBUG] Found figure with state: ${figure.state}")
 
-    figure.state match {
-      case Home =>
-        if steps == 6 then
-          val startPos = board.startPosition(player.color)
-          val blocker = players.flatMap(_.figures).find(_.state match
-            case OnBoard(p) => p == startPos
-            case _ => false
-          )
+  figure.state match {
+    case Home =>
+      if steps == 6 then
+        val startPos = board.startPosition(player.color)
+        val blocker = players.flatMap(_.figures).find(_.state match
+          case OnBoard(p) => p == startPos
+          case _ => false
+        )
 
-          blocker match
-            case Some(b) if b.color == player.color =>
-              println("[DEBUG] Start position is blocked by own figure.")
-              player
-            case Some(b) =>
-              println("[DEBUG] Start position is occupied by enemy — hitting it.")
-              players = players.map { p =>
-                if p.figures.contains(b) then
-                  val updated = p.figures.updated(p.figures.indexOf(b), b.copy(state = Home))
-                  p.copy(figures = updated)
-                else p
-              }
-              val updatedFigure = figure.copy(state = OnBoard(startPos))
-              val updatedPlayer = player.copy(
-                figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
-              )
-              checkForFinish(updatedPlayer)
-            case None =>
-              println("[DEBUG] Start position is free.")
-              val updatedFigure = figure.copy(state = OnBoard(startPos))
-              val updatedPlayer = player.copy(
-                figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
-              )
-              checkForFinish(updatedPlayer)
-        else
-          player
+        blocker match
+          case Some(b) if b.color == player.color =>
+            println("[DEBUG] Start position is blocked by own figure.")
+            player
+          case Some(b) =>
+            println("[DEBUG] Start position is occupied by enemy — hitting it.")
+            players = players.map { p =>
+              if p.figures.contains(b) then
+                val updated = p.figures.updated(p.figures.indexOf(b), b.copy(state = Home))
+                p.copy(figures = updated)
+              else p
+            }
+            val updatedFigure = figure.copy(state = OnBoard(startPos))
+            val updatedPlayer = player.copy(
+              figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
+            )
+            checkForFinish(updatedPlayer)
+          case None =>
+            println("[DEBUG] Start position is free.")
+            val updatedFigure = figure.copy(state = OnBoard(startPos))
+            val updatedPlayer = player.copy(
+              figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
+            )
+            checkForFinish(updatedPlayer)
+      else
+        player
 
-      case OnBoard(pos) =>
-        val path = board.boardPath
-        val goalEntry = board.goalEntryPosition(player.color)
-        val goalPath = board.goalPath(player.color)
-        val currentIndex = path.indexOf(pos)
+    case OnBoard(pos) =>
+      val path = board.boardPath
+      val goalEntry = board.goalEntryPosition(player.color)
+      val goalPath = board.goalPath(player.color)
+      val currentIndex = path.indexOf(pos)
 
-        if currentIndex == -1 then return player
+      if currentIndex == -1 then return player
 
         val goalEntryIndex = path.indexOf(goalEntry)
         val newIndex = currentIndex + steps
@@ -131,16 +136,24 @@ class Game(initialPlayers: List[Player]):
         )
         checkForFinish(updatedPlayer)
 
-      case Goal(pos) =>
-        val goalPath = board.goalPath(player.color)
-        val currentIndex = goalPath.indexOf(pos)
+    case Goal(pos) =>
+      val goalPath = board.goalPath(player.color)
+      val currentIndex = goalPath.indexOf(pos)
 
-        if currentIndex == -1 || currentIndex + steps >= goalPath.length then
+      if currentIndex == -1 then return player
+
+      val targetIndex = currentIndex + steps
+      if targetIndex >= goalPath.length then
+        println("[DEBUG] Not enough room in goal path.")
+        player
+      else
+        val newPos = goalPath(targetIndex)
+        if player.hasFigureAt(newPos) then
+          println("[DEBUG] Zielpfad durch eigene Figur blockiert.")
           player
         else
-          val newPos = goalPath(currentIndex + steps)
           val updatedFigure =
-            if currentIndex + steps == goalPath.length - 1 then
+            if targetIndex == goalPath.length - 1 then
               figure.copy(state = Finished)
             else
               figure.copy(state = Goal(newPos))
@@ -150,10 +163,15 @@ class Game(initialPlayers: List[Player]):
           )
           checkForFinish(updatedPlayer)
 
-      case Finished =>
-        player
-    }
+    case Finished =>
+      player
   }
+}
+
+
+
+
+
 
   private def checkForFinish(updatedPlayer: Player): Player =
     val allFinished = updatedPlayer.figures.forall(_.isFinished)
