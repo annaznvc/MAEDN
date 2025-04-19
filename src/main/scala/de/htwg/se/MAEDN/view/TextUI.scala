@@ -17,7 +17,6 @@ class TextUI(controller: GameController):
       val roll = controller.roll()
       println(s"${player.name} rolled a $roll")
 
-
       println("Current Board:")
       println(renderBoard())
 
@@ -44,8 +43,10 @@ class TextUI(controller: GameController):
             moved = true
           else
             input.toIntOption match
-              case Some(figId) if validFigures.contains(figId) =>
-                moved = controller.move(figId, roll)
+              case Some(figIndex) if validFigures.contains(figIndex) =>
+                val figure = player.figures(figIndex)
+                moved = controller.move(figure.id, roll)
+
                 println(if moved then "Moved." else "Invalid move.")
               case _ =>
                 println("Invalid input. Try again.")
@@ -58,29 +59,47 @@ class TextUI(controller: GameController):
         case Out(place) => println(s"${player.name} placed $place")
         case _ => println(s"${player.name} did not finish")
 
+  def generateLayout(): Array[Array[String]] = {
+    val layout = Array.fill(11, 11)("   ")
+
+    // Main path
+    for pos <- controller.game.board.boardPath do
+      layout(pos.y)(pos.x) = " o "
+
+    // Goal paths
+    val blueGoals = List(Position(5, 9), Position(5, 8), Position(5, 7), Position(5, 6))
+    val yellowGoals = List(Position(1, 5), Position(2, 5), Position(3, 5), Position(4, 5))
+    val redGoals = List(Position(9, 5), Position(8, 5), Position(7, 5), Position(6, 5))
+    val greenGoals = List(Position(5, 1), Position(5, 2), Position(5, 3), Position(5, 4))
+
+    redGoals.foreach(p => layout(p.y)(p.x) = " R ")
+    greenGoals.foreach(p => layout(p.y)(p.x) = " G ")
+    blueGoals.foreach(p => layout(p.y)(p.x) = " B ")
+    yellowGoals.foreach(p => layout(p.y)(p.x) = " Y ")
+
+    // Homes
+    layout(0)(0) = " Y "; layout(0)(1) = " Y "; layout(1)(0) = " Y "; layout(1)(1) = " Y "
+    layout(0)(9) = " B "; layout(0)(10) = " B "; layout(1)(9) = " B "; layout(1)(10) = " B "
+    layout(9)(0) = " G "; layout(9)(1) = " G "; layout(10)(0) = " G "; layout(10)(1) = " G "
+    layout(9)(9) = " R "; layout(9)(10) = " R "; layout(10)(9) = " R "; layout(10)(10) = " R "
+
+    // Center
+    layout(5)(5) = " X "
+
+    // Player figures
+    for player <- controller.game.players do
+      for figure <- player.figures do
+        figure.state match
+          case OnBoard(pos) =>
+            layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+          case Goal(pos) =>
+            layout(pos.y)(pos.x) = s" ${player.color.toString.head}${figure.id % 4} "
+          case _ => // do not render Home or Finished
+
+    layout
+  }
+
   def renderBoard(): String = {
-  val board = BoardLayout.layout
-  val height = board.length
-  val width = if board.nonEmpty then board.head.length else 0
-
-  val figureMap: Map[Position, String] =
-    controller.game.players.flatMap { player =>
-      player.figures.collect {
-        case f if f.state match
-          case OnBoard(_) | Goal(_) => true
-          case _ => false
-        =>
-          val pos = f.state match
-            case OnBoard(p) => p
-            case Goal(p)    => p
-          pos -> s"${player.color.toString.head}${f.id % 4}"
-      }
-    }.toMap
-
-  val rows = for y <- 0 until height yield
-    val cols = for x <- 0 until width yield
-      val pos = Position(x, y)
-      figureMap.getOrElse(pos, board(y)(x))
-    cols.mkString(" ")
-  rows.mkString("\n")
-}
+    val layout = generateLayout()
+    layout.map(_.mkString("")).mkString("\n")
+  }

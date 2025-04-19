@@ -12,13 +12,17 @@ class GameController(val game: Game):
 
   def move(figureId: Int, steps: Int): Boolean =
     val player = currentPlayer
+    println(s"[DEBUG] move() called for ${player.name}, figure $figureId, steps = $steps")
+  
     val updatedPlayer = game.moveFigure(player, figureId, steps)
-
+  
+    println(s"[DEBUG] Is player changed? ${updatedPlayer != player}")
     if updatedPlayer == player then
       false
     else
       game.players = game.players.updated(game.currentPlayerIndex, updatedPlayer)
       true
+
 
   def endTurn(): Unit =
     game.nextPlayer()

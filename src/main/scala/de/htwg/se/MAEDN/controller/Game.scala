@@ -21,38 +21,43 @@ class Game(initialPlayers: List[Player]):
     Dice.roll()
 
   def moveFigure(player: Player, figureId: Int, steps: Int): Player = {
+    println(s"[DEBUG] moveFigure: trying to move figure $figureId with $steps steps for ${player.name}")
+
     val figureOpt = player.figureById(figureId)
-    if figureOpt.isEmpty then return player
+    if figureOpt.isEmpty then
+      println("[DEBUG] Figure not found.")
+      return player
 
     val figure = figureOpt.get
+    println(s"[DEBUG] Found figure with state: ${figure.state}")
 
     figure.state match {
       case Home =>
+        println("[DEBUG] Entered case Home")
         if steps == 6 then
           val startPos = board.startPosition(player.color)
-          val blocked = players.exists(_.hasFigureAt(startPos))
-          println(s"\n> ${player.name} is trying to enter the board.")
-          println(s"> Start position: $startPos")
-          println(s"> Blocked: $blocked")
-          println("> All figures on the board:")
-          
+          val blocked = players.filterNot(_.id == player.id).exists(_.hasFigureAt(startPos))
+
+          println(s"[DEBUG] ${player.name} trying to spawn at $startPos")
+          println(s"[DEBUG] Blocked: $blocked")
+
           players.foreach { p =>
-            p.figures.foreach {
-              case Figure(id, _, OnBoard(pos)) => println(s"  ${p.name}'s figure $id is at $pos (OnBoard)")
-              case Figure(id, _, Goal(pos))    => println(s"  ${p.name}'s figure $id is at $pos (Goal)")
-              case _ => // ignore
-            }
+            println(s"[DEBUG] Player ${p.name}'s figures:")
+            p.figures.foreach(f => println(s"    ${f.id}: ${f.state}"))
           }
 
           if blocked then
+            println("[DEBUG] Spawn blocked.")
             player
           else
             val updatedFigure = figure.copy(state = OnBoard(startPos))
             val updatedPlayer = player.copy(
               figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
             )
+            println("[DEBUG] Spawned figure.")
             checkForFinish(updatedPlayer)
         else
+          println("[DEBUG] Rolled not 6, can't spawn.")
           player
 
       case OnBoard(pos) =>
@@ -66,6 +71,10 @@ class Game(initialPlayers: List[Player]):
         else
           val path = board.boardPath
           val currentIndex = path.indexOf(pos)
+
+          println(s">>> ${player.name}'s figure is currently at $pos")
+          println(s">>> Index in boardPath: $currentIndex")
+
           if currentIndex == -1 then return player
 
           val newIndex = (currentIndex + steps) % path.length
@@ -106,7 +115,6 @@ class Game(initialPlayers: List[Player]):
         player
     }
   }
-
 
   private def checkForFinish(updatedPlayer: Player): Player =
     val allFinished = updatedPlayer.figures.forall(_.isFinished)
