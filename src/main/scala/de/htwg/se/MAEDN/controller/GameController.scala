@@ -16,12 +16,19 @@ class GameController(val game: Game):
   
     val updatedPlayer = game.moveFigure(player, figureId, steps)
   
-    println(s"[DEBUG] Is player changed? ${updatedPlayer != player}")
-    if updatedPlayer == player then
-      false
-    else
+    val hasChanged =
+      updatedPlayer != player ||
+      updatedPlayer.status != player.status ||
+      updatedPlayer.figures.exists { f =>
+        val original = player.figureById(f.id)
+        original.exists(_.state != f.state)
+      }
+
+    if hasChanged then
       game.players = game.players.updated(game.currentPlayerIndex, updatedPlayer)
       true
+    else
+      false
 
 
   def endTurn(): Unit =

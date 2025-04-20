@@ -17,8 +17,7 @@ class Game(initialPlayers: List[Player]):
   def isGameOver: Boolean =
     players.count(p => p.status.isInstanceOf[Out]) == players.size - 1
 
-  def rollDice(): Int =
-    Dice.roll()
+  def rollDice(): Int = Dice.roll()
 
   def moveFigure(player: Player, figureId: Int, steps: Int): Player = {
     println(s"[DEBUG] moveFigure: Player ${player.name}, figureId=$figureId, steps=$steps")
@@ -64,8 +63,7 @@ class Game(initialPlayers: List[Player]):
                 figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
               )
               checkForFinish(updatedPlayer)
-        else
-          player
+        else player
 
       case OnBoard(pos) =>
         val path = board.boardPath
@@ -98,13 +96,13 @@ class Game(initialPlayers: List[Player]):
 
               val goalBlocked = players.exists(_.figures.exists {
                 case f if f.id == figure.id => false
-                case Figure(_, _, Goal(p2)) => p2 == newPos
-                case Figure(_, _, Finished) => goalPath.last == newPos
+                case Figure(_, color, Goal(p2)) if p2 == newPos && color == player.color => true
+                case Figure(_, color, Finished) if newPos == goalPath.last && color == player.color => true
                 case _ => false
               })
 
               if goalBlocked then
-                println("[DEBUG] Goal tile is already occupied.")
+                println("[DEBUG] Goal tile is blocked by own figure.")
                 return player
 
               val updatedFigure =
@@ -159,34 +157,15 @@ class Game(initialPlayers: List[Player]):
         val isBlocked = pathToCheck.exists { pos =>
           players.exists(_.figures.exists {
             case f if f.id == figure.id => false
-            case Figure(_, _, Goal(p2)) if p2 == pos => true
-            case Figure(_, _, Finished) if goalPath.last == pos => true
+            case Figure(_, color, Goal(p2)) if p2 == pos && color == player.color => true
+            case Figure(_, color, Finished) if goalPath.last == pos && color == player.color => true
             case _ => false
           })
         }
 
         if isBlocked then
-          val remainingFields = goalPath.slice(currentIndex + 1, goalPath.length)
-          val allBlocked = remainingFields.forall(pos =>
-            players.exists(p =>
-              p != player && p.figures.exists {
-                case Figure(_, _, Goal(p2)) => p2 == pos
-                case Figure(_, _, Finished) => goalPath.last == pos
-                case _ => false
-              }
-            )
-          )
-
-          if allBlocked then
-            println("[DEBUG] All goal fields ahead are blocked. Auto-finishing.")
-            val updatedFigure = figure.copy(state = Finished)
-            val updatedPlayer = player.copy(
-              figures = player.figures.updated(player.figures.indexOf(figure), updatedFigure)
-            )
-            return checkForFinish(updatedPlayer)
-          else
-            println("[DEBUG] Move blocked in goal path.")
-            return player
+          println("[DEBUG] Move blocked in goal path. Cannot proceed.")
+          return player
 
         val newPos = goalPath(targetIndex)
 
@@ -201,12 +180,11 @@ class Game(initialPlayers: List[Player]):
         )
         checkForFinish(updatedPlayer)
 
-      case Finished =>
-        player
+      case Finished => player
     }
   }
 
-  private def checkForFinish(updatedPlayer: Player): Player =
+  def checkForFinish(updatedPlayer: Player): Player =
     val allFinished = updatedPlayer.figures.forall(_.isFinished)
     val alreadyOut = updatedPlayer.status match
       case Out(_) => true
@@ -215,5 +193,4 @@ class Game(initialPlayers: List[Player]):
     if allFinished && !alreadyOut then
       placementsGiven += 1
       updatedPlayer.copy(status = Out(placementsGiven))
-    else
-      updatedPlayer
+    else updatedPlayer
