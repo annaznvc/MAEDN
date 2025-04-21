@@ -6,6 +6,16 @@ import scala.io.StdIn.readLine
 
 class TextUI(controller: GameController):
 
+  def formatField(content: String): String =
+    if content.length == 3 then content
+    else if content.length == 2 then s" $content"
+    else if content.length == 1 then s" $content "
+    else "   "
+
+  def clearScreen(): Unit =
+    print("\u001b[2J")
+    print("\u001b[H")
+
   def run(): Unit =
     println("\nThe game begins!")
 
@@ -39,7 +49,7 @@ class TextUI(controller: GameController):
 
           println("Your Figures:")
           for (figure, i) <- player.figures.zipWithIndex do
-            println(s"  [$i] ${figure.state}")
+            println(s"  [${i + 1}] ${figure.state}")
 
           val board = controller.game.board
 
@@ -110,7 +120,7 @@ class TextUI(controller: GameController):
             movedSuccessfully = controller.move(figure.id, roll)
             println(if movedSuccessfully then "Moved." else "No valid move.")
           else
-            println(s"Choose a figure to move: ${validFigures.mkString("[", ", ", "]")}")
+            println(s"Choose a figure to move: ${validFigures.map(_ + 1).mkString("[", ", ", "]")}")
             var moved = false
             while !moved do
               val input = readLine("Enter figure number (or 'skip'): ").trim
@@ -119,8 +129,8 @@ class TextUI(controller: GameController):
                 moved = true
               else
                 input.toIntOption match
-                  case Some(figIndex) if validFigures.contains(figIndex) =>
-                    val figure = player.figures(figIndex)
+                  case Some(figIndex) if validFigures.contains(figIndex - 1) =>
+                    val figure = player.figures(figIndex - 1)
                     moved = controller.move(figure.id, roll)
                     movedSuccessfully = moved
                     println(if moved then "Moved." else "Invalid move.")
@@ -157,23 +167,15 @@ class TextUI(controller: GameController):
     yellowGoals.foreach(p => layout(p.y)(p.x) = formatField("Y"))
 
     for player <- controller.game.players do
-      for figure <- player.figures do
+      for figure <- player.figures do {
+        val displayId = (figure.id % 4) + 1
         figure.state match
-          case OnBoard(pos) => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}${figure.id % 4}")
-          case Goal(pos)    => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}${figure.id % 4}")
-          case Finished     =>
+          case OnBoard(pos) => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}$displayId")
+          case Goal(pos) => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}$displayId")
+          case Finished =>
             val pos = controller.game.board.goalPath(player.color).last
-            layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}${figure.id % 4}")
-          case _ =>
+            layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}$displayId")
+          case _ => ()
+      }
 
     layout.map(_.mkString("")).mkString("\n")
-
-  def formatField(content: String): String =
-    if content.length == 3 then content
-    else if content.length == 2 then s" $content"
-    else if content.length == 1 then s" $content "
-    else "   "
-
-  def clearScreen(): Unit =
-    print("\u001b[2J")
-    print("\u001b[H")
