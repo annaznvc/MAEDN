@@ -185,7 +185,7 @@ class Game(initialPlayers: List[Player]):
   }
 
   def checkForFinish(updatedPlayer: Player): Player =
-    val allFinished = updatedPlayer.figures.forall(_.isFinished)
+    val allFinished = updatedPlayer.figures.forall(f => f.isFinished || f.isInGoal)
     val alreadyOut = updatedPlayer.status match
       case Out(_) => true
       case _ => false
