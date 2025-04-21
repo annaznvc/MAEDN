@@ -36,11 +36,15 @@ class TextUI(controller: GameController):
         var takeAnotherTurn = false
         var movedSuccessfully = false
 
-        while remainingRolls > 0 && !movedSuccessfully do
+        while remainingRolls > 0 do
           readLine(s"\n${player.name}'s turn (${player.color}), press ENTER to roll the dice... (${remainingRolls} roll${if remainingRolls > 1 then "s" else ""} left)")
           val roll = controller.roll()
-          remainingRolls -= 1
-          if roll == 6 then takeAnotherTurn = true
+          if roll == 6 then
+            remainingRolls = 1
+          else remainingRolls -= 1
+
+          
+
 
           clearScreen()
           println(s"${player.name} rolled a $roll")
@@ -118,6 +122,10 @@ class TextUI(controller: GameController):
             val index = validFigures.head
             val figure = player.figures(index)
             movedSuccessfully = controller.move(figure.id, roll)
+            player = controller.currentPlayer
+            if movedSuccessfully && roll == 6 && figure.isOnBoard then
+              takeAnotherTurn = true
+
             println(if movedSuccessfully then "Moved." else "No valid move.")
           else
             println(s"Choose a figure to move: ${validFigures.map(_ + 1).mkString("[", ", ", "]")}")
@@ -133,6 +141,7 @@ class TextUI(controller: GameController):
                     val figure = player.figures(figIndex - 1)
                     moved = controller.move(figure.id, roll)
                     movedSuccessfully = moved
+                    player = controller.currentPlayer
                     println(if moved then "Moved." else "Invalid move.")
                   case _ => println("Invalid input. Try again.")
 
