@@ -11,31 +11,34 @@ class Game(initialPlayers: List[Player]):
 
   def currentPlayer: Player = players(currentPlayerIndex)
 
-  def nextPlayer(): Unit =
+  def nextPlayer(): Unit = //erhöht aktuellen Spielerindex um 1 und modulo damit man wieder bei 0 anfängt wenn man am ende der spielerliste angkelkommen ist
     currentPlayerIndex = (currentPlayerIndex + 1) % players.size
 
   def isGameOver: Boolean =
-    players.count(p => p.status.isInstanceOf[Out]) == players.size - 1
+    players.count(p => p.status.isInstanceOf[Out]) == players.size - 1 //wenn alle out sind bis auf einen spieler, ist das spiel verloren
 
   def rollDice(): Int = Dice.roll()
 
+  ///////////////////
   def moveFigure(player: Player, figureId: Int, steps: Int): Player = {
     println(s"[DEBUG] moveFigure: Player ${player.name}, figureId=$figureId, steps=$steps")
 
+    //optionale figr, die vllt vorhanden ist also none oder some weil figureByID ja so definiert ist
     val figureOpt = player.figureById(figureId)
     if figureOpt.isEmpty then
       println("[DEBUG] No figure found.")
-      return player
+      return player //gibt spieler unverändert zurück, kein zug, weil figur fehlt
 
-    val figure = figureOpt.get
+    val figure = figureOpt.get //mit get holen wir den inhalt aus some raus
     println(s"[DEBUG] Found figure with state: ${figure.state}")
 
     figure.state match {
+      //Fall : figur zu hause
       case Home =>
         if steps == 6 then
-          val startPos = board.startPosition(player.color)
-          val blocker = players.flatMap(_.figures).find(_.state match
-            case OnBoard(p) => p == startPos
+          val startPos = board.startPosition(player.color) //berechen startposition für spielerfarbe
+          val blocker = players.flatMap(_.figures).find(_.state match //steht figur schon auf dem Startfeld?
+            case OnBoard(p) => p == startPos //suche erste Figur, die auf dem Startfeld steht, nur figuren auf dem brett werden geprüft
             case _ => false
           )
 
@@ -183,6 +186,9 @@ class Game(initialPlayers: List[Player]):
       case Finished => player
     }
   }
+
+
+
 
   def checkForFinish(updatedPlayer: Player): Player =
     val allFinished = updatedPlayer.figures.forall(f => f.isFinished || f.isInGoal)

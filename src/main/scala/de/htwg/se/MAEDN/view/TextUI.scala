@@ -9,42 +9,41 @@ import scala.io.StdIn.readLine
 class TextUI(controller: GameController): //GameController kümmert sich um roll, move, ednturn usw
 
 
-  def run(): Unit = //Unit = sowas wie void
+
+  def run(): Unit = //Unit = void
     println("\nThe game begins!")
 
 
-    while !controller.isGameOver do //läuft solange das spiel nicht vorbei ist
-      var player = controller.currentPlayer //holt aktuellen spieler
+    while !controller.isGameOver do //solange Spiel nicht vorbei
+      var player = controller.currentPlayer //Spieler = aktueller Spieler
 
 
-      val checkedPlayer = controller.game.checkForFinish(player) ///////////////////Hat der aktuelle Spieler alle Figuren im Ziel? ja -> out
+      val checkedPlayer = controller.game.checkForFinish(player) //Prüfe, ob Spiel fertig ist
       if checkedPlayer != player then //hat sich beim spieler was geändert?
-        controller.game.players = controller.game.players.updated(controller.game.currentPlayerIndex, checkedPlayer) //update
+        controller.game.players = controller.game.players.updated(controller.game.currentPlayerIndex, checkedPlayer) //Update Spielerstatus in Spielerliste
         controller.endTurn()
       else //also checkedplayer == player also Spieler NICHT fertig...
         while player.status.isInstanceOf[Out] do //Überspringe Spieler, die out sind
           controller.endTurn()
-          player = controller.currentPlayer //aktueller Spieler ändert sich durch endturn, also muss aktueller spieler neu geholt werden
+          player = controller.currentPlayer // nächsten Spieler holen
 
 
-        val allAtHome = player.figures.forall(_.isAtHome)
-        var remainingRolls = if (allAtHome) 3 else 1
-        var takeAnotherTurn = false
+///////////////////////////////////////////////
+
+        val allAtHome = player.figures.forall(_.isAtHome) 
+        var remainingRolls = if (allAtHome) 3 else 1 //Wenn alle Figuren zu Hause, 3 Würfe, sonst 1
+        var takeAnotherTurn = false 
         var movedSuccessfully = false
 
 
-        while remainingRolls > 0 do
+
+        while remainingRolls > 0 do //Wiederhole solange Würfe übrig
           // interpolations verwenden um Variablen in Strings zu verwenden wie in GameController
-          readLine(s"\n${player.name}'s turn (${player.color}), press ENTER to roll the dice... (${remainingRolls} roll${if remainingRolls > 1 then "s" else ""} left)")
-          val roll = controller.roll()
+          readLine(s"\n${player.name}'s turn (${player.color}), press ENTER to roll the dice... (${remainingRolls} roll${if remainingRolls > 1 then "s" else ""} left)") //warte auf enter
+          val roll = controller.roll() //würfle
           if roll == 6 then
-            remainingRolls = 1 //noch mal würfeln bei 6
-          else remainingRolls -= 1 //sonst wurf verbraucht verbraucht
-
-
-         
-
-
+            remainingRolls = 1 //Wenn 6: neuer Wurf
+          else remainingRolls -= 1 //sonst Wurf verbraucht und weg
 
 
           clearScreen()
@@ -59,23 +58,21 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
           for (figure, i) <- player.figures.zipWithIndex do //Pattern Match auf Tuppel (Figur, Index) alle figuren des spielers + Index
             println(s"  [$i] ${figure.state}") //gibt die Figur mit dem Index aus und spielstand
 
-
           val board = controller.game.board
-
-
           val validFigures = player.figures.zipWithIndex.flatMap { //Liste aller Figuren des aktuellen Spielers
 
 
-            //falls: Figur zu hause ist und 6 gewürfelt wurde
+
+            //falls: Figur zu hause ist und 6 gewürfelt wurde: nur wenn Start frei
             case (Figure(_, _, Home), i) if roll == 6 =>
               val startPos = board.startPosition(player.color) //Startposition auf dem Spielfeld für diesen Spieler holen
               if player.hasFigureAt(startPos) then None else Some(i) //Wenn Figur auf Startposition ist, dann kann sie nicht bewegt werden, also None zurückgeben, sonst die Figur zurückgeben
 
 
-            //falls: Figur auf dem Spielfeld ist
+            //falls: Figur onBoard: Prüfe, ob Ziel frei und erreichbar
             case (fig @ Figure(_, _, OnBoard(pos)), i) => //mit @ könne wir auf die Figur zugreifen!!!
               val path = board.boardPath
-              val goalEntry = board.goalEntryPosition(player.color) //Einstiefspunkt zum Zielbereich
+              val goalEntry = board.goalEntryPosition(player.color) //Einstiegspunkt zum Zielbereich
               val goalPath = board.goalPath(player.color)
               val currentIndex = path.indexWhere(_ == pos) //sucht in Path an welcher Stelle sich aktuelle Position der Figur befindet
               if currentIndex == -1 then None //wenn aktuelle Position nicht im Pfad ist, dann ungültig, none
@@ -112,7 +109,7 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
 
 
 
-            //falls: Figur ist im Zielbereich
+            //falls: Figur onGoal: Prüfe, ob Ziel frei
             case (fig @ Figure(_, _, Goal(pos)), i) =>
               val goalPath = board.goalPath(player.color)
               val currentIndex = goalPath.indexWhere(_ == pos)
@@ -134,20 +131,20 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
             case _ => None //fall für allea ndere, was nicht oben definiert wurde
           }
 
-
+          //Wenn keine valid Figure, no valid moves
           if validFigures.isEmpty then
             println("No valid moves.")
-          else if validFigures.size == 1 then //nur eine bewegbare figur
+          else if validFigures.size == 1 then //Wenn nur eine Figur valid ist
             val index = validFigures.head //hol ersten und einzigen eintrag in der liste
             val figure = player.figures(index)
-            movedSuccessfully = controller.move(figure.id, roll)
+            movedSuccessfully = controller.move(figure.id, roll) //bewege figur automatisch
             player = controller.currentPlayer
-            if movedSuccessfully && roll == 6 && figure.isOnBoard then
-              takeAnotherTurn = true //logik für einen pash, noch mal würfeln bei einer 6
+            if movedSuccessfully && roll == 6 && figure.isOnBoard then //Wenn figur auf Brett, noch 1 Wurf
+              takeAnotherTurn = true
 
 
             println(if movedSuccessfully then "Moved." else "No valid move.")
-          else
+          else //Wenn mehrere Figuren gültig: Lass benutzer wählen oder skip
             println(s"Choose a figure to move: ${validFigures.mkString("[", ", ", "]")}")
             var moved = false
             while !moved do //solange bis moved true ist
@@ -166,6 +163,9 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
                   case _ => println("Invalid input. Try again.")
 
 
+///////////////////////////////////////////////
+
+
         val playerAfterTurn = controller.game.currentPlayer
         val checkedAfterMove = controller.game.checkForFinish(playerAfterTurn) //ist der spieler nach seienm zu gfertig?
         if checkedAfterMove != playerAfterTurn then //wenn sich beim spieler etwas geändert ha...
@@ -178,12 +178,17 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
 
         controller.endTurn()
 
+  //////////////////////////////
 
     println("\nGame over!")
     for player <- controller.game.players do
       player.status match //unterscuht status jedes spielers
         case Out(place) => println(s"${player.name} placed $place") //wenn out, dann platz erreicht:
         case _ => println(s"${player.name} did not finish") //der, der nicht fertig wurde, did not finish
+
+
+
+
 
 
 
@@ -207,9 +212,12 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
     yellowGoals.foreach(p => layout(p.y)(p.x) = formatField("Y"))
 
 
+    ////////////////////////////////////////////////
+
+
     for player <- controller.game.players do //schleife über alle spieler und deren figuren
       for figure <- player.figures do
-        figure.state match
+        figure.state match //Wenn Figur auf Brett oder Ziel: Zeig Farbe + ID der Figur
           case OnBoard(pos) => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}${figure.id % 4}") //zeigt Ids innerhalb der farbe
           case Goal(pos)    => layout(pos.y)(pos.x) = formatField(s"${player.color.toString.head}${figure.id % 4}")
           case Finished     =>
@@ -218,9 +226,16 @@ class TextUI(controller: GameController): //GameController kümmert sich um roll
           case _ =>
 
 
+
+//////////////////////////////////////////
     layout.map(_.mkString("")).mkString("\n") //map verbindet jede zeile zu einer zeichenkette, also spielfeld zeile und verbindet alle zeilen des boards mit zeilenumbruch -> ergibt anzeigbaren spielfeld textblock
 
 
+
+
+
+
+    
   def formatField(content: String): String =
     if content.length == 3 then content //spielfeld feld genau 3 zeichen breit, passt
     else if content.length == 2 then s" $content" //ein leerzeichen davor
