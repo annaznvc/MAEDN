@@ -1,48 +1,54 @@
 package de.htwg.se.MAEDN.controller
 
-import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.model.model.Game
+import de.htwg.se.MAEDN.model.{Field, Figure, Player}
+import de.htwg.se.MAEDN.util.DifficultyLevel
 
-class GameController(val game: Game): //Klasse bekommt paramter namens game vom Typ Game
+// Controller connects View and Model
+class GameController(playerNames: List[String], difficulty: DifficultyLevel.Value) {
 
-  def currentPlayer: Player = game.currentPlayer //rückgabewert player
+  private val game = new Game(playerNames, difficulty) // Our model: Game
 
-  def roll(): Int =
+  // Roll the dice and return the result
+  def rollDice(): Int = {
     game.rollDice()
+  }
 
-  def move(figureId: Int, steps: Int): Boolean =
-    val player = currentPlayer
-   /**
-     * Dollarzeichen bei String Interpolations, um verkettungen zu umgehen
-     * s vor String aktiviert interpolation
-     * dollar fügt werte der variablen in string ein
-     */
-    println(s"[DEBUG] move() called for ${player.name}, figure $figureId, steps = $steps")
-  
-    val updatedPlayer = game.moveFigure(player, figureId, steps) //bewegunng ausführen, neuer Spielerzustand mit aktualiserter Figur
-  
-    /**
-      * Prüfen:
-        1) hat sich spieler als ganzes verändert?
-        2) hat sich status des spielers verändert? (out, in game)
-        3)Gibts eine Figur, deren Zustand jetzt anders ist als vor dem Zug?
-      */
-    val hasChanged = 
-      updatedPlayer != player ||
-      updatedPlayer.status != player.status ||
-      updatedPlayer.figures.exists { f =>
-        val original = player.figureById(f.id) //holt die Figur mit der ID von player
-        original.exists(_.state != f.state) //vergleich state der original figur mit zustand der neuen figur
-      }
+  // Move a figure by ID (1-4) for the current player
+  def moveFigure(figureId: Int, steps: Int): Boolean = {
+    val figureOpt = game.currentPlayer.figures.find(_.id == figureId)
+    figureOpt match {
+      case Some(figure) =>
+        game.moveFigure(figure, steps)
+        true
+      case None =>
+        false
+    }
+  }
 
-    if hasChanged then //wenn sich was geändert hat, also has changed true ist
-      game.players = game.players.updated(game.currentPlayerIndex, updatedPlayer) //neue Liste mit aktuelisiertem Spieler
-      true
-    else
-      false
-
-
-  def endTurn(): Unit =
+  // End current player's turn and return the new current player
+  def nextPlayer(): Player = {
     game.nextPlayer()
+    game.currentPlayer
+  }
 
-  def isGameOver: Boolean = game.isGameOver
+  // Check if there is a winner
+  def winner: Option[Player] = {
+    game.hasWinner
+  }
+
+  // Get the current player
+  def currentPlayer: Player = {
+    game.currentPlayer
+  }
+
+  // Get all players
+  def allPlayers: List[Player] = {
+    game.players
+  }
+
+  // Get all fields (board)
+  def boardFields: List[Field] = {
+    game.board.fields
+  }
+}
