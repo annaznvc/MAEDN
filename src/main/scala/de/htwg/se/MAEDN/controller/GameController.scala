@@ -2,17 +2,48 @@ package de.htwg.se.MAEDN.controller
 
 import de.htwg.se.MAEDN.model.model.Game
 import de.htwg.se.MAEDN.model.{Field, Figure, Player}
-import de.htwg.se.MAEDN.util.DifficultyLevel
+import de.htwg.se.MAEDN.util.{DifficultyLevel, FieldType}
 
 // Controller connects View and Model
 class GameController(playerNames: List[String], difficulty: DifficultyLevel.Value) {
 
   private val game = new Game(playerNames, difficulty) // Our model: Game
+  private var bonusTurn: Boolean = false
+  var remainingTries: Int = 1
+
 
   // Roll the dice and return the result
   def rollDice(): Int = {
-    game.rollDice()
+    val roll = game.rollDice()
+
+    if (roll == 6) {
+      bonusTurn = true
+    }
+
+    roll
   }
+
+  def isBonusTurn: Boolean = bonusTurn
+
+  def consumeBonus(): Unit = {
+    bonusTurn = false
+  }
+
+  def prepareTurn(): Unit = {
+    val allAtHome = game.currentPlayer.figures.forall(_.position.exists(_.fieldType == FieldType.Home))
+    remainingTries = if (allAtHome) 3 else 1
+  }
+
+  def canRoll: Boolean = remainingTries > 0
+
+  def rollDiceForTurn(): Int = {
+    if (!canRoll) throw new IllegalStateException("No tries left.")
+
+    val roll = rollDice()
+    remainingTries -= 1
+    roll
+  }
+
 
   // Move a figure by ID (1-4) for the current player
   def moveFigure(figureId: Int, steps: Int): Boolean = {
@@ -51,4 +82,9 @@ class GameController(playerNames: List[String], difficulty: DifficultyLevel.Valu
   def boardFields: List[Field] = {
     game.board.fields
   }
+
+  def allFiguresAtHome: Boolean = {
+    game.currentPlayer.figures.forall(_.position.exists(_.fieldType == FieldType.Home))
+  }
+
 }
