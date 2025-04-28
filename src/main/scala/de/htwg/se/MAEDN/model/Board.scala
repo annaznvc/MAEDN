@@ -1,94 +1,27 @@
 package de.htwg.se.MAEDN.model
 
-import de.htwg.se.MAEDN.model._
 
-class Board:
-  val width = 11
-  val height = 11
+import de.htwg.se.MAEDN.util.DifficultyLevel
 
-  private val xRange = 0 until width
-  private val yRange = 0 until height
+// The Board contains all the Fields and is built dynamically
+class Board(playerCount: Int, difficulty: DifficultyLevel.Value) {
 
-  val fields: List[Field] = //für jedes x,y paar ein feld erstellen
-    xRange.flatMap { x =>
-      yRange.map { y =>
-        Field(Position(x, y), FieldType.Board)
-      }
-    }.toList
+  val fields: List[Field] = createFields()
 
-  def getFieldAt(x: Int, y: Int): Option[Field] =
-    fields.find(f => f.position == Position(x, y)) //f ist einzelnes feld in liste, f.position gibt position dieses feldes
+  // How many normal fields (main track) based on difficulty
+  private def fieldsCount: Int = difficulty match {
+    case DifficultyLevel.Easy => 20
+    case DifficultyLevel.Medium => 40
+    case DifficultyLevel.Hard => 60
+  }
 
-  def isValidIndex(x: Int, y: Int): Boolean =
-    x >= 0 && x < width && y >= 0 && y < height
+  // Create the fields list
+  private def createFields(): List[Field] = {
+    (1 to fieldsCount).map(id => Field(id)).toList
+  }
 
-  def allPositions: List[Position] = fields.map(_.position)
-
-  // 🆕 Start positions for each player (you can adjust as needed)
-  def startPosition(color: Color): Position = color match
-    case Color.Yellow    => Position(0, 4)
-    case Color.Green   => Position(6, 0)
-    case Color.Blue  => Position(4, 10)
-    case Color.Red => Position(10, 6)
-
-  // 🆕 Goal entry positions (just before entering goal path)
-  def goalEntryPosition(color: Color): Position = color match
-    case Color.Yellow    => Position(0, 5)
-    case Color.Green   => Position(5, 0)
-    case Color.Red  => Position(10, 5)
-    case Color.Blue => Position(5, 10)
-
-  def goalPath(color: Color): List[Position] = color match
-    case Color.Yellow    => List(Position(1, 5), Position(2, 5), Position(3, 5), Position(4, 5))
-    case Color.Green   => List(Position(5, 1), Position(5, 2), Position(5, 3), Position(5, 4))
-    case Color.Red  => List(Position(9, 5), Position(8, 5), Position(7, 5), Position(6, 5))
-    case Color.Blue => List(Position(5, 9), Position(5, 8), Position(5, 7), Position(5, 6))
-
-  def boardPath: List[Position] = List(
-    // Blue start
-    Position(6, 0),
-    Position(6, 1),
-    Position(6, 2),
-    Position(6, 3),
-    Position(6, 4),
-    Position(7, 4),
-    Position(8, 4),
-    Position(9, 4),
-    Position(10, 4),
-    Position(10, 5),
-    Position(10, 6),
-    Position(9, 6),
-    Position(8, 6),
-    Position(7, 6),
-    Position(6, 6),
-    Position(6, 7),
-    Position(6, 8),
-    Position(6, 9),
-    Position(6, 10),
-    Position(5, 10),
-    Position(4, 10),
-    Position(4, 9),
-    Position(4, 8),
-    Position(4, 7),
-    Position(4, 6),
-    Position(3, 6),
-    Position(2, 6),
-    Position(1, 6),
-    Position(0, 6),
-    Position(0, 5),
-    Position(0, 4),
-    Position(1, 4),
-    Position(2, 4),
-    Position(3, 4),
-    Position(4, 4),
-    Position(4, 3),
-    Position(4, 2),
-    Position(4, 1),
-    Position(4, 0),
-    Position(5, 0),
-    // Finish loop
-    Position(6, 0)
-  )
-
-
-
+  // Find a field by ID
+  def fieldById(id: Int): Option[Field] = {
+    fields.find(_.id == id)
+  }
+}
