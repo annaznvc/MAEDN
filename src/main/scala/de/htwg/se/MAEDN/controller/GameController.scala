@@ -5,9 +5,9 @@ import de.htwg.se.MAEDN.model.{Field, Figure, Player}
 import de.htwg.se.MAEDN.util.{DifficultyLevel, FieldType}
 
 // Controller connects View and Model
-class GameController(playerNames: List[String], difficulty: DifficultyLevel.Value) {
+class GameController(playerNames: List[String], boardSize: Int = 40, figuresPerPlayer: Int = 4) {
 
-  private val game = new Game(playerNames, difficulty) // Our model: Game
+  private val game = new Game(playerNames, boardSize, figuresPerPlayer)
   private var bonusTurn: Boolean = false
   var remainingTries: Int = 1
 
