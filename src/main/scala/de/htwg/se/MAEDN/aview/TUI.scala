@@ -98,28 +98,55 @@ class TUI(controller: GameController) {
   // Print the current board state
   def printBoard(): Unit = {
     val fields = controller.boardFields
+    val currentPlayer = controller.currentPlayer
 
-    println("\nBoard State:")
+    // --- SPIELFELD: Only start, onboard, and shared goal fields ---
+    println("\nSpielfeld:")
+    val mainFields = fields.filter(f =>
+      f.fieldType == FieldType.Start ||
+        f.fieldType == FieldType.OnBoard ||
+        (f.fieldType == FieldType.Goal && f.ownerColor.isEmpty) // shared goal if any
+    )
 
-    val boardString = fields.map { field =>
-      field.occupiedBy match {
-        case Some(figure) =>
-          // Show the figure's color first letter
-          s"[${figure.player.color.toString.head}]"
-        case None =>
-          // No figure → show by field type
-          field.fieldType match {
-            case FieldType.Home    => "[H]"
-            case FieldType.Start   => "[S]"
-            case FieldType.OnBoard => "[ ]"
-            case FieldType.Goal    => "[G]"
-          }
+    val mainRow = mainFields.map {
+      case f if f.occupiedBy.isDefined =>
+        val fig = f.occupiedBy.get
+        s"${fig.player.color.toString.head}${fig.id}"
+      case f => f.fieldType match {
+        case FieldType.Start   => "ST"
+        case FieldType.Goal    => "GG"
+        case FieldType.OnBoard => "00"
+        case _ => "??"
       }
-    }.mkString(" ")
+    }.map(s => f"$s%2s").mkString(" | ")
+    println("        " + mainRow)
 
-    println(boardString)
-    println()
+    // --- HAUS: Home fields belonging to current player ---
+    println("\nHaus:")
+    val homeFields = fields.filter(f =>
+      f.fieldType == FieldType.Home && f.ownerColor.contains(currentPlayer.color)
+    )
+
+    val homeRow = homeFields.map {
+      case f if f.occupiedBy.isDefined =>
+        val fig = f.occupiedBy.get
+        s"${fig.player.color.toString.head}${fig.id}"
+      case _ => "00"
+    }.map(s => f"$s%2s").mkString(" | ")
+    println("        " + homeRow)
+
+    // --- STARTHÄUSCHEN: Figures not yet placed ---
+    println("\nStarthäuschen:")
+    val startRow = currentPlayer.figures.map { fig =>
+      fig.position match {
+        case Some(_) => "00"
+        case None    => s"${fig.player.color.toString.head}${fig.id}"
+      }
+    }.map(s => f"$s%2s").mkString(" | ")
+    println("        " + startRow + "\n")
   }
+
+
 
 
   // Show which player's turn it is

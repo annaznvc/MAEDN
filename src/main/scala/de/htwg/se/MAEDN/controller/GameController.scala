@@ -1,15 +1,15 @@
 package de.htwg.se.MAEDN.controller
 
-import de.htwg.se.MAEDN.model.model.Game
+import de.htwg.se.MAEDN.model.Game
 import de.htwg.se.MAEDN.model.{Field, Figure, Player}
-import de.htwg.se.MAEDN.util.{DifficultyLevel, FieldType}
+import de.htwg.se.MAEDN.util.{Dice, DifficultyLevel, FieldType}
 
 // Controller connects View and Model
-class GameController(playerNames: List[String], boardSize: Int = 40, figuresPerPlayer: Int = 4) {
+class GameController(playerNames: List[String], boardSize: Int = 40, figuresPerPlayer: Int = 4, testDice: Option[Dice] = None) {
 
-  private val game = new Game(playerNames, boardSize, figuresPerPlayer)
+  private val game = new Game(playerNames, boardSize, figuresPerPlayer, testDice)
   private var bonusTurn: Boolean = false
-  var remainingTries: Int = 1
+   var remainingTries: Int = 1
 
 
   // Roll the dice and return the result

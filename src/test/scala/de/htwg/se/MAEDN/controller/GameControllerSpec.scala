@@ -1,35 +1,24 @@
-package de.htwg.se.MAEDN.model
+package de.htwg.se.MAEDN.controller
 
-import de.htwg.se.MAEDN.controller.GameController
-import de.htwg.se.MAEDN.util.FieldType
-import org.scalatest.matchers.should.Matchers
+import de.htwg.se.MAEDN.util.Dice
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 
 class GameControllerSpec extends AnyWordSpec with Matchers {
 
   "A GameController" should {
+    "initialize with one player, one figure, and deterministic dice" in {
+      val fixedDice = new Dice(fixedRoll = Some(6))
+      val controller = new GameController(List("TestPlayer"), boardSize = 10, figuresPerPlayer = 1, testDice = Some(fixedDice))
 
-    "allow single-figure test game" in {
-      val controller = new GameController(List("Test1", "Test2"), boardSize = 20, figuresPerPlayer = 2)
-      val player = controller.currentPlayer
-      val figure = player.figures.head
+      controller.allPlayers should have size 1
+      controller.allPlayers.head.name shouldBe "TestPlayer"
 
-      // Test-Situation setzen: direkt ins Goal setzen
-      val goalField = controller.boardFields.find(f =>
-        f.fieldType == FieldType.Goal && f.ownerColor.contains(player.color)
-      ).get
+      val roll = controller.rollDice()
+      roll shouldBe 6
 
-      goalField.occupiedBy = Some(figure)
-      figure.position = Some(goalField)
-
-      figure.isFinished shouldBe false
-
-      // Simuliere Finish
-      figure.isFinished = true
-
-      figure.isFinished shouldBe true
+      val moveSuccess = controller.moveFigure(1, roll)
+      moveSuccess shouldBe true
     }
-
   }
-
 }
