@@ -2,7 +2,7 @@ package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.util.{FieldType, Color}
 
-class Board(private val fields: Vector[Field]) {
+class Board(val fields: Vector[Field]) {
 
   def getField(index: Int): Option[Field] = {
     if (index > 0 && index <= fields.length) Some(fields(index - 1)) else None
@@ -40,7 +40,7 @@ object Board {
     new Board(fields)
   }
 
-  private def generateFields(totalFields: Int, normalFieldCount: Int, figureCountPerPlayer: Int): Vector[Field] = {
+  def generateFields(totalFields: Int, normalFieldCount: Int, figureCountPerPlayer: Int): Vector[Field] = {
     val colors = List(Color.Red, Color.Blue, Color.Green, Color.Yellow)
 
     val startFields = (1 to 4).map { idx =>
@@ -65,7 +65,7 @@ object Board {
       playerGoalFields(i)
     }.toList
 
-    assert(fieldsList.size == totalFields)
+    require(fieldsList.size == totalFields, s"Expected $totalFields fields, but got ${fieldsList.size}")
     fieldsList.toVector
   }
 }
