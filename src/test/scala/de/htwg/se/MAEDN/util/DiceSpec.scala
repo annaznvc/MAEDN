@@ -1,3 +1,8 @@
+/**
+  * 
+  * 
+  * 
+  * 
 package de.htwg.se.MAEDN.util
 
 import org.scalatest.wordspec.AnyWordSpec
@@ -29,3 +34,5 @@ class DiceSpec extends AnyWordSpec with Matchers {
   }
 
 }
+
+  */

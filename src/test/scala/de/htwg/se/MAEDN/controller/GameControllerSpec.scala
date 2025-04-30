@@ -1,4 +1,10 @@
-package de.htwg.se.MAEDN.controller
+
+
+/**
+ * 
+ * 
+ * 
+ package de.htwg.se.MAEDN.controller
 
 import de.htwg.se.MAEDN.util.Dice
 import org.scalatest.wordspec.AnyWordSpec
@@ -22,3 +28,10 @@ class GameControllerSpec extends AnyWordSpec with Matchers {
     }
   }
 }
+
+
+  * 
+  * 
+  * 
+  * 
+  */
