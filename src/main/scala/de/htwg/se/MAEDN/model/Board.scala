@@ -40,6 +40,7 @@ object Board {
     new Board(fields)
   }
 
+  //private weg für testzwecke
   def generateFields(totalFields: Int, normalFieldCount: Int, figureCountPerPlayer: Int): Vector[Field] = {
     val colors = List(Color.Red, Color.Blue, Color.Green, Color.Yellow)
 
