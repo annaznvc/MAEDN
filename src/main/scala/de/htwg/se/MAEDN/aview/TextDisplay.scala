@@ -86,7 +86,8 @@ object TextDisplay {
     val sections = board.fields.grouped(perSection).toList
 
     for ((section, i) <- sections.zipWithIndex) {
-      val label = if (i < labels.length) labels(i) else s"Player${i + 1}"
+      //ursprünglich: val label = if (i < labels.length) labels(i) else s"Player${i + 1}"
+      val label = labels.lift(i).getOrElse("")
       val color = colorCode(
         section.headOption.map(_.color).getOrElse(Color.WHITE)
       )

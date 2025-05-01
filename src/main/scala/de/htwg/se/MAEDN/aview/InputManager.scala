@@ -26,6 +26,10 @@ class InputManager(val terminal: Terminal) {
   keyMap.bind(Command.PlayDice, "z")
   keyMap.bind(Command.Escape, "\u001b")
 
+
+  /**
+    * currentInput ist nicht testbar, weil sie auf eine echte Tastatureingabe über das Terminal wartet. 
+    */
   def currentInput: Option[Command] = {
     val key = bindingReader.readBinding(keyMap)
     Option(key)
