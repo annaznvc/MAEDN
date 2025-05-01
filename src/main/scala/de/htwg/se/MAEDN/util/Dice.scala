@@ -2,10 +2,14 @@ package de.htwg.se.MAEDN.util
 
 import scala.util.Random
 
-// Dice can roll numbers between 1 and a given number of sides
-class Dice(val sides: Int = 6) {
+object Dice {
   private val random = new Random()
 
-  // Roll the dice, return a number between 1 and sides
-  def roll(): Int = random.nextInt(sides) + 1
+  def roll(): Int = {
+    random.nextInt(6) + 1
+  }
+
+  def rollMultiple(times: Int): List[Int] = {
+    (1 to times).map(_ => roll()).toList
+  }
 }
