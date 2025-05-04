@@ -1,31 +1,42 @@
-package de.htwg.se.MAEDN.model
-
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.util.*
+import de.htwg.se.MAEDN.model.{Field, FieldType, Figure, Player}
+import de.htwg.se.MAEDN.util.Color
 
 class FieldSpec extends AnyWordSpec with Matchers {
 
-  "A Field" should {
+  val dummyPlayer = Player(1, Nil, Color.RED)
+  val dummyFigure = Figure(1, dummyPlayer)
 
-        "report whether it has a figure" in {
-      val player = Player("Anna", Nil, Color.Red)
-      val figure = Figure(1, player)
+  "Field" should {
+    "report if it is occupied" in {
+      val f1 = Field(Some(dummyFigure), FieldType.Normal, Color.RED)
+      val f2 = Field(None, FieldType.Normal, Color.RED)
 
-      val fieldWithFigure = Field(Some(figure), FieldType.Normal, Color.Red)
-      val emptyField = Field(None, FieldType.Normal, Color.Red)
-
-      fieldWithFigure.hasFigure shouldBe true
-      emptyField.hasFigure shouldBe false
+      f1.isOccupied shouldBe true
+      f2.isOccupied shouldBe false
     }
 
-    "support equality between fields" in {
-    val field1 = Field(None, FieldType.Normal, Color.Red)
-    val field2 = Field(None, FieldType.Normal, Color.Red)
-
-    field1 shouldEqual field2
+    "report if it is a Home field" in {
+      Field(None, FieldType.Home, Color.RED).isHome shouldBe true
+      Field(None, FieldType.Start, Color.RED).isHome shouldBe false
     }
 
+    "report if it is a Start field" in {
+      Field(None, FieldType.Start, Color.RED).isStart shouldBe true
+      Field(None, FieldType.Goal, Color.RED).isStart shouldBe false
+    }
 
+    "report if it is a Goal field" in {
+      Field(None, FieldType.Goal, Color.RED).isGoal shouldBe true
+      Field(None, FieldType.Normal, Color.RED).isGoal shouldBe false
+    }
+
+    "fail if fieldType is null" in {
+      an[IllegalArgumentException] should be thrownBy {
+        Field(None, null, Color.RED)
+      }
+    }
   }
+
 }

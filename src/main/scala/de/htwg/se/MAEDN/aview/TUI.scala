@@ -10,7 +10,8 @@ class TUI(controller: Controller) extends Observer {
 
   controller.add(this)
 
-  private def writeline(s: String): Unit = {
+  //war mal private def writeline(s: String): Unit = {
+  protected def writeline(s: String): Unit = {
     terminal.writer().println(s)
     terminal.flush()
   }
@@ -25,6 +26,11 @@ class TUI(controller: Controller) extends Observer {
   }
 
   // * INPUT
+  /**
+    * 
+    * Die Methode update() ist nicht testbar, 
+    * weil sie auf reale Tastatureingaben über inputManager.currentInput wartet und sich dabei rekursiv selbst aufruft.
+    */
   def update(): Unit = {
 
     inputManager.currentInput match {
@@ -68,11 +74,12 @@ class TUI(controller: Controller) extends Observer {
         writeline(TextDisplay.printBoard(controller.manager.board))
       }
       case Event.QuitGameEvent => quit()
-      case _                   => // Nothing to do for other events
+      case _                   => writeline("") // Nothing to do for other events
     }
   }
 
-  private def quit(): Unit = {
+  //war mal private def quit(): Unit = {
+  protected def quit(): Unit = {
     writeline(TextDisplay.clearTerminal())
     writeline("Exiting...")
     terminal.close()
