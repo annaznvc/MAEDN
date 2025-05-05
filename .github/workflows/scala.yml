@@ -1,27 +1,45 @@
-
-name: Scala CI
+name: Scala CI + Coverage
 
 on:
   push:
-    branches: [ main, master, MVC ]
+    branches: [ main, MVC, CI-Travis ]
   pull_request:
-    branches: [ main, master, MVC ]
+    branches: [ main, MVC, CI-Travis ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
-    - name: Set up JDK 11
+    - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
-        distribution: 'adopt'
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Cache Ivy2 + sbt
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+        key: scala-cache-${{ runner.os }}-${{ hashFiles('**/build.sbt') }}
+        restore-keys: |
+          scala-cache-${{ runner.os }}
 
     - name: Compile project
       run: sbt compile
 
     - name: Run tests
       run: sbt test
+
+    - name: Run coverage and report
+      run: sbt clean coverage test coverageReport
+
+    - name: Upload coverage to Coveralls
+      run: sbt coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
