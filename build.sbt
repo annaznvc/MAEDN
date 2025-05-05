@@ -1,7 +1,5 @@
 val scala3Version = "3.5.1"
 
-// enablePlugins(ScoverageSbtPlugin, CoverallsPlugin)
-
 lazy val root = project
   .in(file("."))
   .settings(
@@ -16,3 +14,4 @@ lazy val root = project
       "org.jline" % "jline" % "3.29.0"
     )
   )
+enablePlugins(ScoverageSbtPlugin, CoverallsPlugin)
