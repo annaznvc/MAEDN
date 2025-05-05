@@ -1,1 +1,27 @@
 
+name: Scala CI
+
+on:
+  push:
+    branches: [ main, master, MVC ]
+  pull_request:
+    branches: [ main, master, MVC ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Compile project
+      run: sbt compile
+
+    - name: Run tests
+      run: sbt test
