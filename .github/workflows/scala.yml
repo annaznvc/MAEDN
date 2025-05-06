@@ -18,11 +18,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install sbt
-        run: |
-          curl -L -o sbt.deb https://piccolo.link/sbt-1.9.7.deb
-          sudo dpkg -i sbt.deb
-
       - name: compile
         run: sbt compile
 
@@ -39,11 +34,6 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-
-      - name: Install sbt
-        run: |
-          curl -L -o sbt.deb https://piccolo.link/sbt-1.9.7.deb
-          sudo dpkg -i sbt.deb
 
       - name: Build Project and export Coverage
         env:
