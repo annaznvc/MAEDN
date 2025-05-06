@@ -18,6 +18,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
+
       - name: compile
         run: sbt compile
 
@@ -34,6 +39,11 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Set up sbt
+        uses: coursier/setup-action@v1
+        with:
+          apps: sbt
 
       - name: Build Project and export Coverage
         env:
