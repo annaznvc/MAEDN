@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
+[![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=TestWorkflow)](https://coveralls.io/github/annaznvc/MAEDN?branch=TestWorkflow)
 
 
 
