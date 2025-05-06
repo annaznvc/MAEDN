@@ -1,53 +1,74 @@
-name: Scala CI + Coverage
+name: Scala CI
 
 on:
   push:
-    branches: [ main, MVC, CI-Travis ]
+    branches: [main]
   pull_request:
-    branches: [ main, MVC, CI-Travis ]
+    branches: [main]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+      with:
+          fetch-depth: 0
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '23'
+        cache: 'sbt'
 
-      - name: Set up sbt
-        uses: coursier/setup-action@v1
-        with:
-          apps: sbt
+    - name: Setup sbt installer
+      uses: sbt/setup-sbt@v1.1.5
 
-      - name: compile
-        run: sbt compile
+    - name: Run compile
+      run: sbt clean compile
 
-      - name: run tests
-        run: sbt test
+    - name: Cache SBT
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
 
   run_tests:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+        - name: Git checkout (merge)
+          uses: actions/checkout@v4
+          if: github.event_name != 'pull_request'
+          with:
+            fetch-depth: 0
 
-      - name: Set up sbt
-        uses: coursier/setup-action@v1
-        with:
-          apps: sbt
+        - name: Git checkout (PR)
+          uses: actions/checkout@v4
+          if: github.event_name == 'pull_request'
+          with:
+            fetch-depth: 0
+            ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Build Project and export Coverage
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: |
-          sbt clean coverage test coverageReport
-          sbt coveralls
+        - name: Set up JDK
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'temurin'
+            java-version: '23'
+            cache: 'sbt'
+
+        - name: Setup sbt installer
+          uses: sbt/setup-sbt@v1.1.5
+
+        - name: Run tests
+          run: sbt clean coverage test
+
+        - name: Upload coverage data to Coveralls
+          run: sbt coverageReport coveralls
+          env:
+            COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
