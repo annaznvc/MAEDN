@@ -1,3 +1,9 @@
+## Pipelines
+
+- [![Scala CI with Coverage](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml/badge.svg)](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml)
+
+- [![Release Pipeline](https://github.com/annaznvc/MAEDN/actions/workflows/release.yml/badge.svg)](https://github.com/annaznvc/MAEDN/actions/workflows/release.yml)
+
 ## Build status
 
 [![Build Status](https://travis-ci.org/annaznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annaznvc/MAEDN)
