@@ -1,5 +1,6 @@
-[![Build Status](https://app.travis-ci.com/annaznvc/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP)](https://app.travis-ci.com/annaznvc/MAEDN)
-[![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=TestWorkflow)](https://coveralls.io/github/annaznvc/MAEDN?branch=TestWorkflow)
+[![Build Status](https://app.travis-ci.com/annaznvc/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP)](https://app.travis-ci.com/annaznvc/MAEDN?branch=main)
+
+[![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
 
 ## Coverage
 
