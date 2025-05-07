@@ -1,7 +1,7 @@
 [![Build Status](https://app.travis-ci.com/LaythAnna/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP&branch=main)](https://app.travis-ci.com/LaythAnna/MAEDN)
 [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=TestWorkflow)](https://coveralls.io/github/annaznvc/MAEDN?branch=TestWorkflow)
 
-
+[![codecov](https://codecov.io/gh/YOUR_ACCOUNT/YOUR_REPO/branch/YOUR_BRANCH/graph/badge.svg)](https://codecov.io/gh/YOUR_ACCOUNT/YOUR_REPO)
 
 HEAD
 ## sbt project compiled with Scala 3
