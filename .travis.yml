@@ -2,10 +2,7 @@ language: scala
 
 scala:
   - 3.5.1
-
-jdk:
-  - openjdk17
-
+  
 script:
   - sbt clean coverage test coverageReport
 
