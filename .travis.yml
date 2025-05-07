@@ -9,7 +9,18 @@ jdk:
 branches:
   only:
     - main
-    - TestWorkflow
+    - test
+
+before_cache:
+  - rm -f $HOME/.ivy2/cache/com.example/*/ivydata-*.properties
+  - rm -rf $HOME/.ivy2/cache/com.example/
+  - rm -rf $HOME/.ivy2/local
+  - find $HOME/.sbt -name "*.lock" | xargs rm -f
+
+cache:
+  directories:
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
 
 script:
   - sbt clean coverage test coverageReport
