@@ -1,14 +1,38 @@
 [![Build Status](https://app.travis-ci.com/LaythAnna/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP&branch=main)](https://app.travis-ci.com/LaythAnna/MAEDN)
 [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=TestWorkflow)](https://coveralls.io/github/annaznvc/MAEDN?branch=TestWorkflow)
 
+## Coverage
+
 Codecov: [![codecov](https://codecov.io/github/annaznvc/MAEDN/graph/badge.svg?token=1RD2DIMUZK)](https://codecov.io/github/annaznvc/MAEDN)
 
-HEAD
-## sbt project compiled with Scala 3
+### Sunburst
 
-### Usage
+![Sunburst](https://codecov.io/gh/annaznvc/MAEDN/graphs/sunburst.svg?token=1RD2DIMUZK)
 
-This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
+Die Sunburst-Darstellung visualisiert die Codeabdeckung dieses Projekts in einem kreisförmigen Diagramm, wobei jede Datei und jedes Verzeichnis durch einen Sektor repräsentiert wird. Die Farben (grün, gelb, rot) zeigen den Abdeckungsgrad an, wobei grün eine hohe Abdeckung und rot eine niedrige Abdeckung signalisiert. So lässt sich schnell erkennen, welche Teile des Codes gut getestet sind und welche verbessert werden müssen.
 
-For more information on the sbt-dotty plugin, see the
-[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+
+
+# Mensch ärgere dich nicht 🎲 – Scala Edition
+
+Ein digitaler Nachbau des klassischen deutschen Brettspiels **„Mensch ärgere dich nicht“**, entwickelt in **Scala**. Ziel des Spiels ist es, alle eigenen Spielfiguren sicher ins Ziel zu bringen – bevor die Mitspieler sie rauswerfen!
+
+## 📌 Features
+
+- 👥 2–4 Spieler
+- ♟️ Spiellogik nach den bekannten Regeln
+- 🖥️ Textbasiertes Benutzerinterface (Konsole)
+
+## 🛠️ Installation & Ausführen
+
+### Voraussetzungen
+
+- [Scala 2.13+](https://www.scala-lang.org/)
+- [sbt (Scala Build Tool)](https://www.scala-sbt.org/)
+
+### Projekt klonen und starten
+
+```bash
+git clone https://github.com/dein-benutzername/mensch-aergere-dich-nicht.git
+cd mensch-aergere-dich-nicht
+sbt run
