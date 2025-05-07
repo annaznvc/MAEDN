@@ -35,6 +35,6 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: target/scala-*/SoftwareEngineeringJJ-${{ env.VERSION }}.jar
+        files: target/scala-*/MAEDN-${{ env.VERSION }}.jar
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

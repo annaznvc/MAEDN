@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As
 val scala3Version = "3.3.1"
 
 lazy val root = project
@@ -14,4 +15,4 @@ lazy val root = project
       "org.jline" % "jline" % "3.29.0"
     )
   )
-enablePlugins(ScoverageSbtPlugin, CoverallsPlugin)
+enablePlugins(ScoverageSbtPlugin, CoverallsPlugin, AssemblyPlugin)
