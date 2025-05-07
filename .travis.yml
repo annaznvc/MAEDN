@@ -9,7 +9,7 @@ jdk:
 branches:
   only:
     - main
-    - test
+    - TestWorkflow
 
 script:
   - sbt clean coverage test coverageReport
