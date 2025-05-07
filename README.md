@@ -14,6 +14,5 @@ For more information on the sbt-dotty plugin, see the
 
 ![Build](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml/badge.svg?branch=TestWorkflow)
 
-![Scala CI](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml/badge.svg?branch=TestWorkflow)
 
 
