@@ -1,6 +1,6 @@
 ## Build status
 
-[![Build Status](https://travis-ci.org/annnznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annnznvc/MAEDN)
+[![Build Status](https://travis-ci.org/annaznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annaznvc/MAEDN)
 
 
 ## Coverage
