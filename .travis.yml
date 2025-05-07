@@ -1,13 +1,18 @@
 language: scala
-scala:
-- 3.5.1
 
-script:
-- sbt clean coverage test coverageReport
+scala:
+  - 3.5.1
 
 jdk:
-- openjdk17
+  - openjdk17
+
+branches:
+  only:
+    - main
+    - test
+
+script:
+  - sbt clean coverage test coverageReport
 
 after_success:
-- sbt coverageReport coveralls
-
+  - sbt coverageReport coveralls
