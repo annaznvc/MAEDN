@@ -5,6 +5,9 @@ scala:
 script:
 - sbt clean coverage test coverageReport
 
+jdk:
+- openjdk17
+
 after_success:
 - sbt coverageReport coveralls
 
