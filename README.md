@@ -1,10 +1,11 @@
-[![Build Status](https://app.travis-ci.com/annaznvc/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP)](https://app.travis-ci.com/annaznvc/MAEDN?branch=main)
+## Build status
 
-[![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
+[![Build Status](https://travis-ci.org/annnznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annnznvc/MAEDN)
+
 
 ## Coverage
 
-Codecov: [![codecov](https://codecov.io/github/annaznvc/MAEDN/graph/badge.svg?token=1RD2DIMUZK)](https://codecov.io/github/annaznvc/MAEDN)
+Coveralls:  [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
 
 ### Sunburst
 
