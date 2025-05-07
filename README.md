@@ -1,4 +1,4 @@
-[![Build Status](https://app.travis-ci.com/LaythAnna/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP&branch=main)](https://app.travis-ci.com/LaythAnna/MAEDN)
+[![Build Status](https://app.travis-ci.com/annaznvc/MAEDN.svg?token=e43oQMmxLaw5MryLeqwP)](https://app.travis-ci.com/annaznvc/MAEDN)
 [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=TestWorkflow)](https://coveralls.io/github/annaznvc/MAEDN?branch=TestWorkflow)
 
 ## Coverage
