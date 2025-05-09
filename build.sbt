@@ -15,4 +15,4 @@ lazy val root = project
       "org.jline" % "jline" % "3.29.0"
     )
   )
-enablePlugins(ScoverageSbtPlugin, CoverallsPlugin, AssemblyPlugin)
+enablePlugins(ScoverageSbtPlugin, CoverallsPlugin)
