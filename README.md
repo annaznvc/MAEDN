@@ -1,13 +1,8 @@
-## Pipelines
+## Project Status & CI
 
-- [![Scala CI with Coverage](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml/badge.svg)](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml)
+- [![Scala CI](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml/badge.svg)](https://github.com/annaznvc/MAEDN/actions/workflows/scala.yml)
 - [![Last Commit](https://img.shields.io/github/last-commit/annaznvc/MAEDN.svg?color=blue)](https://github.com/annaznvc/MAEDN/commits/main)
-
-
-## Build status
-
 - [![Build Status](https://travis-ci.org/annaznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annaznvc/MAEDN)
-
 
 ## Coverage
 
