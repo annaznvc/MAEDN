@@ -12,7 +12,7 @@
 
 [![Sunburst](https://codecov.io/gh/annaznvc/MAEDN/graphs/sunburst.svg?token=1RD2DIMUZK)](https://codecov.io/gh/annaznvc/MAEDN)
 
-Die Sunburst-Darstellung zeigt die Codeabdeckung dieses Projekts in einem kreisförmigen Diagramm, bei dem jedes Verzeichnis und jede Datei als einzelner Sektor dargestellt ist. Die Farbgebung – grün, gelb und rot – gibt den Abdeckungsgrad an: Grün steht für hohe, Rot für geringe Testabdeckung. So lässt sich auf einen Blick erkennen, welche Teile des Codes gut getestet sind und wo noch Optimierungsbedarf besteht.
+Die Sunburst-Darstellung zeigt die Codeabdeckung dieses Projekts in einem kreisförmigen Diagramm, bei dem jedes Verzeichnis und jede Datei als einzelner Sektor dargestellt ist. Die Farbgebung – grün, gelb und rot – gibt den Abdeckungsgrad an: **Grün** steht für hohe, **Rot** für geringe Testabdeckung. So lässt sich auf einen Blick erkennen, welche Teile des Codes gut getestet sind und wo noch Optimierungsbedarf besteht.
 
 
 # Mensch ärgere dich nicht 🎲 – Scala Edition
