@@ -41,6 +41,6 @@ Ein digitaler Nachbau des klassischen deutschen Brettspiels **„Mensch ärgere 
 ### Projekt klonen und starten
 
 ```bash
-git clone https://github.com/dein-benutzername/mensch-aergere-dich-nicht.git
-cd mensch-aergere-dich-nicht
+git clone https://github.com/annaznvc/MAEDN.git
+cd MAEDN
 sbt run
