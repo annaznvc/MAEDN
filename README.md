@@ -5,12 +5,12 @@
 
 ## Build status
 
-[![Build Status](https://travis-ci.org/annaznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annaznvc/MAEDN)
+- [![Build Status](https://travis-ci.org/annaznvc/MAEDN.svg?branch=main)](https://travis-ci.org/annaznvc/MAEDN)
 
 
 ## Coverage
 
-Coveralls:  [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
+- Coveralls:  [![Coverage Status](https://coveralls.io/repos/github/annaznvc/MAEDN/badge.svg?branch=main)](https://coveralls.io/github/annaznvc/MAEDN?branch=main)
 
 ### Sunburst
 
