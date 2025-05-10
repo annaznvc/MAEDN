@@ -1,37 +1,37 @@
 package de.htwg.se.MAEDN.aview
 
-import org.jline.terminal.{Terminal, TerminalBuilder}
+import org.jline.terminal.Terminal
 import org.jline.keymap.{BindingReader, KeyMap}
+import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.command._
 
-enum Command {
-  case PlayDice, PlayNext, MoveUp, MoveDown, IncreaseFigures, DecreaseFigures,
-    IncreaseBoardSize, DecreaseBoardSize, QuitGame, StartGame, Escape
-}
-
-class InputManager(val terminal: Terminal) {
+class InputManager(val controller: Controller, val terminal: Terminal) {
 
   private val bindingReader = new BindingReader(terminal.reader())
-  private val keyMap = new KeyMap[Command]
+  private val keyMap = new KeyMap[Command]()
 
-  // Mapping keys to commands
-  keyMap.bind(Command.IncreaseFigures, "e")
-  keyMap.bind(Command.DecreaseFigures, "d")
-  keyMap.bind(Command.IncreaseBoardSize, "r")
-  keyMap.bind(Command.DecreaseBoardSize, "f")
-  keyMap.bind(Command.MoveUp, "w")
-  keyMap.bind(Command.MoveDown, "s")
-  keyMap.bind(Command.QuitGame, "q")
-  keyMap.bind(Command.StartGame, "n")
-  keyMap.bind(Command.PlayNext, " ")
-  keyMap.bind(Command.PlayDice, "z")
-  keyMap.bind(Command.Escape, "\u001b")
+  // Tasten direkt an Command-Objekte binden
+  keyMap.bind(PlayDiceCommand(controller), "z")
+  keyMap.bind(PlayNextCommand(controller), " ")
+  keyMap.bind(MoveUpCommand(controller), "w")
+  keyMap.bind(MoveDownCommand(controller), "s")
+  keyMap.bind(IncreaseFiguresCommand(controller), "e")
+  keyMap.bind(DecreaseFiguresCommand(controller), "d")
+  keyMap.bind(IncreaseBoardSizeCommand(controller), "r")
+  keyMap.bind(DecreaseBoardSizeCommand(controller), "f")
+  keyMap.bind(QuitGameCommand(controller), "q")
+  keyMap.bind(StartGameCommand(controller), "n")
 
+  // ESC bleibt direkt verarbeitet – das ist kein Command
+  private val ESC = "\u001b"
 
-  /**
-    * currentInput ist nicht testbar, weil sie auf eine echte Tastatureingabe über das Terminal wartet. 
-    */
   def currentInput: Option[Command] = {
     val key = bindingReader.readBinding(keyMap)
     Option(key)
+  }
+
+  def isEscape: Boolean = {
+    val peek = terminal.reader().peek(10)
+    peek == 27 // ASCII ESC
   }
 }

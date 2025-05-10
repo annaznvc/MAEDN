@@ -5,19 +5,20 @@ import org.jline.terminal.{TerminalBuilder, Terminal}
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
+import de.htwg.se.MAEDN.controller.command._
 
 class TUI(controller: Controller) extends Observer {
 
   controller.add(this)
 
-  //war mal private def writeline(s: String): Unit = {
+  // war mal private def writeline(s: String): Unit = {
   protected def writeline(s: String): Unit = {
     terminal.writer().println(s)
     terminal.flush()
   }
 
   val terminal: Terminal = TerminalBuilder.builder().system(true).build()
-  val inputManager = InputManager(terminal)
+  val inputManager = InputManager(controller, terminal)
 
   def run(): Unit = {
     writeline(TextDisplay.clearTerminal())
@@ -26,22 +27,21 @@ class TUI(controller: Controller) extends Observer {
   }
 
   // * INPUT
-  /**
-    * 
-    * Die Methode update() ist nicht testbar, 
-    * weil sie auf reale Tastatureingaben über inputManager.currentInput wartet und sich dabei rekursiv selbst aufruft.
+  /** Die Methode update() ist nicht testbar, weil sie auf reale
+    * Tastatureingaben über inputManager.currentInput wartet und sich dabei
+    * rekursiv selbst aufruft.
     */
   def update(): Unit = {
-
-    inputManager.currentInput match {
-      case Some(Command.Escape) => quit()
-      case Some(Command.QuitGame)
-          if controller.manager.state == State.Menu => // Quit game
-      case Some(value) => {
-        controller.processCommand(value)
-        update()
+    if (inputManager.isEscape) {
+      quit()
+    } else {
+      inputManager.currentInput match {
+        case Some(cmd) =>
+          cmd.execute()
+          update()
+        case None =>
+          update()
       }
-      case None => update()
     }
   }
 
@@ -74,11 +74,11 @@ class TUI(controller: Controller) extends Observer {
         writeline(TextDisplay.printBoard(controller.manager.board))
       }
       case Event.QuitGameEvent => quit()
-      case _                   => writeline("") // Nothing to do for other events
+      case _ => writeline("") // Nothing to do for other events
     }
   }
 
-  //war mal private def quit(): Unit = {
+  // war mal private def quit(): Unit = {
   protected def quit(): Unit = {
     writeline(TextDisplay.clearTerminal())
     writeline("Exiting...")
