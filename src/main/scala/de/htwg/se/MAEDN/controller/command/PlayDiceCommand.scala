@@ -6,5 +6,6 @@ case class PlayDiceCommand(controller: Controller) extends Command {
   override def execute(): Unit = {
     controller.manager = controller.manager.playDice()
     controller.notifyObservers()
+    println("DEBUG: PlayDiceCommand wurde ausgeführt")
   }
 }

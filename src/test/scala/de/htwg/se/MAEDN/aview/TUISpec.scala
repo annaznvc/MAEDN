@@ -5,10 +5,14 @@ import org.scalatest.matchers.should.Matchers
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.model.{Manager, State}
+import de.htwg.se.MAEDN.controller.command._
+import org.jline.terminal.TerminalBuilder
 
 class TUISpec extends AnyWordSpec with Matchers {
 
-  class TestTUI(controller: Controller) extends TUI(controller) {
+  val sharedTerminal = TerminalBuilder.builder().dumb(true).build()
+
+  class TestTUI(ctrl: Controller) extends TUI(ctrl) {
     var lines: List[String] = Nil
     override protected def writeline(s: String): Unit = lines :+= s
   }
@@ -41,172 +45,108 @@ class TUISpec extends AnyWordSpec with Matchers {
       var wasCalled = false
       class RunTestTUI(controller: Controller) extends TUI(controller) {
         override protected def writeline(s: String): Unit = wasCalled = true
-        override def update(): Unit = () // prevent recursion
+        override def update(): Unit = ()
       }
       val tui = new RunTestTUI(controller)
       tui.run()
       wasCalled shouldBe true
     }
 
-    "call update() should process input commands" in {
+    "execute commands from mock input manager" in {
       val controller = new Controller()
-      class UpdateTestTUI(controller: Controller) extends TUI(controller) {
-        var processedCommand: Boolean = false
-        var quitCalled: Boolean = false
+
+      class CommandTestTUI(ctrl: Controller) extends TUI(controller) {
+        var executed: List[String] = Nil
+        var quitCalled = false
 
         override protected def writeline(s: String): Unit = ()
         override protected def quit(): Unit = quitCalled = true
 
-        override val inputManager = new InputManager(terminal) {
-          private var inputs = List(
-            Some(Command.Escape),
-            Some(Command.IncreaseBoardSize),
-            None
-          )
-          override def currentInput: Option[Command] = {
-            val next = inputs.headOption.flatten
-            inputs = inputs.drop(1)
-            next
+        override val inputManager =
+          new InputManager(ctrl, sharedTerminal) {
+            private var inputs: List[() => Command] = List(
+              () => StartGameCommand(ctrl),
+              () => IncreaseBoardSizeCommand(ctrl),
+              () => QuitGameCommand(ctrl),
+              () => null
+            )
+
+            override def currentInput: Option[Command] = {
+              inputs match {
+                case head :: tail =>
+                  inputs = tail
+                  Option(head()).filter(_ != null)
+                case Nil => None
+              }
+            }
+
+            override def isEscape: Boolean = false
           }
-        }
 
         override def update(): Unit = {
           inputManager.currentInput match {
-            case Some(Command.Escape) => quit()
-            case Some(Command.IncreaseBoardSize) => processedCommand = true
-            case _ => ()
+            case Some(cmd) =>
+              executed :+= cmd.getClass.getSimpleName
+              cmd.execute()
+              update()
+            case None =>
+              quit()
           }
         }
       }
 
-      val tui = new UpdateTestTUI(controller)
-      tui.update(); tui.update(); tui.update()
-      tui.processedCommand shouldBe true
+      val tui = new CommandTestTUI(controller)
+      tui.update()
+
+      tui.executed should contain("StartGameCommand")
+      tui.executed should contain("IncreaseBoardSizeCommand")
       tui.quitCalled shouldBe true
     }
 
-    "call real writeline from subclass to cover println and flush" in {
-      val controller = new Controller()
-      class RealWriteTUI(controller: Controller) extends TUI(controller) {
-        def testWrite(): Unit = writeline("test")
-      }
-      val tui = new RealWriteTUI(controller)
-      tui.testWrite()
-    }
-
-    "update() should trigger all match cases with real code" in {
-        val controller = new Controller()
-        controller.manager = Manager(controller) // ✅ stellt sicher: State == Menu
-      controller.manager = Manager(controller) // State.Menu sicherstellen
-
-      class FullMatchTUI(controller: Controller) extends TUI(controller) {
-        var flags: List[String] = Nil
-        var callCount = 0
-
-        override protected def writeline(s: String): Unit = ()
-        override protected def quit(): Unit = flags :+= "quit"
-
-        override val inputManager = new InputManager(terminal) {
-          private var inputs = List(
-            Some(Command.Escape),           // -> quit()
-            Some(Command.QuitGame),         // -> match Menu
-            Some(Command.IncreaseFigures),  // -> processCommand
-            None                            // -> match None
-          )
-          override def currentInput: Option[Command] = {
-            val next = inputs.headOption.flatten
-            inputs = inputs.drop(1)
-            next
-          }
-        }
-
-        override def update(): Unit = {
-          callCount += 1
-          inputManager.currentInput match {
-            case Some(Command.Escape) =>
-              quit()
-            case Some(Command.QuitGame) if controller.manager.state == State.Menu =>
-              flags :+= "quitGame"
-            case Some(value) =>
-              controller.processCommand(value)
-              flags :+= "processed"
-              update()
-            case None =>
-              flags :+= "none"
-          }
-        }
-      }
-
-      val tui = new FullMatchTUI(controller)
-      tui.update(); tui.update(); tui.update(); tui.update()
-
-      tui.flags should contain allOf ("quit", "quitGame", "processed", "none")
-      tui.callCount shouldBe 5
-    }
-
     "react to ConfigEvent" in {
-        val controller = new Controller()
-        val tui = new TestTUI(controller)
-        tui.processEvent(Event.ConfigEvent)
-        tui.lines.exists(_.contains("Players")) shouldBe true
-        }
-
-    
+      val controller = new Controller()
+      val tui = new TestTUI(controller)
+      tui.processEvent(Event.ConfigEvent)
+      tui.lines.exists(_.contains("Players")) shouldBe true
+    }
 
     "react to QuitGameEvent" in {
-        val controller = new Controller()
-        var quitWasCalled = false
-
-        class QuitTestTUI(controller: Controller) extends TUI(controller) {
-            override protected def quit(): Unit = quitWasCalled = true
-            override protected def writeline(s: String): Unit = ()
-        }
-
-        val tui = new QuitTestTUI(controller)
-        tui.processEvent(Event.QuitGameEvent)
-
-        quitWasCalled shouldBe true
-        }
+      val controller = new Controller()
+      var quitWasCalled = false
+      class QuitTestTUI(controller: Controller) extends TUI(controller) {
+        override protected def quit(): Unit = quitWasCalled = true
+        override protected def writeline(s: String): Unit = ()
+      }
+      val tui = new QuitTestTUI(controller)
+      tui.processEvent(Event.QuitGameEvent)
+      quitWasCalled shouldBe true
+    }
 
     "react to unknown event" in {
-        val controller = new Controller()
-        val tui = new TestTUI(controller)
-        tui.processEvent(Event.RollDiceEvent(4)) // wird nicht explizit behandelt
-        tui.lines.exists(_ == "") shouldBe true // "" von writeline("")
-        }
-
-
+      val controller = new Controller()
+      val tui = new TestTUI(controller)
+      tui.processEvent(Event.RollDiceEvent(4))
+      tui.lines.exists(_ == "") shouldBe true
+    }
 
     "call quit() should clear terminal and print exit message" in {
-        val controller = new Controller()
-        var lines: List[String] = Nil
-        var closed = false
+      val controller = new Controller()
+      var lines: List[String] = Nil
+      var closed = false
 
-        class QuitTestTUI(controller: Controller) extends TUI(controller) {
-            override protected def writeline(s: String): Unit = lines :+= s
-            override protected def quit(): Unit = {
-            super.quit()
-            closed = true
-            }
-
-            // Öffentlicher Aufruf für Test
-            def callQuit(): Unit = quit()
+      class QuitTestTUI(controller: Controller) extends TUI(controller) {
+        override protected def writeline(s: String): Unit = lines :+= s
+        override protected def quit(): Unit = {
+          super.quit()
+          closed = true
         }
+        def callQuit(): Unit = quit()
+      }
 
-        val tui = new QuitTestTUI(controller)
-        tui.callQuit() // <-- jetzt erlaubt
-
-        lines.exists(_.contains("Exiting")) shouldBe true
-        closed shouldBe true
-        }
-
-
-
-
-
-
-    
-
-
+      val tui = new QuitTestTUI(controller)
+      tui.callQuit()
+      lines.exists(_.contains("Exiting")) shouldBe true
+      closed shouldBe true
+    }
   }
 }
