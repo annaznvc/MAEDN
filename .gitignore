@@ -32,4 +32,6 @@ metals.sbt
 /.worksheet/
 
 
-.scala-build
+.scala-build/
+
+src/main/scala/.scala-build/
