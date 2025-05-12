@@ -3,6 +3,8 @@ package de.htwg.se.MAEDN.model.states
 import de.htwg.se.MAEDN.model.{Manager, Board, Player, BoardFactory, State}
 import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.util.Color
+import de.htwg.se.MAEDN.model.Figure
 
 case class ConfigState(
     override val controller: Controller,
@@ -13,14 +15,19 @@ case class ConfigState(
     val boardFactory: BoardFactory = BoardFactory()
 ) extends Manager {
 
-  override def getBoardSize: Int = boardFactory.normalFieldCount
+  val syncedBoardFactory: BoardFactory = boardFactory
+    .withFigureCount(players.headOption.map(_.figures.size).getOrElse(1))
+    .withPlayers(players)
+
+  override def getBoardSize: Int = syncedBoardFactory.normalFieldCount
   override val state: State = State.Config
+
   override def startGame(): Manager = {
     controller.eventQueue.enqueue(Event.StartGameEvent)
     RunningState(
       controller,
       moves,
-      boardFactory.withPlayers(players).build(),
+      syncedBoardFactory.build(),
       players,
       0,
       0,
@@ -65,14 +72,25 @@ case class ConfigState(
   override def moveUp(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newFactory = boardFactory.withPlayers(players)
-    if (players.size < 4) {
+    val availableColors = List(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW)
+      .diff(players.map(_.color))
+
+    if (players.size < 4 && availableColors.nonEmpty) {
+      val newColor = availableColors.head
+      val newPlayerId = players.map(_.id).max + 1
+      val newPlayer = Player(
+        newPlayerId,
+        (1 to players.head.figures.size)
+          .map(i => Figure(i, null))
+          .toList, // temp null owner
+        newColor
+      )
+      val properPlayer = newPlayer.copy(figures =
+        newPlayer.figures.map(f => f.copy(owner = newPlayer))
+      )
       copy(
-        players = players :+ Player(
-          players.size + 1,
-          List.fill(players.head.figures.size)(players.head.figures.head),
-          players.head.color
-        ),
-        boardFactory = newFactory
+        players = players :+ properPlayer,
+        boardFactory = newFactory.withPlayers(players :+ properPlayer)
       )
     } else {
       this

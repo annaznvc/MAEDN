@@ -65,6 +65,7 @@ class TUI(controller: Controller) extends Observer {
           )
         )
       }
+
       case Event.BackToMenuEvent => {
         writeline(TextDisplay.clearTerminal())
         writeline(TextDisplay.printCover(controller.manager))
