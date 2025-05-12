@@ -53,10 +53,9 @@ class BoardFactory(
 
     val fieldsList = (0 until 4)
       .flatMap(i =>
-        startFields.slice(i, i + 1) ++
-          normalFields
-            .slice(i * normalFieldCount, (i + 1) * normalFieldCount) ++
-          playerGoalFields(i)
+        playerGoalFields(i) ++ // Goal fields first
+          startFields.slice(i, i + 1) ++ // then Start field
+          normalFields.slice(i * normalFieldCount, (i + 1) * normalFieldCount)
       )
       .toList
 

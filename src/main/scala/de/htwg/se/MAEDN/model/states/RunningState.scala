@@ -56,16 +56,15 @@ case class RunningState(
 
     if (board == newBoard) {
       controller.eventQueue.enqueue(Event.InvalidMoveEvent)
+      this
     } else {
-      controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFigure))
       if (rolled == 6) {
         controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
-        copy(allowedRollDice = true)
+        copy(board = newBoard, allowedRollDice = true)
       } else {
-        playNext()
+        playNext().asInstanceOf[RunningState].copy(board = newBoard)
       }
     }
-    this
   }
 
   override def quitGame(): Manager = {

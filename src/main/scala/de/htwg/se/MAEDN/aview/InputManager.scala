@@ -12,7 +12,7 @@ class InputManager(val controller: Controller, val terminal: Terminal) {
 
   // Tasten direkt an Command-Objekte binden
   keyMap.bind(PlayDiceCommand(controller), "z")
-  keyMap.bind(PlayNextCommand(controller), " ")
+  keyMap.bind(PlayNextCommand(controller), "x")
   keyMap.bind(MoveUpCommand(controller), "w")
   keyMap.bind(MoveDownCommand(controller), "s")
   keyMap.bind(IncreaseFiguresCommand(controller), "e")

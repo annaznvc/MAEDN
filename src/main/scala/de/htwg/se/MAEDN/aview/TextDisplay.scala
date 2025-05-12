@@ -7,7 +7,6 @@ import scala.io.AnsiColor._
 
 object TextDisplay {
   def clearTerminal(): String = {
-    // ANSI escape code to clear the terminal
     "\u001b[2J\u001b[H"
   }
 
@@ -15,22 +14,25 @@ object TextDisplay {
     menuState.state match {
       case State.Menu =>
         s"""${RED}Menu${RESET}
-                   |${menuState.moves} moves
-                   |${menuState.getPlayerCount} players
-                   |${menuState.getBoardSize}x${menuState.getBoardSize} board
-                   |""".stripMargin
+           |${menuState.moves} moves
+           |${menuState.getPlayerCount} players
+           |${menuState.getBoardSize}x${menuState.getBoardSize} Board
+           |${menuState.getFigureCount} Figures
+           |""".stripMargin
       case State.Config =>
         s"""${YELLOW}Config${RESET}
-                   |${menuState.moves} moves
-                   |${menuState.getPlayerCount} players
-                   |${menuState.getBoardSize}x${menuState.getBoardSize} board
-                   |""".stripMargin
+           |${menuState.moves} moves
+           |${menuState.getPlayerCount} players
+           |${menuState.getBoardSize}x${menuState.getBoardSize} board
+           |${menuState.getFigureCount} Figures
+           |""".stripMargin
       case State.Running =>
         s"""${GREEN}Running${RESET}
-                   |${menuState.moves} moves
-                   |${menuState.getPlayerCount} players
-                   |${menuState.getBoardSize}x${menuState.getBoardSize} board
-                   |""".stripMargin
+           |${menuState.moves} moves
+           |${menuState.getPlayerCount} players
+           |${menuState.getBoardSize}x${menuState.getBoardSize} board
+           |${menuState.getFigureCount} Figures
+           |""".stripMargin
     }
   }
 
@@ -60,16 +62,22 @@ object TextDisplay {
 
     val sb = new StringBuilder
 
-    // 1. Print Home fields
+    // === Home Fields ===
     sb.append(s"${BOLD}Home Fields:${RESET}\n")
-    val perGoal = board.homeFields.size / 4
+
+    val usedColors = board.homeFields.map(_.color).distinct
     val groupedHome =
-      if (perGoal > 0) board.homeFields.grouped(perGoal).toList
-      else List.fill(4)(List.empty[Field]) // empty placeholders
-    val labels = List("Red", "Blue", "Green", "Yellow")
+      usedColors.map(color => board.homeFields.filter(_.color == color))
+    val labels = usedColors.map {
+      case Color.RED    => "Red"
+      case Color.BLUE   => "Blue"
+      case Color.GREEN  => "Green"
+      case Color.YELLOW => "Yellow"
+      case _            => "Player"
+    }
 
     for ((group, i) <- groupedHome.zipWithIndex) {
-      val label = if (i < labels.length) labels(i) else s"Player${i + 1}"
+      val label = labels(i)
       val color = colorCode(
         group.headOption.map(_.color).getOrElse(Color.WHITE)
       )
@@ -79,23 +87,63 @@ object TextDisplay {
 
     sb.append("\n")
 
-    // 2. Print Main Grid
+    // === Main Board ===
     sb.append(s"${BOLD}Main Board:${RESET}\n")
+
     val perPlayer = board.size
-    val perSection = perPlayer + 1 + perGoal
+    val figuresPerPlayer =
+      if (usedColors.nonEmpty)
+        board.homeFields.count(_.color == usedColors.head)
+      else 0
+    val perSection = perPlayer + 1 + figuresPerPlayer
     val sections = board.fields.grouped(perSection).toList
 
     for ((section, i) <- sections.zipWithIndex) {
-      //ursprünglich: val label = if (i < labels.length) labels(i) else s"Player${i + 1}"
+      val labelColor = section
+        .find(_.fieldType == FieldType.Start)
+        .map(_.color)
+        .getOrElse(Color.WHITE)
       val label = labels.lift(i).getOrElse("")
-      val color = colorCode(
-        section.headOption.map(_.color).getOrElse(Color.WHITE)
-      )
+      val color = colorCode(labelColor)
       val rendered = section.map(renderField).mkString(" ")
-      sb.append(s"$color$label:$RESET $rendered\n")
+      sb.append(s"$rendered\n")
     }
 
     sb.toString()
+  }
+
+  def printFlatBoard(board: Board): String = {
+    def colorCode(c: Color): String = c match {
+      case Color.RED    => RED
+      case Color.BLUE   => BLUE
+      case Color.GREEN  => GREEN
+      case Color.YELLOW => YELLOW
+      case Color.WHITE  => WHITE
+    }
+
+    def renderField(f: Field): String = {
+      val baseColor = colorCode(f.color)
+      val content = f.figure match {
+        case Some(fig) => s"F${fig.id}"
+        case None =>
+          f.fieldType match {
+            case FieldType.Home   => "H "
+            case FieldType.Start  => "S "
+            case FieldType.Goal   => "G "
+            case FieldType.Normal => "N "
+          }
+      }
+      s"$baseColor$content$RESET"
+    }
+
+    val sb = new StringBuilder
+    sb.append(s"${BOLD}Main Board:${RESET}\n")
+
+    board.fields.foreach { field =>
+      sb.append(renderField(field)).append(" ")
+    }
+
+    sb.toString().trim + "\n"
   }
 
   def printConfig(
@@ -114,5 +162,4 @@ object TextDisplay {
     ${BOLD}Press [Space] to start a new game${RESET}
   """.stripMargin
   }
-
 }

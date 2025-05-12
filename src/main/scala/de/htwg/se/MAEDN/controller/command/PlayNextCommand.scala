@@ -6,5 +6,6 @@ case class PlayNextCommand(controller: Controller) extends Command {
   override def execute(): Unit = {
     controller.manager = controller.manager.playNext()
     controller.notifyObservers()
+
   }
 }
