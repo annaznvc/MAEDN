@@ -3,6 +3,7 @@ package de.htwg.se.MAEDN.model.states
 import de.htwg.se.MAEDN.model.{IState, Manager, Board, Player, State}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model.strategy.DefaultDiceRollStrategy
 
 case class RunningState(
     override val controller: Controller,
@@ -33,13 +34,11 @@ case class RunningState(
 
   override def playDice(): Manager = {
     if (!allowedRollDice) return this
+
     val newRolled = Dice.roll()
-    controller.eventQueue.enqueue(Event.RollDiceEvent(newRolled))
-    copy(
-      allowedRollDice = false,
-      rolled = newRolled
-    )
+    DefaultDiceRollStrategy.handleRoll(newRolled, this)
   }
+
   override def playNext(): Manager = {
     val nextPlayerIndex = (moves + 1) % players.size
     copy(moves = moves + 1)
@@ -49,21 +48,20 @@ case class RunningState(
     if (allowedRollDice) return this
 
     controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFigure))
-    val newBoard = board.moveFigure(
-      players(getCurrentPlayer).figures(selectedFigure),
-      rolled
-    )
+
+    val figure = players(getCurrentPlayer).figures(selectedFigure)
+    val newBoard = board.moveFigure(figure, rolled)
 
     if (board == newBoard) {
       controller.eventQueue.enqueue(Event.InvalidMoveEvent)
-      this
+      return this
+    }
+
+    if (rolled == 6) {
+      controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
+      copy(board = newBoard, allowedRollDice = true)
     } else {
-      if (rolled == 6) {
-        controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
-        copy(board = newBoard, allowedRollDice = true)
-      } else {
-        playNext().asInstanceOf[RunningState].copy(board = newBoard)
-      }
+      playNext().asInstanceOf[RunningState].copy(board = newBoard)
     }
   }
 
