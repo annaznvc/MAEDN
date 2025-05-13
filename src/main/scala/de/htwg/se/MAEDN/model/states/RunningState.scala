@@ -16,14 +16,15 @@ case class RunningState(
   override val state: State = State.Running
 
   override def moveUp(): Manager = {
-    println(s"[DEBUG] moveUp called — current selected: $selectedFigure")
+    if (allowedRollDice || rolled != 6)
+      return this // Auswahl nur nach 6 erlaubt
     val selected = (selectedFigure + 1) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
     copy(selectedFigure = selected)
   }
 
   override def moveDown(): Manager = {
-    println(s"[DEBUG] moveDown called — current selected: $selectedFigure")
+    if (allowedRollDice || rolled != 6) return this
     val selected =
       (selectedFigure - 1 + players.head.figures.size) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
