@@ -6,6 +6,7 @@ import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.controller.command._
+import de.htwg.se.MAEDN.model.states.RunningState
 
 class TUI(controller: Controller) extends Observer {
 
@@ -48,12 +49,26 @@ class TUI(controller: Controller) extends Observer {
   // * OUTPUT
   override def processEvent(event: Event): Unit = {
     event match {
-      case Event.StartGameEvent => {
+
+      case Event.StartGameEvent =>
         writeline(TextDisplay.clearTerminal())
-        writeline(TextDisplay.printCover(controller.manager))
-        writeline(TextDisplay.printBoard(controller.manager.board))
-      }
-      case Event.ConfigEvent => {
+        controller.manager match {
+          case rs: RunningState =>
+            writeline(TextDisplay.printCover(rs))
+            writeline(
+              TextDisplay.printBoard(
+                rs.board,
+                rs.selectedFigure,
+                rs.getCurrentPlayer,
+                rs.players
+              )
+            )
+          case _ =>
+            writeline(TextDisplay.printCover(controller.manager))
+            writeline(TextDisplay.printBoard(controller.manager.board))
+        }
+
+      case Event.ConfigEvent =>
         val manager = controller.manager
         writeline(TextDisplay.clearTerminal())
         writeline(TextDisplay.printCover(manager))
@@ -64,18 +79,73 @@ class TUI(controller: Controller) extends Observer {
             manager.getBoardSize
           )
         )
-      }
 
-      case Event.BackToMenuEvent => {
+      case Event.RollDiceEvent(rolled) =>
+        writeline(TextDisplay.clearTerminal())
+        controller.manager match {
+          case rs: RunningState =>
+            writeline(TextDisplay.printCover(rs))
+            writeline(
+              TextDisplay.printBoard(
+                rs.board,
+                rs.selectedFigure,
+                rs.getCurrentPlayer,
+                rs.players
+              )
+            )
+          case _ =>
+            writeline(TextDisplay.printCover(controller.manager))
+            writeline(TextDisplay.printBoard(controller.manager.board))
+        }
+        writeline(s"You rolled a $rolled!")
+        if (rolled == 6)
+          writeline(
+            "You rolled a 6! Use 'w'/'s' to select a figure and press 'm' to move."
+          )
+
+      case Event.ChangeSelectedFigureEvent(_) =>
+        writeline(TextDisplay.clearTerminal())
+        controller.manager match {
+          case rs: RunningState =>
+            writeline(TextDisplay.printCover(rs))
+            writeline(
+              TextDisplay.printBoard(
+                rs.board,
+                rs.selectedFigure,
+                rs.getCurrentPlayer,
+                rs.players
+              )
+            )
+          case _ =>
+            writeline(TextDisplay.printCover(controller.manager))
+            writeline(TextDisplay.printBoard(controller.manager.board))
+        }
+
+      case Event.InvalidMoveEvent =>
+        writeline("Invalid move!")
+        controller.manager match {
+          case rs: RunningState =>
+            writeline(
+              TextDisplay.printBoard(
+                rs.board,
+                rs.selectedFigure,
+                rs.getCurrentPlayer,
+                rs.players
+              )
+            )
+          case _ =>
+            writeline(TextDisplay.printBoard(controller.manager.board))
+        }
+
+      case Event.BackToMenuEvent =>
         writeline(TextDisplay.clearTerminal())
         writeline(TextDisplay.printCover(controller.manager))
-      }
-      case Event.InvalidMoveEvent => {
-        writeline("Invalid move!")
-        writeline(TextDisplay.printBoard(controller.manager.board))
-      }
-      case Event.QuitGameEvent => quit()
-      case _ => writeline("") // Nothing to do for other events
+
+      case Event.QuitGameEvent =>
+        quit()
+
+      case _ =>
+        writeline("") // No-op fallback
     }
   }
 

@@ -2,6 +2,8 @@ package de.htwg.se.MAEDN.aview
 
 import de.htwg.se.MAEDN.model.{IState, State, Board, Field, FieldType}
 import de.htwg.se.MAEDN.util.Color
+import de.htwg.se.MAEDN.model.states.RunningState
+import de.htwg.se.MAEDN.model.Player
 
 import scala.io.AnsiColor._
 
@@ -28,15 +30,26 @@ object TextDisplay {
            |""".stripMargin
       case State.Running =>
         s"""${GREEN}Running${RESET}
-           |${menuState.moves} moves
-           |${menuState.getPlayerCount} players
-           |${menuState.getBoardSize}x${menuState.getBoardSize} board
-           |${menuState.getFigureCount} Figures
-           |""".stripMargin
+            |${menuState.moves} moves
+            |Current Player: ${menuState.getCurrentPlayer + 1}
+            |Selected Figure: ${menuState
+            .asInstanceOf[RunningState]
+            .selectedFigure + 1}
+            |Rolled: ${menuState.rolled}
+            |${menuState.getPlayerCount} players
+            |${menuState.getBoardSize}x${menuState.getBoardSize} board
+            |${menuState.getFigureCount} Figures
+            |""".stripMargin
+
     }
   }
 
-  def printBoard(board: Board): String = {
+  def printBoard(
+      board: Board,
+      selectedFigure: Int = -1,
+      currentPlayerIndex: Int = -1,
+      players: List[Player] = Nil
+  ): String = {
     def colorCode(c: Color): String = c match {
       case Color.RED    => RED
       case Color.BLUE   => BLUE
@@ -45,10 +58,11 @@ object TextDisplay {
       case Color.WHITE  => WHITE
     }
 
-    def renderField(f: Field): String = {
+    def renderField(f: Field, isSelected: Boolean): String = {
       val baseColor = colorCode(f.color)
       val content = f.figure match {
-        case Some(fig) => s"F${fig.id}"
+        case Some(fig) =>
+          if (isSelected) s">${fig.id}<" else s"F${fig.id}"
         case None =>
           f.fieldType match {
             case FieldType.Home   => "H "
@@ -65,23 +79,21 @@ object TextDisplay {
     // === Home Fields ===
     sb.append(s"${BOLD}Home Fields:${RESET}\n")
 
-    val usedColors = board.homeFields.map(_.color).distinct
-    val groupedHome =
-      usedColors.map(color => board.homeFields.filter(_.color == color))
-    val labels = usedColors.map {
-      case Color.RED    => "Red"
-      case Color.BLUE   => "Blue"
-      case Color.GREEN  => "Green"
-      case Color.YELLOW => "Yellow"
-      case _            => "Player"
-    }
+    val groupedHomeFields =
+      players.map(p => board.homeFields.filter(_.color == p.color))
 
-    for ((group, i) <- groupedHome.zipWithIndex) {
-      val label = labels(i)
-      val color = colorCode(
-        group.headOption.map(_.color).getOrElse(Color.WHITE)
-      )
-      val rendered = group.map(renderField).mkString(" ")
+    for ((player, i) <- players.zipWithIndex) {
+      val color = colorCode(player.color)
+      val label = player.color.toString.capitalize
+      val group = groupedHomeFields(i)
+      val rendered = group
+        .map { f =>
+          val isSelected =
+            i == currentPlayerIndex &&
+              f.figure.exists(_.id == selectedFigure + 1)
+          renderField(f, isSelected)
+        }
+        .mkString(" ")
       sb.append(s"$color$label:$RESET $rendered\n")
     }
 
@@ -92,8 +104,8 @@ object TextDisplay {
 
     val perPlayer = board.size
     val figuresPerPlayer =
-      if (usedColors.nonEmpty)
-        board.homeFields.count(_.color == usedColors.head)
+      if (players.nonEmpty)
+        board.homeFields.count(_.color == players.head.color)
       else 0
     val perSection = perPlayer + 1 + figuresPerPlayer
     val sections = board.fields.grouped(perSection).toList
@@ -103,9 +115,8 @@ object TextDisplay {
         .find(_.fieldType == FieldType.Start)
         .map(_.color)
         .getOrElse(Color.WHITE)
-      val label = labels.lift(i).getOrElse("")
       val color = colorCode(labelColor)
-      val rendered = section.map(renderField).mkString(" ")
+      val rendered = section.map(f => renderField(f, false)).mkString(" ")
       sb.append(s"$rendered\n")
     }
 
