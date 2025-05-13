@@ -7,7 +7,7 @@ import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.model.{Manager, State}
 import de.htwg.se.MAEDN.controller.command._
 import org.jline.terminal.TerminalBuilder
-
+s
 class TUISpec extends AnyWordSpec with Matchers {
 
   val sharedTerminal = TerminalBuilder.builder().dumb(true).build()

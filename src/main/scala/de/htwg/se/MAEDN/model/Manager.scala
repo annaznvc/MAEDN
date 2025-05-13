@@ -5,17 +5,19 @@ import de.htwg.se.MAEDN.model.IState
 import de.htwg.se.MAEDN.model.states.MenuState
 import de.htwg.se.MAEDN.util.Color
 
-trait Manager extends IState {
+trait Manager extends IState with IMemento {
 
   val moves: Int = 0
-  val board: Board = BoardFactory().build()
+  val board: Board = Board(8)
   val players: List[Player] = {
     List(Color.RED, Color.BLUE).zipWithIndex.map { case (color, index) =>
       val placeholder = Player(index + 1, List.empty, color)
-      val figures = (1 to 4).map(i => Figure(i, placeholder)).toList
+      val figures = (1 to 4).map(i => Figure(i, placeholder, -1)).toList
       placeholder.copy(figures = figures)
     }
   }
+  val selectedFigure: Int = 0
+
   def increaseBoardSize(): Manager = this
   def decreaseBoardSize(): Manager = this
   def increaseFigures(): Manager = this
@@ -28,6 +30,8 @@ trait Manager extends IState {
   def startGame(): Manager = this
   def moveFigure(): Manager = this
 
+  def getSnapshot: Manager = this
+
   def getPlayerCount: Int = players.size
   def getFigureCount: Int = players.head.figures.size
   def getBoardSize: Int = board.size
@@ -39,10 +43,10 @@ object Manager {
     MenuState(
       controller,
       0,
-      BoardFactory().build(),
+      Board(8),
       List(Color.RED, Color.BLUE).zipWithIndex.map { case (color, index) =>
         val placeholder = Player(index + 1, List.empty, color)
-        val figures = (1 to 4).map(i => Figure(i, placeholder)).toList
+        val figures = (1 to 4).map(i => Figure(i, placeholder, -1)).toList
         placeholder.copy(figures = figures)
       }
     )

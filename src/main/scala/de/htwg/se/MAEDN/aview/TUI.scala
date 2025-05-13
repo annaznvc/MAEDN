@@ -80,7 +80,7 @@ class TUI(controller: Controller) extends Observer {
           )
         )
 
-      case Event.RollDiceEvent(rolled) =>
+      case Event.PlayDiceEvent(rolled) =>
         writeline(TextDisplay.clearTerminal())
         controller.manager match {
           case rs: RunningState =>

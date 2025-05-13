@@ -10,7 +10,7 @@ case class RunningState(
     override val board: Board,
     override val players: List[Player],
     override val rolled: Int = 0,
-    val selectedFigure: Int = 0,
+    override val selectedFigure: Int = 0,
     val allowedRollDice: Boolean = true
 ) extends Manager {
   override val state: State = State.Running
@@ -35,7 +35,7 @@ case class RunningState(
     if (!allowedRollDice) return this
 
     val newRolled = Dice.roll()
-    controller.eventQueue.enqueue(Event.RollDiceEvent(newRolled))
+    controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
 
     if (newRolled == 6) {
       // Spieler bleibt dran
@@ -55,19 +55,22 @@ case class RunningState(
   override def moveFigure(): Manager = {
     if (allowedRollDice) return this
 
-    controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFigure))
-
+    val figures = players.flatMap(_.figures)
     val figure = players(getCurrentPlayer).figures(selectedFigure)
-    val newBoard = board.moveFigure(figure, rolled)
 
-    if (board == newBoard) {
+    val newFigures = board.moveFigure(figure, figures, rolled)
+
+    if (newFigures == figures) {
       controller.eventQueue.enqueue(Event.InvalidMoveEvent)
       this
-    } else if (rolled == 6) {
-      controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
-      copy(board = newBoard, allowedRollDice = true)
     } else {
-      playNext().asInstanceOf[RunningState].copy(board = newBoard)
+      // Update the players with the new figures
+      controller.eventQueue.enqueue(Event.MoveFigureEvent(figure.id))
+      val updatedPlayers = players.zipWithIndex.map { case (player, index) =>
+        val playerFigures = newFigures.filter(_.owner.id == index)
+        player.copy(figures = playerFigures)
+      }
+      copy(players = updatedPlayers)
     }
   }
 

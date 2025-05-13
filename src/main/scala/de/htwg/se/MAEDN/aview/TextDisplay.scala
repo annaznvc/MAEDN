@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.aview
 
-import de.htwg.se.MAEDN.model.{IState, State, Board, Field, FieldType}
+import de.htwg.se.MAEDN.model.{IState, State, Board}
 import de.htwg.se.MAEDN.util.Color
 import de.htwg.se.MAEDN.model.states.RunningState
 import de.htwg.se.MAEDN.model.Player
