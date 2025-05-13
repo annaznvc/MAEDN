@@ -11,7 +11,8 @@ class Observable {
   val eventQueue: Queue[Event] = Queue()
 
   def add(s: Observer): Unit = subscribers = subscribers :+ s
-  def remove(s: Observer): Unit = subscribers = subscribers.filterNot(o => o == s)
+  def remove(s: Observer): Unit = subscribers =
+    subscribers.filterNot(o => o == s)
 
   def instantNotifyObservers(event: Event): Unit = {
     subscribers.foreach(_.processEvent(event))

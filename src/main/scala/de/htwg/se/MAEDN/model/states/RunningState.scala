@@ -3,7 +3,6 @@ package de.htwg.se.MAEDN.model.states
 import de.htwg.se.MAEDN.model.{IState, Manager, Board, Player, State}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.strategy.DefaultDiceRollStrategy
 
 case class RunningState(
     override val controller: Controller,
@@ -36,7 +35,16 @@ case class RunningState(
     if (!allowedRollDice) return this
 
     val newRolled = Dice.roll()
-    DefaultDiceRollStrategy.handleRoll(newRolled, this)
+    controller.eventQueue.enqueue(Event.RollDiceEvent(newRolled))
+
+    if (newRolled == 6) {
+      // Spieler bleibt dran
+      copy(rolled = newRolled, allowedRollDice = false)
+    } else {
+      // Nächster Spieler, Auswahl zurücksetzen
+      controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(0))
+      copy(rolled = newRolled, allowedRollDice = true, moves = moves + 1)
+    }
   }
 
   override def playNext(): Manager = {
@@ -54,10 +62,8 @@ case class RunningState(
 
     if (board == newBoard) {
       controller.eventQueue.enqueue(Event.InvalidMoveEvent)
-      return this
-    }
-
-    if (rolled == 6) {
+      this
+    } else if (rolled == 6) {
       controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
       copy(board = newBoard, allowedRollDice = true)
     } else {
