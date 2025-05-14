@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As
 val scala3Version = "3.5.1"
 
 lazy val root = project
