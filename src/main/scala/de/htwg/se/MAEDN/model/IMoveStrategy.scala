@@ -8,6 +8,13 @@ trait IMoveStrategy {
       rolled: Int
   ): List[Figure]
 
+  def canMove(
+      figure: Figure,
+      figures: List[Figure],
+      size: Int,
+      rolled: Int
+  ): Boolean
+
   def isOnGoal(figure: Figure, goalCount: Int, size: Int): Boolean =
     figure.index >= size * 4 - goalCount
 

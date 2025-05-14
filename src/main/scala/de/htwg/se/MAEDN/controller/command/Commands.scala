@@ -42,21 +42,7 @@ case class MoveDownCommand(controller: Controller) extends Command {
 
 case class MoveUpCommand(controller: Controller) extends Command {
   override def execute(): Manager = {
-    controller.manager = controller.manager.moveDown()
-    controller.manager
-  }
-}
-
-case class MoveFigureCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
-    controller.manager = controller.manager.moveFigure()
-    controller.manager
-  }
-}
-
-case class PlayDiceCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
-    controller.manager = controller.manager.playDice()
+    controller.manager = controller.manager.moveUp()
     controller.manager
   }
 }

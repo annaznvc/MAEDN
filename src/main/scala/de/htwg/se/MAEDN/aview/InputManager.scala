@@ -11,7 +11,6 @@ class InputManager(val controller: Controller, val terminal: Terminal) {
   private val keyMap = new KeyMap[Command]()
 
   // Tasten direkt an Command-Objekte binden
-  keyMap.bind(PlayDiceCommand(controller), "z")
   keyMap.bind(PlayNextCommand(controller), "x")
   keyMap.bind(MoveUpCommand(controller), "w")
   keyMap.bind(MoveDownCommand(controller), "s")
@@ -21,7 +20,6 @@ class InputManager(val controller: Controller, val terminal: Terminal) {
   keyMap.bind(DecreaseBoardSizeCommand(controller), "f")
   keyMap.bind(QuitGameCommand(controller), "q")
   keyMap.bind(StartGameCommand(controller), "n")
-  keyMap.bind(MoveFigureCommand(controller), "m")
   keyMap.bind(UndoCommand(controller), "u")
 
   // ESC bleibt direkt verarbeitet – das ist kein Command

@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{Board, Figure, IMoveStrategy}
+import de.htwg.se.MAEDN.model.{Board, Figure, IMoveStrategy, Collision}
 
 class KickFigureStrategy extends IMoveStrategy {
   override def moveFigure(
@@ -9,16 +9,25 @@ class KickFigureStrategy extends IMoveStrategy {
       size: Int,
       rolled: Int
   ): List[Figure] = {
-    figures
-      .map { otherFigure =>
-        if (
-          otherFigure != figure && otherFigure.adjustedIndex(size) == figure
-            .adjustedIndex(size)
-        ) {
-          otherFigure.copy(index = -1) // Move the collided figure to home
-        } else {
-          otherFigure
-        }
+    figures.map { f =>
+      if (f.checkForCollision(figure, size) == Collision.EnemyCollision) {
+        // Move the enemy figure back to home
+        f.copy(index = -1)
+      } else {
+        f
       }
+    }
+  }
+
+  // Checks if there are collisions with other figures
+  override def canMove(
+      figure: Figure,
+      figures: List[Figure],
+      size: Int,
+      rolled: Int
+  ): Boolean = {
+    figures.exists(f =>
+      f.checkForCollision(figure, size) == Collision.EnemyCollision
+    )
   }
 }

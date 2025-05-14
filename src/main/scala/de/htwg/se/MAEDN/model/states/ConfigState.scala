@@ -1,9 +1,8 @@
 package de.htwg.se.MAEDN.model.states
 
-import de.htwg.se.MAEDN.model.{Manager, Board, Player, State, Figure}
-import de.htwg.se.MAEDN.util.Event
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.util.{Event, Color}
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.util.Color
 
 case class ConfigState(
     override val controller: Controller,
@@ -23,8 +22,7 @@ case class ConfigState(
       board,
       players,
       0,
-      0,
-      true
+      0
     )
   }
 
@@ -45,7 +43,7 @@ case class ConfigState(
 
   override def increaseFigures(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    val newFigureCount = Math.min(board.size, players.head.figures.size)
+    val newFigureCount = Math.min(board.size, players.head.figures.size + 1)
     val newPlayers = players.map(player =>
       player.copy(figures = List.fill(newFigureCount)(player.figures.head))
     )
@@ -64,13 +62,8 @@ case class ConfigState(
   override def moveUp(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newPlayerCount = Math.min(4, players.size + 1)
-    val newPlayers = Color.values.zipWithIndex.map { case (color, index) =>
-      val placeholder = Player(index + 1, List.empty, color)
-      val figures = (1 to players.head.figures.size)
-        .map(i => Figure(i, placeholder, -1))
-        .toList
-      placeholder.copy(figures = figures)
-    }
+    val newPlayers =
+      PlayerFactory.createPlayers(newPlayerCount, players.head.figures.size)
     copy(players = newPlayers)
   }
 

@@ -9,13 +9,7 @@ trait Manager extends IState with IMemento {
 
   val moves: Int = 0
   val board: Board = Board(8)
-  val players: List[Player] = {
-    List(Color.RED, Color.BLUE).zipWithIndex.map { case (color, index) =>
-      val placeholder = Player(index + 1, List.empty, color)
-      val figures = (1 to 4).map(i => Figure(i, placeholder, -1)).toList
-      placeholder.copy(figures = figures)
-    }
-  }
+  val players: List[Player] = PlayerFactory.createPlayers(2, 4)
   val selectedFigure: Int = 0
 
   def increaseBoardSize(): Manager = this
@@ -44,10 +38,6 @@ object Manager {
       controller,
       0,
       Board(8),
-      List(Color.RED, Color.BLUE).zipWithIndex.map { case (color, index) =>
-        val placeholder = Player(index + 1, List.empty, color)
-        val figures = (1 to 4).map(i => Figure(i, placeholder, -1)).toList
-        placeholder.copy(figures = figures)
-      }
+      PlayerFactory.createPlayers(2, 4)
     )
 }

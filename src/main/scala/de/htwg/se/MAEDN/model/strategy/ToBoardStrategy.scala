@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{Board, Figure, IMoveStrategy}
+import de.htwg.se.MAEDN.model.{Board, Figure, IMoveStrategy, Collision}
+import de.htwg.se.MAEDN.util.Position
 
 /** The OnBoardStrategy is responsible for moving a figure from home to the
   * start position when a 6 is rolled. It is used when the figure is not on the
@@ -13,17 +14,33 @@ class ToBoardStrategy extends IMoveStrategy {
       size: Int,
       rolled: Int
   ): List[Figure] = {
-    if (rolled != 6) {
+    if (!canMove(figure, figures, size, rolled)) {
       figures
     } else {
       figures.map { f =>
         if (f == figure) {
-          // If the rolled number is 6, the figure can move to the start position
+          // Move the figure to the start position if no other figure is there
           f.copy(index = 0)
         } else {
           f
         }
       }
     }
+  }
+
+  override def canMove(
+      figure: Figure,
+      figures: List[Figure],
+      size: Int,
+      rolled: Int
+  ): Boolean = {
+    // Check if the figure can move to the start position
+    rolled == 6 && !figures.exists(f =>
+      f.checkForPossibleCollision(
+        figure,
+        size,
+        Position.Start(size, figure.owner.color)
+      ) == Collision.OwnCollision
+    )
   }
 }
