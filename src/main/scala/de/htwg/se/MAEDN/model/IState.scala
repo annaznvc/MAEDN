@@ -11,6 +11,7 @@ trait IState {
   val state: State
   val controller: Controller
   val rolled: Int
+  val selectedFigure: Int
 
   def startGame(): Manager
   def quitGame(): Manager

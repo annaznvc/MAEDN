@@ -10,62 +10,85 @@ case class RunningState(
     override val board: Board,
     override val players: List[Player],
     override val rolled: Int = 0,
-    val selectedFigure: Int = 0,
-    val allowedRollDice: Boolean = true
+    override val selectedFigure: Int = 0
 ) extends Manager {
   override val state: State = State.Running
 
   override def moveUp(): Manager = {
     val selected = (selectedFigure + 1) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
-    copy(
-      selectedFigure = selected
-    )
+    copy(selectedFigure = selected)
   }
+
   override def moveDown(): Manager = {
     val selected =
       (selectedFigure - 1 + players.head.figures.size) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
-    copy(
-      selectedFigure = selected
-    )
+    copy(selectedFigure = selected)
   }
 
   override def playDice(): Manager = {
-    if (!allowedRollDice) return this
     val newRolled = Dice.roll()
-    controller.eventQueue.enqueue(Event.RollDiceEvent(newRolled))
-    copy(
-      allowedRollDice = false,
-      rolled = newRolled
-    )
+    controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
+    copy(rolled = newRolled)
   }
+
   override def playNext(): Manager = {
-    val nextPlayerIndex = (moves + 1) % players.size
-    copy(moves = moves + 1)
+    rolled match {
+      case -1 => {
+        controller.eventQueue.enqueue(
+          Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+        )
+        copy(
+          moves = moves + 1,
+          rolled = 0
+        )
+      }
+      case 0 => playDice()
+      case _ => moveFigure()
+    }
   }
 
   override def moveFigure(): Manager = {
-    if (allowedRollDice) return this
-
-    controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFigure))
-    val newBoard = board.moveFigure(
-      players(getCurrentPlayer).figures(selectedFigure),
-      rolled
-    )
-
-    if (board == newBoard) {
-      controller.eventQueue.enqueue(Event.InvalidMoveEvent)
-    } else {
-      controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFigure))
-      if (rolled == 6) {
-        controller.eventQueue.enqueue(Event.RollDiceEvent(rolled))
-        copy(allowedRollDice = true)
-      } else {
-        playNext()
-      }
+    if (
+      !board.checkIfMoveIsPossible(
+        players.flatMap(_.figures),
+        rolled,
+        players(getCurrentPlayer).color
+      )
+    ) {
+      controller.eventQueue.enqueue(
+        Event.PlayNextEvent(
+          (getCurrentPlayer + 1) % players.size
+        )
+      )
+      return copy(
+        rolled = 0,
+        moves = moves + 1
+      )
     }
-    this
+
+    val figures = players.flatMap(_.figures)
+    val figure = players(getCurrentPlayer).figures(selectedFigure)
+
+    val newFigures = board.moveFigure(figure, figures, rolled)
+
+    if (newFigures == figures) {
+      controller.eventQueue.enqueue(Event.InvalidMoveEvent)
+      this
+    } else {
+      // Update the players with the new figures
+      controller.eventQueue.enqueue(Event.MoveFigureEvent(figure.id))
+      val updatedPlayers = players.zipWithIndex.map { case (player, index) =>
+        val playerFigures = newFigures.filter(_.owner.id == player.id)
+        player.copy(figures = playerFigures)
+      }
+
+      copy(
+        players = updatedPlayers,
+        rolled = if (rolled == 6) 0 else -1
+      )
+    }
   }
 
   override def quitGame(): Manager = {
