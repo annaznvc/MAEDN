@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - CI-Travis1
+      - pattern
+      - patternTest
   pull_request:
     branches:
       - main
