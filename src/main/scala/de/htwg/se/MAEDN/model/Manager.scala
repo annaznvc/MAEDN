@@ -7,6 +7,8 @@ import de.htwg.se.MAEDN.util.Color
 
 trait Manager extends IState with IMemento {
 
+  val controller: Controller // ✅ STABILE VAL statt def!
+
   val moves: Int = 0
   val board: Board = Board(8)
   val players: List[Player] = PlayerFactory.createPlayers(2, 4)

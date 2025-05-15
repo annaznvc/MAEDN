@@ -54,4 +54,6 @@ case class Figure(
     else if (this.owner.color == other.owner.color) Collision.OwnCollision
     else Collision.EnemyCollision
   }
+
+  override def toString: String = s"Figure($id, index=$index)"
 }

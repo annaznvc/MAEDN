@@ -9,4 +9,6 @@ case class Player(
     color: Color
 ) {
   def startPosition(size: Int): Int = color.offset * size
+
+  override def toString: String = s"Player($id, $color)" // 💥 FIX: kein Rekursionszugriff auf figures
 }

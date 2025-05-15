@@ -2,7 +2,6 @@ package de.htwg.se.MAEDN.controller.command
 
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.Manager
-import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.util.Event
 
 case class DecreaseBoardSizeCommand(controller: Controller) extends Command {

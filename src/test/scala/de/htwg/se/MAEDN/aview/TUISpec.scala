@@ -1,152 +1,214 @@
 package de.htwg.se.MAEDN.aview
 
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.se.MAEDN.aview.TUI
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.util.Event
-import de.htwg.se.MAEDN.model.{Manager, State}
+import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.model.State
+import scala.reflect.Selectable.reflectiveSelectable
 import de.htwg.se.MAEDN.controller.command._
-import org.jline.terminal.TerminalBuilder
-s
+import de.htwg.se.MAEDN.model.states._
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.model.Board
+import de.htwg.se.MAEDN.model.PlayerFactory
+
 class TUISpec extends AnyWordSpec with Matchers {
 
-  val sharedTerminal = TerminalBuilder.builder().dumb(true).build()
+  class TestTUI(controller: Controller) extends TUI(controller) {
+    val outputBuffer = new StringBuilder
 
-  class TestTUI(ctrl: Controller) extends TUI(ctrl) {
-    var lines: List[String] = Nil
-    override protected def writeline(s: String): Unit = lines :+= s
+    override protected def writeline(s: String): Unit = {
+      outputBuffer.append(s).append("\n")
+    }
+
+    def output: String = outputBuffer.toString.trim
   }
 
-  "TUI" should {
-
-    "react to StartGameEvent" in {
-      val controller = new Controller()
+  "A TUI" should {
+    "print game cover and board on StartGameEvent" in {
+      val controller = new Controller
       val tui = new TestTUI(controller)
-      tui.processEvent(Event.StartGameEvent)
-      tui.lines.exists(_.contains("Main Board")) shouldBe true
+      controller.instantNotifyObservers(Event.StartGameEvent)
+      tui.output should include("Mensch")
+      tui.output should include("Main Track")
     }
 
-    "react to InvalidMoveEvent" in {
-      val controller = new Controller()
+    "print configuration screen on ConfigEvent" in {
+      val controller = new Controller
       val tui = new TestTUI(controller)
-      tui.processEvent(Event.InvalidMoveEvent)
-      tui.lines.exists(_.contains("Invalid move")) shouldBe true
+      controller.instantNotifyObservers(Event.ConfigEvent)
+      tui.output should include("Players")
+      tui.output should include("Board size")
     }
 
-    "react to BackToMenuEvent" in {
-      val controller = new Controller()
+    "print cover only on BackToMenuEvent" in {
+      val controller = new Controller
       val tui = new TestTUI(controller)
-      tui.processEvent(Event.BackToMenuEvent)
-      tui.lines.exists(_.contains("Menu")) shouldBe true
+      controller.instantNotifyObservers(Event.BackToMenuEvent)
+      tui.output should include("Mensch")
     }
 
-    "call run() should invoke writeline and update" in {
-      val controller = new Controller()
-      var wasCalled = false
-      class RunTestTUI(controller: Controller) extends TUI(controller) {
-        override protected def writeline(s: String): Unit = wasCalled = true
-        override def update(): Unit = ()
+    "print exiting message on QuitGameEvent" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.instantNotifyObservers(Event.QuitGameEvent)
+      tui.output should include("Exiting")
+    }
+
+    "print empty line on unknown Event" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.instantNotifyObservers(
+        Event.UndoEvent
+      ) // not handled explicitly
+      tui.output shouldBe ""
+    }
+
+    "execute the real writeline method" in {
+      val controller = new Controller
+      val test: TUI { def callWriteline(): Unit } = new TUI(controller) {
+        def callWriteline(): Unit = writeline("test")
       }
-      val tui = new RunTestTUI(controller)
-      tui.run()
-      wasCalled shouldBe true
+      noException should be thrownBy test.callWriteline()
     }
 
-    "execute commands from mock input manager" in {
-      val controller = new Controller()
-
-      class CommandTestTUI(ctrl: Controller) extends TUI(controller) {
-        var executed: List[String] = Nil
-        var quitCalled = false
-
-        override protected def writeline(s: String): Unit = ()
-        override protected def quit(): Unit = quitCalled = true
-
-        override val inputManager =
-          new InputManager(ctrl, sharedTerminal) {
-            private var inputs: List[() => Command] = List(
-              () => StartGameCommand(ctrl),
-              () => IncreaseBoardSizeCommand(ctrl),
-              () => QuitGameCommand(ctrl),
-              () => null
-            )
-
-            override def currentInput: Option[Command] = {
-              inputs match {
-                case head :: tail =>
-                  inputs = tail
-                  Option(head()).filter(_ != null)
-                case Nil => None
-              }
-            }
-
-            override def isEscape: Boolean = false
-          }
-
-        override def update(): Unit = {
-          inputManager.currentInput match {
-            case Some(cmd) =>
-              executed :+= cmd.getClass.getSimpleName
-              cmd.execute()
-              update()
-            case None =>
-              quit()
-          }
-        }
-      }
-
-      val tui = new CommandTestTUI(controller)
-      tui.update()
-
-      tui.executed should contain("StartGameCommand")
-      tui.executed should contain("IncreaseBoardSizeCommand")
-      tui.quitCalled shouldBe true
-    }
-
-    "react to ConfigEvent" in {
-      val controller = new Controller()
+    "react to MoveFigureEvent with RunningState" in {
+      val controller = new Controller
       val tui = new TestTUI(controller)
-      tui.processEvent(Event.ConfigEvent)
-      tui.lines.exists(_.contains("Players")) shouldBe true
+      controller.instantNotifyObservers(Event.MoveFigureEvent(0))
+      tui.output should include("Mensch")
+      tui.output should include("Main Track")
     }
 
-    "react to QuitGameEvent" in {
-      val controller = new Controller()
-      var quitWasCalled = false
-      class QuitTestTUI(controller: Controller) extends TUI(controller) {
-        override protected def quit(): Unit = quitWasCalled = true
-        override protected def writeline(s: String): Unit = ()
-      }
-      val tui = new QuitTestTUI(controller)
-      tui.processEvent(Event.QuitGameEvent)
-      quitWasCalled shouldBe true
-    }
-
-    "react to unknown event" in {
-      val controller = new Controller()
+    "react to PlayDiceEvent with roll != 6" in {
+      val controller = new Controller
       val tui = new TestTUI(controller)
-      tui.processEvent(Event.RollDiceEvent(4))
-      tui.lines.exists(_ == "") shouldBe true
+      controller.instantNotifyObservers(Event.PlayDiceEvent(3))
+      tui.output should include("You rolled a 3!")
     }
 
-    "call quit() should clear terminal and print exit message" in {
-      val controller = new Controller()
-      var lines: List[String] = Nil
-      var closed = false
+    "react to PlayDiceEvent with roll == 6" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.instantNotifyObservers(Event.PlayDiceEvent(6))
+      tui.output should include("You rolled a 6!")
+      tui.output should include("Use 'w'/'s' to select a figure")
+    }
 
-      class QuitTestTUI(controller: Controller) extends TUI(controller) {
-        override protected def writeline(s: String): Unit = lines :+= s
-        override protected def quit(): Unit = {
-          super.quit()
-          closed = true
-        }
-        def callQuit(): Unit = quit()
-      }
+    "react to ChangeSelectedFigureEvent" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.instantNotifyObservers(Event.ChangeSelectedFigureEvent(0))
+      tui.output should include("Mensch")
+      tui.output should include("Main Track")
+    }
 
-      val tui = new QuitTestTUI(controller)
-      tui.callQuit()
-      lines.exists(_.contains("Exiting")) shouldBe true
-      closed shouldBe true
+    "react to PlayNextEvent" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.instantNotifyObservers(Event.PlayNextEvent(1))
+      tui.output should include("Player 2's turn!")
+      tui.output should include("Mensch")
+    }
+
+    "render cover and board for MoveFigureEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+
+      // Wir umgehen die States und setzen direkt einen gültigen RunningState
+      val running = de.htwg.se.MAEDN.model.states.RunningState(
+        controller,
+        moves = 0,
+        board = Board(8),
+        players = PlayerFactory.createPlayers(2, 4),
+        rolled = 1,
+        selectedFigure = 0
+      )
+
+      controller.manager = running.moveFigure() // erzeugt MoveFigureEvent
+      controller.notifyObservers() // verarbeitet Event im TUI
+
+      tui.output should include("Mensch")
+      tui.output should include("Main Track")
+      tui.output should include("Goal Lanes:")
+    }
+
+    "react to StartGameEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.manager = RunningState(
+        controller,
+        0,
+        Board(8),
+        PlayerFactory.createPlayers(2, 4)
+      )
+      controller.instantNotifyObservers(Event.StartGameEvent)
+      tui.output should include("Main Track")
+    }
+
+    "react to PlayDiceEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.manager = RunningState(
+        controller,
+        0,
+        Board(8),
+        PlayerFactory.createPlayers(2, 4)
+      )
+      controller.instantNotifyObservers(Event.PlayDiceEvent(5))
+      tui.output should include("You rolled a 5!")
+      tui.output should include("Main Track")
+    }
+
+    "react to ChangeSelectedFigureEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.manager = RunningState(
+        controller,
+        0,
+        Board(8),
+        PlayerFactory.createPlayers(2, 4)
+      )
+      controller.instantNotifyObservers(Event.ChangeSelectedFigureEvent(1))
+      tui.output should include("Main Track")
+    }
+
+    "react to InvalidMoveEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.manager = RunningState(
+        controller,
+        0,
+        Board(8),
+        PlayerFactory.createPlayers(2, 4)
+      )
+      controller.instantNotifyObservers(Event.InvalidMoveEvent)
+      tui.output should include("Invalid move!")
+      tui.output should include("Main Track")
+    }
+
+    "react to MoveFigureEvent in RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+      controller.manager = RunningState(
+        controller,
+        0,
+        Board(8),
+        PlayerFactory.createPlayers(2, 4)
+      )
+      controller.instantNotifyObservers(Event.MoveFigureEvent(0))
+      tui.output should include("Main Track")
+    }
+
+    "react to InvalidMoveEvent in non-RunningState" in {
+      val controller = new Controller
+      val tui = new TestTUI(controller)
+
+      // MenuState ist der default Manager, also kein RS
+      controller.instantNotifyObservers(Event.InvalidMoveEvent)
+
+      tui.output should include("Main Track")
     }
   }
 }

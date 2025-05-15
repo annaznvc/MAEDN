@@ -79,4 +79,8 @@ object Board {
       new KickFigureStrategy()
     )
   }
+
+  // ✅ Jetzt richtig: Methode gehört direkt ins Objekt Board
+  def isOnGoal(figure: Figure, goalCount: Int, size: Int): Boolean =
+    figure.index >= size * 4 - goalCount
 }

@@ -17,35 +17,34 @@ case class RunningState(
   override def moveUp(): Manager = {
     val selected = (selectedFigure + 1) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
+    controller.notifyObservers()
     copy(selectedFigure = selected)
   }
 
   override def moveDown(): Manager = {
-    val selected =
-      (selectedFigure - 1 + players.head.figures.size) % players.head.figures.size
+    val selected = (selectedFigure - 1 + players.head.figures.size) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
+    controller.notifyObservers()
     copy(selectedFigure = selected)
   }
 
   override def playDice(): Manager = {
     val newRolled = Dice.roll()
     controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
+    controller.notifyObservers()
     copy(rolled = newRolled)
   }
 
   override def playNext(): Manager = {
     rolled match {
-      case -1 => {
-        controller.eventQueue.enqueue(
-          Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
-        )
-        copy(
-          moves = moves + 1,
-          rolled = 0
-        )
-      }
-      case 0 => playDice()
-      case _ => moveFigure()
+      case -1 =>
+        controller.eventQueue.enqueue(Event.PlayNextEvent((getCurrentPlayer + 1) % players.size))
+        controller.notifyObservers()
+        copy(moves = moves + 1, rolled = 0)
+      case 0 =>
+        playDice()
+      case _ =>
+        moveFigure()
     }
   }
 
@@ -57,29 +56,24 @@ case class RunningState(
         players(getCurrentPlayer).color
       )
     ) {
-      controller.eventQueue.enqueue(
-        Event.PlayNextEvent(
-          (getCurrentPlayer + 1) % players.size
-        )
-      )
-      return copy(
-        rolled = 0,
-        moves = moves + 1
-      )
+      controller.eventQueue.enqueue(Event.PlayNextEvent((getCurrentPlayer + 1) % players.size))
+      controller.notifyObservers()
+      return copy(rolled = 0, moves = moves + 1)
     }
 
     val figures = players.flatMap(_.figures)
     val figure = players(getCurrentPlayer).figures(selectedFigure)
-
     val newFigures = board.moveFigure(figure, figures, rolled)
 
     if (newFigures == figures) {
       controller.eventQueue.enqueue(Event.InvalidMoveEvent)
+      controller.notifyObservers()
       this
     } else {
-      // Update the players with the new figures
       controller.eventQueue.enqueue(Event.MoveFigureEvent(figure.id))
-      val updatedPlayers = players.zipWithIndex.map { case (player, index) =>
+      controller.notifyObservers()
+
+      val updatedPlayers = players.zipWithIndex.map { case (player, _) =>
         val playerFigures = newFigures.filter(_.owner.id == player.id)
         player.copy(figures = playerFigures)
       }
@@ -93,6 +87,7 @@ case class RunningState(
 
   override def quitGame(): Manager = {
     controller.eventQueue.enqueue(Event.BackToMenuEvent)
+    controller.notifyObservers()
     MenuState(controller, moves, board, players)
   }
 }

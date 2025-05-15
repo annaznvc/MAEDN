@@ -1,0 +1,35 @@
+package de.htwg.se.MAEDN.aview
+
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import de.htwg.se.MAEDN.controller.Controller
+import org.jline.terminal.impl.DummyTerminal
+import org.jline.utils.NonBlockingReader
+
+class InputManagerSpec extends AnyWordSpec with Matchers {
+
+  // Simulierter Terminal mit steuerbarem Peek-Wert
+  class EscapeTerminal(peekValue: Int) extends DummyTerminal("test", "ansi") {
+    override def reader(): NonBlockingReader = new NonBlockingReader {
+      override def peek(timeout: Long): Int = peekValue
+      override def read(): Int = -1
+      override def read(cbuf: Array[Char], offset: Int, length: Int): Int = -1
+      override def close(): Unit = ()
+    }
+  }
+
+  "InputManager" should {
+
+    "return true when ESC is peeked" in {
+      val controller = new Controller
+      val inputManager = new InputManager(controller, new EscapeTerminal(27))
+      inputManager.isEscape shouldBe true
+    }
+
+    "return false when peeked key is not ESC" in {
+      val controller = new Controller
+      val inputManager = new InputManager(controller, new EscapeTerminal(65)) // 'A'
+      inputManager.isEscape shouldBe false
+    }
+  }
+}
