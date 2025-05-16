@@ -6,7 +6,7 @@ on:
       - patternTest
   pull_request:
     branches:
-      - main
+      - patternTest
 
 jobs:
   build:
