@@ -16,7 +16,7 @@ class InputManager(val controller: Controller, val terminal: Terminal) {
   keyMap.bind(MoveDownCommand(controller), "s")
   keyMap.bind(IncreaseFiguresCommand(controller), "e")
   keyMap.bind(DecreaseFiguresCommand(controller), "d")
-  keyMap.bind(IncreaseBoardSizeCommand(controller), "r")
+  keyMap.bind(IncreaseBoardSizeCommand(controller), "t")
   keyMap.bind(DecreaseBoardSizeCommand(controller), "f")
   keyMap.bind(QuitGameCommand(controller), "q")
   keyMap.bind(StartGameCommand(controller), "n")

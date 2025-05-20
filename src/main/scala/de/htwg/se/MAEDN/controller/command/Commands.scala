@@ -109,22 +109,26 @@ class StartGameCommand(controller: Controller) extends BaseCommand(controller) {
 
 class UndoCommand(controller: Controller) extends Command {
   override def doStep(): Unit = {
+    // Just call controller.undo() without adding this command to the undoStack
     controller.undo()
-    controller.eventQueue.enqueue(
-      Event.MoveFigureEvent(-1)
-    ) // oder passender Event
+    // You might want a different event for undo operations
+    controller.eventQueue.enqueue(Event.MoveFigureEvent(-1))
   }
+
+  // These methods should be no-ops since UndoCommand shouldn't be undone/redone itself
   override def undoStep(): Unit = ()
   override def redoStep(): Unit = ()
 }
 
 class RedoCommand(controller: Controller) extends Command {
   override def doStep(): Unit = {
+    // Just call controller.redo() without adding this command to the undoStack
     controller.redo()
-    controller.eventQueue.enqueue(
-      Event.MoveFigureEvent(-1)
-    ) // oder passender Event
+    // You might want a different event for redo operations
+    controller.eventQueue.enqueue(Event.MoveFigureEvent(-1))
   }
+
+  // These methods should be no-ops since RedoCommand shouldn't be undone/redone itself
   override def undoStep(): Unit = ()
   override def redoStep(): Unit = ()
 }
