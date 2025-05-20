@@ -22,9 +22,12 @@ class UndoManager {
 
   def redoStep(): Unit = redoStack match {
     case head :: tail =>
+      println(s"[DEBUG] Redoing command: $head")
       head.redoStep()
       redoStack = tail
       undoStack = head :: undoStack
-    case Nil => ()
+    case Nil =>
+      println("[DEBUG] Redo stack is empty.")
   }
+
 }

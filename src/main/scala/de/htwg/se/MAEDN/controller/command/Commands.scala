@@ -9,16 +9,21 @@ import de.htwg.se.MAEDN.util.Event
 abstract class BaseCommand(controller: Controller) extends Command {
   protected var before: Option[GameData] = None
   protected var after: Option[GameData] = None
+  protected var event: Option[Event] = None
 
-  override def undoStep(): Unit =
+  override def undoStep(): Unit = {
     before.foreach(data =>
       controller.manager = controller.manager.setGameData(data)
     )
+    event.foreach(controller.eventQueue.enqueue)
+  }
 
-  override def redoStep(): Unit =
+  override def redoStep(): Unit = {
     after.foreach(data =>
       controller.manager = controller.manager.setGameData(data)
     )
+    event.foreach(controller.eventQueue.enqueue)
+  }
 }
 
 // ========== INDIVIDUAL COMMANDS ==========
@@ -105,14 +110,20 @@ class StartGameCommand(controller: Controller) extends BaseCommand(controller) {
 class UndoCommand(controller: Controller) extends Command {
   override def doStep(): Unit = {
     controller.undo()
+    controller.eventQueue.enqueue(
+      Event.MoveFigureEvent(-1)
+    ) // oder passender Event
   }
-  override def undoStep(): Unit = () // nicht rückgängig machbar
-  override def redoStep(): Unit = () // nicht wiederholbar
+  override def undoStep(): Unit = ()
+  override def redoStep(): Unit = ()
 }
 
 class RedoCommand(controller: Controller) extends Command {
   override def doStep(): Unit = {
     controller.redo()
+    controller.eventQueue.enqueue(
+      Event.MoveFigureEvent(-1)
+    ) // oder passender Event
   }
   override def undoStep(): Unit = ()
   override def redoStep(): Unit = ()
