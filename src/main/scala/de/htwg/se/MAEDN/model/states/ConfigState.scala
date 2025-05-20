@@ -1,76 +1,72 @@
 package de.htwg.se.MAEDN.model.states
 
 import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.util.{Event, Color}
+import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model.GameData
 
 case class ConfigState(
     override val controller: Controller,
-    override val moves: Int,
-    override val board: Board,
-    override val players: List[Player],
-    override val rolled: Int = 0
+    override val data: GameData
 ) extends Manager {
 
   override val state: State = State.Config
 
+  override def setGameData(newData: GameData): Manager =
+    this.copy(data = newData)
+
+  override def getGameData: GameData = data
+
   override def startGame(): Manager = {
     controller.eventQueue.enqueue(Event.StartGameEvent)
-    RunningState(
-      controller,
-      moves,
-      board,
-      players,
-      0,
-      0
-    )
+    RunningState(controller, data)
   }
 
   override def quitGame(): Manager = {
     controller.eventQueue.enqueue(Event.BackToMenuEvent)
-    MenuState(controller, moves, board, players)
+    MenuState(controller, data)
   }
 
   override def increaseBoardSize(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    copy(board = Board(Math.min(12, getBoardSize + 1)))
+    copy(data = data.copy(board = Board(Math.min(12, data.board.size + 1))))
   }
 
   override def decreaseBoardSize(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    copy(board = Board(Math.max(8, getBoardSize - 1)))
+    copy(data = data.copy(board = Board(Math.max(8, data.board.size - 1))))
   }
 
   override def increaseFigures(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    val newFigureCount = Math.min(board.size, players.head.figures.size + 1)
-    val newPlayers = players.map(player =>
-      player.copy(figures = List.fill(newFigureCount)(player.figures.head))
+    val newCount = Math.min(data.board.size, data.players.head.figures.size + 1)
+    val newPlayers = data.players.map(p =>
+      p.copy(figures = List.fill(newCount)(p.figures.head))
     )
-    copy(players = newPlayers)
+    copy(data = data.copy(players = newPlayers))
   }
 
   override def decreaseFigures(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    val newFigureCount = Math.max(1, players.head.figures.size - 1)
-    val newPlayers = players.map(player =>
-      player.copy(figures = List.fill(newFigureCount)(player.figures.head))
+    val newCount = Math.max(1, data.players.head.figures.size - 1)
+    val newPlayers = data.players.map(p =>
+      p.copy(figures = List.fill(newCount)(p.figures.head))
     )
-    copy(players = newPlayers)
+    copy(data = data.copy(players = newPlayers))
   }
 
   override def moveUp(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    val newPlayerCount = Math.min(4, players.size + 1)
+    val newCount = Math.min(4, data.players.size + 1)
     val newPlayers =
-      PlayerFactory.createPlayers(newPlayerCount, players.head.figures.size)
-    copy(players = newPlayers)
+      PlayerFactory.createPlayers(newCount, data.players.head.figures.size)
+    copy(data = data.copy(players = newPlayers))
   }
 
   override def moveDown(): Manager = {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    val newPlayerCount = Math.max(2, players.size - 1)
-    val newPlayers = players.take(newPlayerCount)
-    copy(players = newPlayers)
+    val newCount = Math.max(2, data.players.size - 1)
+    val newPlayers = data.players.take(newCount)
+    copy(data = data.copy(players = newPlayers))
   }
 }

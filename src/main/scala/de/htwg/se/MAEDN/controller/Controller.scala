@@ -1,23 +1,25 @@
 package de.htwg.se.MAEDN.controller
 
-import scala.collection.mutable.Stack
-
-import de.htwg.se.MAEDN.controller.command.{Command, UndoCommand, RedoCommand}
-import de.htwg.se.MAEDN.model.{Manager, IMemento}
-import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.controller.command.Command
+import de.htwg.se.MAEDN.model.Manager
+import de.htwg.se.MAEDN.util.{Observable, UndoManager}
 
 class Controller extends Observable {
   var manager: Manager = Manager(this)
+  val undoManager = new UndoManager()
 
-  val undoStack = Stack[IMemento]()
-  val redoStack = Stack[IMemento]()
-
-  // Command execution
   def executeCommand(command: Command): Unit = {
-    if !command.isInstanceOf[UndoCommand] && !command.isInstanceOf[RedoCommand]
-    then undoStack.push(manager.getSnapshot)
+    undoManager.doStep(command)
+    notifyObservers()
+  }
 
-    command.execute()
+  def undo(): Unit = {
+    undoManager.undoStep()
+    notifyObservers()
+  }
+
+  def redo(): Unit = {
+    undoManager.redoStep()
     notifyObservers()
   }
 }

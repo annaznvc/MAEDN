@@ -1,5 +1,5 @@
 package de.htwg.se.MAEDN.model
 
 trait IMemento {
-  def getSnapshot: Manager
+  def getSnapshot: GameData
 }

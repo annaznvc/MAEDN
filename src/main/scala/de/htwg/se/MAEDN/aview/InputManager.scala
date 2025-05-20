@@ -20,7 +20,8 @@ class InputManager(val controller: Controller, val terminal: Terminal) {
   keyMap.bind(DecreaseBoardSizeCommand(controller), "f")
   keyMap.bind(QuitGameCommand(controller), "q")
   keyMap.bind(StartGameCommand(controller), "n")
-  keyMap.bind(UndoCommand(controller), "u")
+  keyMap.bind(new UndoCommand(controller), "u")
+  keyMap.bind(new RedoCommand(controller), "r")
 
   // ESC bleibt direkt verarbeitet – das ist kein Command
   private val ESC = "\u001b"

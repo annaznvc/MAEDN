@@ -1,91 +1,119 @@
 package de.htwg.se.MAEDN.controller.command
 
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.Manager
-import de.htwg.se.MAEDN.model.State
+import de.htwg.se.MAEDN.model.GameData
 import de.htwg.se.MAEDN.util.Event
 
-case class DecreaseBoardSizeCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+// ========== COMMON COMMAND BASE ==========
+
+abstract class BaseCommand(controller: Controller) extends Command {
+  protected var before: Option[GameData] = None
+  protected var after: Option[GameData] = None
+
+  override def undoStep(): Unit =
+    before.foreach(data =>
+      controller.manager = controller.manager.setGameData(data)
+    )
+
+  override def redoStep(): Unit =
+    after.foreach(data =>
+      controller.manager = controller.manager.setGameData(data)
+    )
+}
+
+// ========== INDIVIDUAL COMMANDS ==========
+
+class DecreaseBoardSizeCommand(controller: Controller)
+    extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.decreaseBoardSize()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class DecreaseFiguresCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class DecreaseFiguresCommand(controller: Controller)
+    extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.decreaseFigures()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class IncreaseBoardSizeCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class IncreaseBoardSizeCommand(controller: Controller)
+    extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.increaseBoardSize()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class IncreaseFiguresCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class IncreaseFiguresCommand(controller: Controller)
+    extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.increaseFigures()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class MoveDownCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class MoveDownCommand(controller: Controller) extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.moveDown()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class MoveUpCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class MoveUpCommand(controller: Controller) extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.moveUp()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class PlayNextCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class PlayNextCommand(controller: Controller) extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.playNext()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class QuitGameCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class QuitGameCommand(controller: Controller) extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.quitGame()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
 
-case class StartGameCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
+class StartGameCommand(controller: Controller) extends BaseCommand(controller) {
+  override def doStep(): Unit = {
+    before = Some(controller.manager.getGameData)
     controller.manager = controller.manager.startGame()
-    controller.manager
+    after = Some(controller.manager.getGameData)
   }
 }
+
+// ========== UNDO / REDO COMMANDS (SEPARAT, OPTIONAL) ==========
+// Hinweis: Mit neuem UndoManager werden diese Commands evtl. nicht mehr gebraucht!
 
 class UndoCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
-    if controller.undoStack.nonEmpty then {
-      controller.manager = controller.undoStack.pop().getSnapshot
-      controller.redoStack.push(controller.manager.getSnapshot)
-    }
-    controller.eventQueue.enqueue(Event.UndoEvent)
-    controller.manager
+  override def doStep(): Unit = {
+    controller.undo()
   }
+  override def undoStep(): Unit = () // nicht rückgängig machbar
+  override def redoStep(): Unit = () // nicht wiederholbar
 }
 
-case class RedoCommand(controller: Controller) extends Command {
-  override def execute(): Manager = {
-    if controller.redoStack.nonEmpty then {
-      controller.undoStack.push(controller.manager.getSnapshot)
-      controller.manager = controller.redoStack.pop().getSnapshot
-    }
-    controller.eventQueue.enqueue(Event.RedoEvent)
-    controller.manager
+class RedoCommand(controller: Controller) extends Command {
+  override def doStep(): Unit = {
+    controller.redo()
   }
+  override def undoStep(): Unit = ()
+  override def redoStep(): Unit = ()
 }
