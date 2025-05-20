@@ -83,7 +83,20 @@ class MoveUpCommand(controller: Controller) extends BaseCommand(controller) {
 class PlayNextCommand(controller: Controller) extends BaseCommand(controller) {
   override def doStep(): Unit = {
     before = Some(controller.manager.getGameData)
-    controller.manager = controller.manager.playNext()
+
+    // Check if this command is being executed after an undo operation
+    val wasUndone = controller.undoManager.wasLastOperationUndo
+
+    // If the last operation was an undo, or in other specific cases
+    // where you want to force a new dice roll, do it here
+    if (wasUndone) {
+      // Force a new dice roll by creating a modified manager that will roll new dice
+      controller.manager = controller.manager.playNextWithNewDice()
+    } else {
+      // Use the normal playNext method for regular gameplay
+      controller.manager = controller.manager.playNext()
+    }
+
     after = Some(controller.manager.getGameData)
   }
 }

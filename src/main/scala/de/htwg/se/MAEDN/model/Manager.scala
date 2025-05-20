@@ -5,6 +5,8 @@ import de.htwg.se.MAEDN.model.IState
 import de.htwg.se.MAEDN.model.states.MenuState
 import de.htwg.se.MAEDN.util.Color
 import de.htwg.se.MAEDN.model.GameData
+import de.htwg.se.MAEDN.model.states.RunningState
+import de.htwg.se.MAEDN.util.Dice
 
 trait Manager extends IState {
 
@@ -35,6 +37,20 @@ trait Manager extends IState {
   def players: List[Player] = data.players
   val rolled: Int = data.rolled
   val selectedFigure: Int = data.selectedFigure
+
+  def playNextWithNewDice(): Manager = {
+    val newRoll = Dice.roll()
+
+    // Erzeuge eine neue Version von dir selbst mit neuem Dice-Wert
+    val updatedManager = this match {
+      case rs: RunningState =>
+        rs.copy(data = rs.data.copy(rolled = newRoll))
+      case _ => this
+    }
+
+    // Jetzt Spielzug ausführen mit dem neuen Würfelwert
+    updatedManager.playNext()
+  }
 
 }
 
