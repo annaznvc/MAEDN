@@ -155,7 +155,7 @@ object TextDisplay {
   ): String = {
     s"""
          Players       Figures       Board size
-        ${CYAN}/\\ 'w'${RESET}       ${GREEN}/\\ 'e'${RESET}         ${YELLOW}/\\ 'r'${RESET}
+        ${CYAN}/\\ 'w'${RESET}       ${GREEN}/\\ 'e'${RESET}         ${YELLOW}/\\ 't'${RESET}
          |             |              |
         ${CYAN}$playerCount${RESET}             ${GREEN}$figureCount${RESET}              ${YELLOW}$boardSize${RESET}
          |             |              |
