@@ -61,7 +61,7 @@ object Manager {
       GameData(
         moves = 0,
         board = Board(8),
-        players = PlayerFactory.createPlayers(2, 4)
+        players = PlayerFactory(2, 4)
       )
     )
 }

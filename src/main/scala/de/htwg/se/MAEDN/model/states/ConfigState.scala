@@ -59,7 +59,7 @@ case class ConfigState(
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newCount = Math.min(4, data.players.size + 1)
     val newPlayers =
-      PlayerFactory.createPlayers(newCount, data.players.head.figures.size)
+      PlayerFactory(newCount, data.players.head.figures.size)
     copy(data = data.copy(players = newPlayers))
   }
 
