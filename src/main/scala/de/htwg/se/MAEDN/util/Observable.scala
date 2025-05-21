@@ -35,7 +35,7 @@ package de.htwg.se.MAEDN.util
 
 import scala.collection.mutable.PriorityQueue
 import scala.concurrent.{Future, ExecutionContext}
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
 
 // Observer trait remains unchanged
 trait Observer {
@@ -64,24 +64,20 @@ class Observable(using ec: ExecutionContext = ExecutionContext.global) {
 
   def instantNotifyObservers(event: Event): Unit = {
     subscribers.foreach { observer =>
-      Future {
-        observer.processEvent(event)
-      }.onComplete {
-        case Failure(ex) => println(s"Observer failed: ${ex.getMessage}")
-        case Success(_)  => // ok
+      Try(observer.processEvent(event)).failed.foreach { ex =>
+        println(s"Observer failed: ${ex.getMessage}")
       }
     }
   }
 
   def notifyObservers(): Unit = {
     while (eventQueue.nonEmpty) {
-      val event = eventQueue.dequeue()
-      subscribers.foreach { observer =>
-        Future {
-          observer.processEvent(event)
-        }.onComplete {
-          case Failure(ex) => println(s"Observer failed: ${ex.getMessage}")
-          case Success(_)  => // ok
+      Future {
+        val event = eventQueue.dequeue()
+        subscribers.foreach { observer =>
+          Try(observer.processEvent(event)).failed.foreach { ex =>
+            println(s"Observer failed: ${ex.getMessage}")
+          }
         }
       }
     }
