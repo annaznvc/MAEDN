@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.controller
 
 import scala.collection.mutable.Stack
+import scala.util.{Success, Failure}
 
 import de.htwg.se.MAEDN.controller.command.{Command, UndoCommand, RedoCommand}
 import de.htwg.se.MAEDN.model.{Manager, IMemento}
@@ -14,10 +15,19 @@ class Controller extends Observable {
 
   // Command execution
   def executeCommand(command: Command): Unit = {
-    if !command.isInstanceOf[UndoCommand] && !command.isInstanceOf[RedoCommand]
-    then undoStack.push(manager.getSnapshot)
+    if (command.isNormal) {
+      manager.createMemento.foreach { case memento: IMemento =>
+        undoStack.push(memento)
+        redoStack.clear()
+      }
+    }
 
-    command.execute()
+    command.execute() match {
+      case Failure(exception) =>
+        eventQueue.enqueue(Event.ErrorEvent(exception.getMessage))
+      case Success(newManager) =>
+        manager = newManager
+    }
     notifyObservers()
   }
 }

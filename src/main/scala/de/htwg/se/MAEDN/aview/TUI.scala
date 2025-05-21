@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.aview
 
 import org.jline.terminal.{TerminalBuilder, Terminal}
+import scala.io.AnsiColor.{RED, RESET}
 
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.Controller
@@ -47,41 +48,11 @@ class TUI(controller: Controller) extends Observer {
   override def processEvent(event: Event): Unit = {
     event match {
       // ----------------------------------------------------------------------
-      case Event.StartGameEvent =>
+      case Event.StartGameEvent | Event.MoveFigureEvent(_) |
+          Event.ChangeSelectedFigureEvent(_) =>
         writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
-            )
-          case _ =>
-            writeline(TextDisplay.printCover(controller.manager))
-            writeline(TextDisplay.printBoard(controller.manager.board))
-        }
-      // ----------------------------------------------------------------------
-      case Event.MoveFigureEvent(id) =>
-        writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
-            )
-          case _ =>
-            writeline(TextDisplay.printCover(controller.manager))
-            writeline(TextDisplay.printBoard(controller.manager.board))
-        }
+        printBoard(TextDisplay.printCover(controller.manager), "")
+
       // ----------------------------------------------------------------------
       case Event.ConfigEvent =>
         val manager = controller.manager
@@ -97,85 +68,50 @@ class TUI(controller: Controller) extends Observer {
       // ----------------------------------------------------------------------
       case Event.PlayDiceEvent(rolled) =>
         writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
-            )
-          case _ =>
-            writeline(TextDisplay.printCover(controller.manager))
-            writeline(TextDisplay.printBoard(controller.manager.board))
-        }
-        writeline(s"You rolled a $rolled!")
-        if (rolled == 6)
-          writeline(
+        val afterMessage =
+          if (rolled == 6)
             "You rolled a 6! Use 'w'/'s' to select a figure and press 'm' to move."
-          )
-      // ----------------------------------------------------------------------
-      case Event.ChangeSelectedFigureEvent(_) =>
-        writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
-            )
-          case _ =>
-            writeline(TextDisplay.printCover(controller.manager))
-            writeline(TextDisplay.printBoard(controller.manager.board))
-        }
-      // ----------------------------------------------------------------------
-      case Event.InvalidMoveEvent =>
-        writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
-            )
-            writeline("Invalid move!")
-          case _ =>
-            writeline(TextDisplay.printBoard(controller.manager.board))
-        }
+          else
+            s"You rolled a $rolled!"
+        printBoard(TextDisplay.printCover(controller.manager), afterMessage)
       // ----------------------------------------------------------------------
       case Event.PlayNextEvent(id) =>
         writeline(TextDisplay.clearTerminal())
-        controller.manager match {
-          case rs: RunningState =>
-            writeline(TextDisplay.printCover(rs))
-            writeline(
-              TextDisplay.printBoard(
-                rs.board,
-                rs.selectedFigure,
-                rs.getCurrentPlayer,
-                rs.players
-              )
+        controller.manager.state match {
+          case State.Running =>
+            printBoard(
+              TextDisplay.printCover(controller.manager),
+              s"Player ${id + 1}'s turn!"
             )
           case _ =>
-            writeline(TextDisplay.printCover(controller.manager))
-            writeline(TextDisplay.printBoard(controller.manager.board))
+            printBoard(
+              TextDisplay.printCover(controller.manager),
+              s"Player ${id + 1}'s turn!"
+            )
         }
-        writeline(s"Player ${id + 1}'s turn!")
+      // ----------------------------------------------------------------------
+      case Event.UndoEvent | Event.RedoEvent =>
+        writeline(TextDisplay.clearTerminal())
+        controller.manager.state match {
+          case State.Running =>
+            printBoard(
+              TextDisplay.printCover(controller.manager),
+              s"${event.toString} executed!"
+            )
+          case _ =>
+            printBoard(TextDisplay.printCover(controller.manager), "")
+        }
       // ----------------------------------------------------------------------
       case Event.BackToMenuEvent =>
         writeline(TextDisplay.clearTerminal())
         writeline(TextDisplay.printCover(controller.manager))
+      // ----------------------------------------------------------------------
+      case Event.ErrorEvent(message) =>
+        writeline(TextDisplay.clearTerminal())
+        printBoard(
+          TextDisplay.printCover(controller.manager),
+          s"Error: ${RED}$message${RESET}"
+        )
       // ----------------------------------------------------------------------
       case Event.QuitGameEvent =>
         continue = false
@@ -186,8 +122,22 @@ class TUI(controller: Controller) extends Observer {
     }
   }
 
-  // war mal private def quit(): Unit = {
-  protected def quit(): Unit = {
+  private def printBoard(
+      beforeMessage: String,
+      afterMessage: String
+  ): String = {
+    val message = beforeMessage + TextDisplay.printBoard(
+      controller.manager.board,
+      controller.manager.selectedFigure,
+      controller.manager.getCurrentPlayer,
+      controller.manager.players
+    ) + afterMessage
+
+    writeline(message)
+    message
+  }
+
+  private def quit(): Unit = {
     writeline(TextDisplay.clearTerminal())
     writeline("Exiting...")
     terminal.close()

@@ -3,6 +3,9 @@ package de.htwg.se.MAEDN.model.states
 import de.htwg.se.MAEDN.model.{IState, Manager, Board, Player, State}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model.GameData
+
+import scala.util.{Try, Success, Failure}
 
 case class RunningState(
     override val controller: Controller,
@@ -14,34 +17,36 @@ case class RunningState(
 ) extends Manager {
   override val state: State = State.Running
 
-  override def moveUp(): Manager = {
+  override def moveUp(): Try[Manager] = {
     val selected = (selectedFigure + 1) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
-    copy(selectedFigure = selected)
+    Try(copy(selectedFigure = selected))
   }
 
-  override def moveDown(): Manager = {
+  override def moveDown(): Try[Manager] = {
     val selected =
       (selectedFigure - 1 + players.head.figures.size) % players.head.figures.size
     controller.eventQueue.enqueue(Event.ChangeSelectedFigureEvent(selected))
-    copy(selectedFigure = selected)
+    Try(copy(selectedFigure = selected))
   }
 
-  override def playDice(): Manager = {
+  override def playDice(): Try[Manager] = {
     val newRolled = Dice.roll()
     controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
-    copy(rolled = newRolled)
+    Try(copy(rolled = newRolled))
   }
 
-  override def playNext(): Manager = {
+  override def playNext(): Try[Manager] = {
     rolled match {
       case -1 => {
         controller.eventQueue.enqueue(
           Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
         )
-        copy(
-          moves = moves + 1,
-          rolled = 0
+        Try(
+          copy(
+            moves = moves + 1,
+            rolled = 0
+          )
         )
       }
       case 0 => playDice()
@@ -49,7 +54,7 @@ case class RunningState(
     }
   }
 
-  override def moveFigure(): Manager = {
+  override def moveFigure(): Try[Manager] = {
     if (
       !board.checkIfMoveIsPossible(
         players.flatMap(_.figures),
@@ -62,9 +67,11 @@ case class RunningState(
           (getCurrentPlayer + 1) % players.size
         )
       )
-      return copy(
-        rolled = 0,
-        moves = moves + 1
+      return Try(
+        copy(
+          rolled = 0,
+          moves = moves + 1
+        )
       )
     }
 
@@ -74,8 +81,7 @@ case class RunningState(
     val newFigures = board.moveFigure(figure, figures, rolled)
 
     if (newFigures == figures) {
-      controller.eventQueue.enqueue(Event.InvalidMoveEvent)
-      this
+      Failure(new IllegalArgumentException("Invalid move!"))
     } else {
       // Update the players with the new figures
       controller.eventQueue.enqueue(Event.MoveFigureEvent(figure.id))
@@ -84,15 +90,28 @@ case class RunningState(
         player.copy(figures = playerFigures)
       }
 
-      copy(
-        players = updatedPlayers,
-        rolled = if (rolled == 6) 0 else -1
+      Success(
+        copy(
+          players = updatedPlayers,
+          rolled = if (rolled == 6) 0 else -1
+        )
       )
     }
   }
 
-  override def quitGame(): Manager = {
+  override def quitGame(): Try[Manager] = {
     controller.eventQueue.enqueue(Event.BackToMenuEvent)
-    MenuState(controller, moves, board, players)
+    Try(MenuState(controller, moves, board, players))
   }
+
+  override def createMemento: Option[GameData] =
+    Some(
+      GameData(
+        moves,
+        board,
+        players,
+        selectedFigure,
+        rolled
+      )
+    )
 }

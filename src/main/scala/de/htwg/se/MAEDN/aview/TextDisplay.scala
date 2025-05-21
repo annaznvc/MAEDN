@@ -26,12 +26,12 @@ object TextDisplay {
       s"${menuState.getBoardSize}x${menuState.getBoardSize} board",
       s"${menuState.getFigureCount} figures"
     )
-    val runningInfo = menuState match {
-      case rs: RunningState =>
+    val runningInfo = menuState.state match {
+      case State.Running =>
         Seq(
-          s"Current Player: ${rs.getCurrentPlayer + 1}",
-          s"Selected Figure: ${rs.selectedFigure + 1}",
-          s"Rolled: ${rs.rolled}"
+          s"Current Player: ${menuState.getCurrentPlayer + 1}",
+          s"Selected Figure: ${menuState.selectedFigure + 1}",
+          s"Rolled: ${menuState.rolled}"
         )
       case _ => Seq.empty
     }

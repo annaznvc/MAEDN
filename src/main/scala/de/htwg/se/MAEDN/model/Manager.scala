@@ -5,26 +5,28 @@ import de.htwg.se.MAEDN.model.IState
 import de.htwg.se.MAEDN.model.states.MenuState
 import de.htwg.se.MAEDN.util.Color
 
-trait Manager extends IState with IMemento {
+import scala.util.Try
+
+trait Manager extends IState with IOriginator {
 
   val moves: Int = 0
   val board: Board = Board(8)
-  val players: List[Player] = PlayerFactory.createPlayers(2, 4)
+  val players: List[Player] = PlayerFactory(2, 4)
   val selectedFigure: Int = 0
 
-  def increaseBoardSize(): Manager = this
-  def decreaseBoardSize(): Manager = this
-  def increaseFigures(): Manager = this
-  def decreaseFigures(): Manager = this
-  def moveUp(): Manager = this
-  def moveDown(): Manager = this
-  def playDice(): Manager = this
-  def playNext(): Manager = this
-  def quitGame(): Manager = this
-  def startGame(): Manager = this
-  def moveFigure(): Manager = this
+  def increaseBoardSize(): Try[Manager] = Try(this)
+  def decreaseBoardSize(): Try[Manager] = Try(this)
+  def increaseFigures(): Try[Manager] = Try(this)
+  def decreaseFigures(): Try[Manager] = Try(this)
+  def moveUp(): Try[Manager] = Try(this)
+  def moveDown(): Try[Manager] = Try(this)
+  def playDice(): Try[Manager] = Try(this)
+  def playNext(): Try[Manager] = Try(this)
+  def quitGame(): Try[Manager] = Try(this)
+  def startGame(): Try[Manager] = Try(this)
+  def moveFigure(): Try[Manager] = Try(this)
 
-  def getSnapshot: Manager = this
+  def createMemento: Option[GameData] = None
 
   def getPlayerCount: Int = players.size
   def getFigureCount: Int = players.head.figures.size
@@ -38,6 +40,6 @@ object Manager {
       controller,
       0,
       Board(8),
-      PlayerFactory.createPlayers(2, 4)
+      PlayerFactory(2, 4)
     )
 }

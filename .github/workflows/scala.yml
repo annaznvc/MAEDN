@@ -3,8 +3,7 @@ name: Scala CI with Coverage
 on:
   push:
     branches:
-      - main
-      - CI-Travis1
+      - patternTest
   pull_request:
     branches:
       - main
