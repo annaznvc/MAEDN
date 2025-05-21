@@ -2,6 +2,8 @@ package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.controller.Controller
 
+import scala.util.Try
+
 enum State {
   case Menu, Config, Running
 }
@@ -13,17 +15,17 @@ trait IState {
   val rolled: Int
   val selectedFigure: Int
 
-  def startGame(): Manager
-  def quitGame(): Manager
-  def moveUp(): Manager
-  def moveDown(): Manager
-  def increaseFigures(): Manager
-  def decreaseFigures(): Manager
-  def increaseBoardSize(): Manager
-  def decreaseBoardSize(): Manager
-  def playDice(): Manager
-  def playNext(): Manager
-  def moveFigure(): Manager
+  def startGame(): Try[Manager]
+  def quitGame(): Try[Manager]
+  def moveUp(): Try[Manager]
+  def moveDown(): Try[Manager]
+  def increaseFigures(): Try[Manager]
+  def decreaseFigures(): Try[Manager]
+  def increaseBoardSize(): Try[Manager]
+  def decreaseBoardSize(): Try[Manager]
+  def playDice(): Try[Manager]
+  def playNext(): Try[Manager]
+  def moveFigure(): Try[Manager]
 
   def getPlayerCount: Int
   def getFigureCount: Int
