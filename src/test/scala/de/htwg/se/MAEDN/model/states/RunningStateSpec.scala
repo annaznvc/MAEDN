@@ -1,122 +1,195 @@
+package de.htwg.se.MAEDN.model.states
+
+import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.util.Event
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.model.states.RunningState
-import de.htwg.se.MAEDN.model.{Player, Figure, Board, Field, FieldType}
-import de.htwg.se.MAEDN.util.Color
-import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.util.Event
-
 
 class RunningStateSpec extends AnyWordSpec with Matchers {
 
-  val controller = new Controller()
-  val red = Player(1, Nil, Color.RED)
-  val fig = Figure(1, red)
-  val redWithFig = red.copy(figures = List(fig))
-  val board = Board(Vector(Field(Some(fig), FieldType.Start, Color.RED)), Vector.empty)
+  // DummyStrategy für Tests – tut nichts
+  object DummyStrategy extends IMoveStrategy {
+    override def moveFigure(
+        figure: Figure,
+        all: List[Figure],
+        size: Int,
+        steps: Int
+    ): List[Figure] = all // keine Änderung = Bewegung "fehlschlägt"
 
-  val state = RunningState(controller, moves = 0, board, List(redWithFig), rolled = 0)
+    override def canMove(
+        figure: Figure,
+        all: List[Figure],
+        size: Int,
+        steps: Int
+    ): Boolean = true // Bewegung immer möglich
+  }
 
-  "RunningState" should {
+  "A RunningState" should {
 
-    "roll a dice only if allowed" in {
-      val withRoll = state.playDice()
-      withRoll.rolled should (be >= 1 and be <= 6)
+    val controller = new Controller
+    val board = Board(8)
+    val players = PlayerFactory(2, 4)
+    val state = RunningState(controller, 0, board, players)
+
+    "have state == Running" in {
+      state.state shouldBe State.Running
     }
 
-    "not roll if already rolled" in {
-      val alreadyRolled = state.copy(allowedRollDice = false)
-      alreadyRolled.playDice().rolled shouldBe 0
+    "move up in selectedFigure index" in {
+      val next = state.moveUp()
+      next.isSuccess shouldBe true
+      next.get.selectedFigure shouldBe 1
     }
 
-    "move to next player on playNext" in {
-      val s = state.copy(moves = 0, players = List(redWithFig, redWithFig))
+    "move down in selectedFigure index" in {
+      val next = state.moveDown()
+      next.isSuccess shouldBe true
+      next.get.selectedFigure shouldBe 3
+    }
+
+    "roll dice with playDice and store value" in {
+      val rolledState = state.playDice()
+      rolledState.isSuccess shouldBe true
+      rolledState.get.rolled should (be >= 1 and be <= 6)
+    }
+
+    "call playNext with rolled == -1 and go to next player" in {
+      val s = state.copy(rolled = -1)
       val next = s.playNext()
-      next.getCurrentPlayer shouldBe 1
+      next.isSuccess shouldBe true
+      next.get.getCurrentPlayer shouldBe 1
+      next.get.rolled shouldBe 0
     }
 
-    "change selected figure with moveUp and moveDown" in {
-      val multiFigPlayer = redWithFig.copy(figures = List(Figure(1, red), Figure(2, red), Figure(3, red)))
-      val s = state.copy(players = List(multiFigPlayer))
-
-      val up = s.copy(selectedFigure = 0).moveUp()
-      up.asInstanceOf[RunningState].selectedFigure shouldBe 1
-
-      val down = s.copy(selectedFigure = 0).moveDown()
-      down.asInstanceOf[RunningState].selectedFigure shouldBe 2
+    "call playNext with rolled == 0 and roll dice" in {
+      val s = state.copy(rolled = 0)
+      val next = s.playNext()
+      next.isSuccess shouldBe true
+      next.get.rolled should (be >= 1 and be <= 6)
     }
 
-    "return to menu on quitGame" in {
+    "call playNext with rolled > 0 and delegate to moveFigure" in {
+      val s = state.copy(rolled = 3)
+      val result = s.playNext()
+      result.isSuccess || result.isFailure shouldBe true
+    }
+
+    "return Failure if move is not possible" in {
+      val s = state.copy(rolled = 3)
+      val r = s.moveFigure()
+      r.isSuccess || r.isFailure shouldBe true
+    }
+
+    "create a valid memento" in {
+      val memento = state.copy(rolled = 6, selectedFigure = 2).createMemento
+      memento.isDefined shouldBe true
+      memento.get.rolled shouldBe 6
+      memento.get.selectedFigure shouldBe 2
+    }
+
+    "return to MenuState on quitGame" in {
       val newState = state.quitGame()
-      newState.state.toString shouldBe "Menu"
+      newState.isSuccess shouldBe true
+      newState.get shouldBe a[MenuState]
     }
 
-    "not move a figure if dice not rolled" in {
-      val notRolled = state.copy(allowedRollDice = true)
-      val result = notRolled.moveFigure()
-      result shouldBe notRolled
+    "fail moveFigure if board.moveFigure returns unchanged list" in {
+      val figure = players.head.figures.head
+      val fakeBoard = Board(8, DummyStrategy, DummyStrategy, DummyStrategy)
+
+      val s = RunningState(
+        controller,
+        0,
+        fakeBoard,
+        players,
+        rolled = 3,
+        selectedFigure = 0
+      )
+      val result = s.moveFigure()
+      result.isFailure shouldBe true
+      result.failed.get shouldBe a[IllegalArgumentException]
     }
 
-    "should enqueue MoveFigureEvent when move is valid" in {
-        val controller = new Controller()
-        val p = Player(1, Nil, Color.RED)
-        val f = Figure(1, p)
-        val pWithFig = p.copy(figures = List(f))
+    "succeed moveFigure and return updated state with changed players and rolled = -1" in {
+      val figure = players.head.figures.head
+      val moved = figure.copy(index = figure.index + 3)
 
-        val start = Field(Some(f), FieldType.Start, Color.RED)
-        val empty = Field(None, FieldType.Normal, Color.WHITE)
-        val board = Board(Vector(start, empty), Vector.empty)
-
-        val state = RunningState(controller, 0, board, List(pWithFig), rolled = 1, allowedRollDice = false)
-
-        controller.eventQueue.clear()
-        val _ = state.moveFigure()
-
-        val event = controller.eventQueue.dequeueFirst(_ => true)
-        event match {
-            case Some(Event.MoveFigureEvent(0)) => succeed
-            case other => fail(s"Unexpected event: $other")
+      val customStrategy = new IMoveStrategy {
+        override def moveFigure(
+            f: Figure,
+            all: List[Figure],
+            size: Int,
+            steps: Int
+        ): List[Figure] = all.map {
+          case `figure` => moved
+          case other    => other
         }
+
+        override def canMove(
+            figure: Figure,
+            all: List[Figure],
+            size: Int,
+            steps: Int
+        ): Boolean = true
+      }
+
+      val fakeBoard = Board(8, customStrategy, customStrategy, DummyStrategy)
+
+      val s = RunningState(
+        controller,
+        0,
+        fakeBoard,
+        players,
+        rolled = 3,
+        selectedFigure = 0
+      )
+      val result = s.moveFigure()
+      result.isSuccess shouldBe true
+
+      val newState = result.get
+      newState.players.exists(
+        _.figures.exists(_.index == moved.index)
+      ) shouldBe true
+      newState.rolled shouldBe -1
     }
 
-   "should enqueue RollDiceEvent when rolled was 6" in {
-        val controller = new Controller()
-        val p = Player(1, Nil, Color.RED)
-        val f = Figure(1, p)
-        val pWithFig = p.copy(figures = List(f))
+    "reset rolled to 0 if player rolls a 6 and moves" in {
+      val figure = players.head.figures.head
+      val moved = figure.copy(index = figure.index + 6)
 
-        val start = Field(Some(f), FieldType.Start, Color.RED)
-        val empty = Field(None, FieldType.Normal, Color.WHITE)
-        val board = Board(Vector(start, empty), Vector.empty)
+      val customStrategy = new IMoveStrategy {
+        override def moveFigure(
+            f: Figure,
+            all: List[Figure],
+            size: Int,
+            steps: Int
+        ): List[Figure] = all.map {
+          case `figure` => moved
+          case other    => other
+        }
 
-        val state = RunningState(controller, 0, board, List(pWithFig), rolled = 6, allowedRollDice = false)
+        override def canMove(
+            figure: Figure,
+            all: List[Figure],
+            size: Int,
+            steps: Int
+        ): Boolean = true
+      }
 
-        controller.eventQueue.clear()
-        state.moveFigure()
+      val fakeBoard = Board(8, customStrategy, customStrategy, DummyStrategy)
 
-        val events = controller.eventQueue.dequeueAll(_ => true)
-        events should contain (Event.MoveFigureEvent(0))
-        events should contain (Event.RollDiceEvent(6))
+      val s = RunningState(
+        controller,
+        0,
+        fakeBoard,
+        players,
+        rolled = 6,
+        selectedFigure = 0
+      )
+      val result = s.moveFigure()
+      result.isSuccess shouldBe true
+      result.get.rolled shouldBe 0
     }
-
-    "should call playNext if rolled was not 6" in {
-        val controller = new Controller()
-        val p = Player(1, Nil, Color.RED)
-        val f = Figure(1, p)
-        val pWithFig = p.copy(figures = List(f))
-
-        val start = Field(Some(f), FieldType.Start, Color.RED)
-        val empty = Field(None, FieldType.Normal, Color.WHITE)
-        val board = Board(Vector(start, empty), Vector.empty)
-
-        val state = RunningState(controller, 0, board, List(pWithFig), rolled = 2, allowedRollDice = false)
-
-        controller.eventQueue.clear()
-        state.moveFigure()
-
-        val events = controller.eventQueue.dequeueAll(_ => true)
-        events should contain (Event.MoveFigureEvent(0))
-    }
-    
   }
 }

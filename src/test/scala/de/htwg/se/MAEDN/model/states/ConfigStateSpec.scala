@@ -1,86 +1,92 @@
+package de.htwg.se.MAEDN.model.states
+
+import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.util.Event
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.model.states.ConfigState
-import de.htwg.se.MAEDN.model.{BoardFactory, Player, Figure, State}
-import de.htwg.se.MAEDN.util.Color
-import de.htwg.se.MAEDN.controller.Controller
 
 class ConfigStateSpec extends AnyWordSpec with Matchers {
 
   "A ConfigState" should {
 
-    val controller = new Controller()
-    val figure = Figure(1, null)
-    val player = Player(1, List(figure), Color.RED)
-    val boardFactory = BoardFactory().withPlayers(List(player)).withFigureCount(1)
-    val board = boardFactory.build()
+    val controller = new Controller
+    val board = Board(8)
+    val players = PlayerFactory(2, 4)
+    val state = ConfigState(controller, 0, board, players)
 
-    val config = ConfigState(controller, moves = 0, board, List(player), rolled = 0, boardFactory)
-
-    "have state Config" in {
-      config.state shouldBe State.Config
+    "have state == Config" in {
+      state.state shouldBe State.Config
     }
 
-    "increase and decrease board size" in {
-      val bigger = config.increaseBoardSize()
-      bigger.getBoardSize shouldBe (config.getBoardSize + 1)
-
-      val smaller = bigger.decreaseBoardSize()
-      smaller.getBoardSize shouldBe config.getBoardSize
+    "start game and transition to RunningState" in {
+      val next = state.startGame()
+      next.isSuccess shouldBe true
+      next.get shouldBe a[RunningState]
     }
 
-    "increase and decrease figures" in {
-      val more = config.increaseFigures()
-      more.getFigureCount shouldBe (config.getFigureCount + 1)
-
-      val less = more.decreaseFigures()
-      less.getFigureCount shouldBe config.getFigureCount
+    "quit game and return to MenuState" in {
+      val next = state.quitGame()
+      next.isSuccess shouldBe true
+      next.get shouldBe a[MenuState]
     }
 
-    "add and remove players" in {
-        val added1 = config.moveUp()
-        val added2 = added1.moveUp()
-        added2.getPlayerCount shouldBe 3
+    "increase board size but not exceed 12" in {
+      val newState = state.copy(board = Board(11)).increaseBoardSize()
+      newState.isSuccess shouldBe true
+      newState.get.board.size shouldBe 12
 
-        val removed = added2.moveDown()
-        removed.getPlayerCount shouldBe 2
+      val capped = newState.get.increaseBoardSize()
+      capped.get.board.size shouldBe 12 // cap reached
     }
 
-    "switch to RunningState on startGame" in {
-      val running = config.startGame()
-      running.state shouldBe State.Running
+    "decrease board size but not go below 8" in {
+      val newState = state.copy(board = Board(9)).decreaseBoardSize()
+      newState.isSuccess shouldBe true
+      newState.get.board.size shouldBe 8
+
+      val capped = newState.get.decreaseBoardSize()
+      capped.get.board.size shouldBe 8 // min reached
     }
 
-    "return to MenuState on quitGame" in {
-      val back = config.quitGame()
-      back.state shouldBe State.Menu
+    "increase number of figures per player but not exceed board size" in {
+      val s = state.copy(players = PlayerFactory(2, 7), board = Board(8))
+      val newState = s.increaseFigures()
+      newState.isSuccess shouldBe true
+      newState.get.players.head.figures should have size 8
+
+      val capped = newState.get.increaseFigures()
+      capped.get.players.head.figures should have size 8
     }
 
-    "should not add more than 4 players" in {
-        val controller = new Controller()
-        val fig = Figure(1, null)
-        val player = Player(1, List(fig), Color.RED)
-        val players = List.fill(4)(player)
-        val board = BoardFactory().withPlayers(players).build()
-        val config = ConfigState(controller, 0, board, players)
+    "decrease number of figures per player but not go below 1" in {
+      val s = state.copy(players = PlayerFactory(2, 2))
+      val newState = s.decreaseFigures()
+      newState.isSuccess shouldBe true
+      newState.get.players.head.figures should have size 1
 
-        val result = config.moveUp()
-        result shouldBe config // nothing changed → triggers "this"
+      val capped = newState.get.decreaseFigures()
+      capped.get.players.head.figures should have size 1
     }
 
-    "should not remove players if only 2 remain" in {
-        val controller = new Controller()
-        val fig = Figure(1, null)
-        val player = Player(1, List(fig), Color.RED)
-        val players = List.fill(2)(player)
-        val board = BoardFactory().withPlayers(players).build()
-        val config = ConfigState(controller, 0, board, players)
+    "increase number of players up to 4" in {
+      val s = state.copy(players = PlayerFactory(2, 3))
+      val newState = s.moveUp()
+      newState.isSuccess shouldBe true
+      newState.get.players should have size 3
 
-        val result = config.moveDown()
-        result shouldBe config // nothing changed → triggers "this"
-        }
+      val capped = newState.get.moveUp().get.moveUp()
+      capped.get.players should have size 4
+    }
 
+    "decrease number of players down to 2" in {
+      val s = state.copy(players = PlayerFactory(4, 3))
+      val newState = s.moveDown()
+      newState.isSuccess shouldBe true
+      newState.get.players should have size 3
 
-
+      val capped = newState.get.moveDown().get.moveDown()
+      capped.get.players should have size 2
+    }
   }
 }

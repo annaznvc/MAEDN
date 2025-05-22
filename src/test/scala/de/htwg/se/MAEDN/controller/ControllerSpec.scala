@@ -1,62 +1,122 @@
+package de.htwg.se.MAEDN.controller
+
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.controller.command.Command
+import de.htwg.se.MAEDN.util._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.State
-import de.htwg.se.MAEDN.controller.command._
+import org.scalatest.concurrent.Eventually
 
-class ControllerSpec extends AnyWordSpec with Matchers {
+import scala.util.{Success, Failure, Try}
+import scala.concurrent.duration.*
+
+class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
+
+  given patience: PatienceConfig =
+    PatienceConfig(timeout = 1.second, interval = 50.millis)
 
   "A Controller" should {
 
-    "start the game" in {
-      val c = new Controller()
-      StartGameCommand(c).execute()
-      c.manager.state shouldBe State.Config
+    "push memento to undoStack and clear redoStack on normal command" in {
+      val controller = new Controller
+      val initialMemento = dummyGameData
+
+      controller.manager = new DummyManager(controller, Some(initialMemento))
+
+      val command = new DummyCommand(
+        isNormal = true,
+        result = Success(new DummyManager(controller))
+      )
+
+      controller.executeCommand(command)
+
+      controller.undoStack.top shouldBe initialMemento
+      controller.redoStack shouldBe empty
     }
 
-    "quit the game in menu" in {
-      val c = new Controller()
-      QuitGameCommand(c).execute()
-      c.manager.state shouldBe State.Menu
+    "not push memento when command is not normal" in {
+      val controller = new Controller
+      val command = new DummyCommand(
+        isNormal = false,
+        result = Success(new DummyManager(controller))
+      )
+
+      controller.executeCommand(command)
+
+      controller.undoStack shouldBe empty
+      controller.redoStack shouldBe empty
     }
 
-    "increase and decrease board size" in {
-      val c = new Controller()
-      StartGameCommand(c).execute()
-      val oldSize = c.manager.getBoardSize
-      IncreaseBoardSizeCommand(c).execute()
-      c.manager.getBoardSize shouldBe (oldSize + 1)
+    "handle failed command and enqueue error event" in {
+      val controller = new Controller
+      var captured: Option[Event] = None
 
-      DecreaseBoardSizeCommand(c).execute()
-      c.manager.getBoardSize shouldBe oldSize
+      controller.add(new Observer {
+        override def processEvent(event: Event): Unit = captured = Some(event)
+      })
+
+      val errorCommand = new DummyCommand(
+        isNormal = true,
+        result = Failure(new RuntimeException("fail"))
+      )
+
+      controller.executeCommand(errorCommand)
+
+      eventually {
+        captured shouldBe Some(Event.ErrorEvent("fail"))
+      }
+    }
+    "update manager and notifyObservers on success" in {
+      val controller = new Controller
+      var wasNotified = false
+
+      controller.add(new Observer {
+        override def processEvent(event: Event): Unit = {
+          if event == Event.StartGameEvent then wasNotified = true
+        }
+      })
+
+      // 👉 Simuliere ein echtes Ereignis, das vom Observer verarbeitet werden kann
+      controller.enqueueEvent(Event.StartGameEvent)
+
+      // 👉 Führe erfolgreichen Command aus (der ruft notifyObservers() auf)
+      val command = new DummyCommand(
+        isNormal = true,
+        result = Success(new DummyManager(controller))
+      )
+
+      controller.executeCommand(command)
+
+      eventually {
+        wasNotified shouldBe true
+      }
     }
 
-    "increase and decrease figures" in {
-      val c = new Controller()
-      StartGameCommand(c).execute()
-      val oldCount = c.manager.getFigureCount
-      IncreaseFiguresCommand(c).execute()
-      c.manager.getFigureCount shouldBe (oldCount + 1)
+  }
 
-      DecreaseFiguresCommand(c).execute()
-      c.manager.getFigureCount shouldBe oldCount
-    }
+  // === Dummy-Implementierungen ===
 
-    "move up and down in config" in {
-      val c = new Controller()
-      StartGameCommand(c).execute()
-      val oldPlayerCount = c.manager.getPlayerCount
-      MoveUpCommand(c).execute()
-      c.manager.getPlayerCount should (be >= oldPlayerCount)
+  val dummyGameData: GameData = GameData(
+    moves = 0,
+    board = Board(8),
+    players = PlayerFactory(2, 4),
+    selectedFigure = 0,
+    rolled = 0
+  )
 
-      MoveDownCommand(c).execute()
-      c.manager.getPlayerCount should (be <= oldPlayerCount + 1)
-    }
+  class DummyManager(
+      override val controller: Controller,
+      memento: Option[GameData] = Some(dummyGameData)
+  ) extends Manager {
+    override val rolled: Int = 0
+    override val state: State = State.Menu
+    override def createMemento: Option[GameData] = memento
+  }
 
-    "handle PlayNext and PlayDice safely even in non-running state" in {
-      val c = new Controller()
-      noException should be thrownBy PlayNextCommand(c).execute()
-      noException should be thrownBy PlayDiceCommand(c).execute()
-    }
+  class DummyCommand(
+      override val isNormal: Boolean,
+      val result: Try[Manager]
+  ) extends Command {
+    override def execute(): Try[Manager] = result
   }
 }

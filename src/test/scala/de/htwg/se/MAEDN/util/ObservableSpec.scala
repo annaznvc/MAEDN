@@ -3,57 +3,87 @@ package de.htwg.se.MAEDN.util
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
-class ObservableSpec extends AnyWordSpec with Matchers {
-  "An Observable" should {
-    "notify its observers immediately when instantNotifyObservers is called" in {
-      val observable = new Observable
-      var updated = false
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Promise}
+import scala.util.Try
 
+class ObservableSpec extends AnyWordSpec with Matchers {
+
+  "An Observable" should {
+
+    "add and remove observers" in {
+      val observable = new Observable
+      val observer = new Observer {
+        override def processEvent(event: Event): Unit = ()
+      }
+
+      observable.add(observer)
+      observable.remove(observer)
+      // Test succeeds if no exception occurs
+    }
+
+    "enqueue and clear events" in {
+      val observable = new Observable
+      observable.enqueueEvent(Event.MoveFigureEvent(0))
+      observable.eventQueue.nonEmpty shouldBe true
+      observable.clearEvents()
+      observable.eventQueue.isEmpty shouldBe true
+    }
+
+    "notify observers immediately with instantNotifyObservers" in {
+      var wasCalled = false
       val observer = new Observer {
         override def processEvent(event: Event): Unit = {
-          updated = true
+          wasCalled = true
+          event shouldBe Event.StartGameEvent
         }
       }
 
+      val observable = new Observable
       observable.add(observer)
       observable.instantNotifyObservers(Event.StartGameEvent)
-
-      updated shouldBe true
+      wasCalled shouldBe true
     }
 
-    "notify its observers via eventQueue when notifyObservers is called" in {
-      val observable = new Observable
-      var updated = false
+    "notify all observers asynchronously with notifyObservers" in {
+      val promise1 = Promise[Boolean]()
+      val promise2 = Promise[Boolean]()
 
-      val observer = new Observer {
-        override def processEvent(event: Event): Unit = {
-          if (event == Event.ConfigEvent) updated = true
-        }
+      val observer1 = new Observer {
+        override def processEvent(event: Event): Unit = promise1.success(true)
       }
 
-      observable.add(observer)
-      observable.eventQueue.enqueue(Event.ConfigEvent)
+      val observer2 = new Observer {
+        override def processEvent(event: Event): Unit = promise2.success(true)
+      }
+
+      val observable = new Observable
+      observable.add(observer1)
+      observable.add(observer2)
+      observable.enqueueEvent(Event.PlayDiceEvent(6))
       observable.notifyObservers()
 
-      updated shouldBe true
+      Await.result(promise1.future, 1.second) shouldBe true
+      Await.result(promise2.future, 1.second) shouldBe true
     }
 
-    "remove an observer correctly" in {
-        val observable = new Observable
-        var called = false
+    "handle exceptions in observers gracefully (instant and async)" in {
+      val crashingObserver = new Observer {
+        override def processEvent(event: Event): Unit =
+          throw new RuntimeException("expected failure")
+      }
 
-        val observer = new Observer {
-            override def processEvent(event: Event): Unit = {
-            called = true
-            }
-        }
+      val observable = new Observable
+      observable.add(crashingObserver)
 
-        observable.add(observer)
-        observable.remove(observer)
-        observable.instantNotifyObservers(Event.StartGameEvent)
-
-        called shouldBe false // weil observer entfernt wurde
-        }
+      noException should be thrownBy {
+        observable.instantNotifyObservers(Event.ConfigEvent)
+        observable.enqueueEvent(Event.ErrorEvent("fail"))
+        observable.notifyObservers()
+        Thread.sleep(100) // wait for async
+      }
+    }
 
   }
 }

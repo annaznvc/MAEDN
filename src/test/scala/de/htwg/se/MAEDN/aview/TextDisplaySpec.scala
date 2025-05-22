@@ -1,206 +1,265 @@
+package de.htwg.se.MAEDN.aview
+
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.aview.TextDisplay
-import de.htwg.se.MAEDN.model.{
-  Board,
-  Field,
-  FieldType,
-  Player,
-  Figure,
-  IState,
-  State
-}
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.model.states._
+import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.controller._
 import de.htwg.se.MAEDN.util.Color
-import de.htwg.se.MAEDN.model.Manager
-import de.htwg.se.MAEDN.model.BoardFactory
+import de.htwg.se.MAEDN.aview.TextDisplay
+import scala.io.AnsiColor
+import de.htwg.se.MAEDN.model.PlayerFactory
+import de.htwg.se.MAEDN.model.Board
 
 class TextDisplaySpec extends AnyWordSpec with Matchers {
 
+  def stripAnsi(s: String): String = s.replaceAll("\u001B\\[[;\\d]*m", "")
+
   "TextDisplay" should {
 
-    "clear the terminal with ANSI code" in {
-      TextDisplay.clearTerminal() should include("\u001b[2J")
-    }
+    "render 'N ' for a field with no figure and no start field" in {
+      val size = 4
+      val board = Board(size)
 
-    "print cover for Config state" in {
-      val dummy = new de.htwg.se.MAEDN.model.Manager {
-        override val controller = null
-        override val moves = 7
-        override val rolled = 0
-        override val state = de.htwg.se.MAEDN.model.State.Config
-        override val board =
-          de.htwg.se.MAEDN.model.Board(Vector.empty, Vector.empty)
-        override val players = List.empty
+      // Spieler mit Startfeld z. B. auf Position 0 → wir testen eine andere, z. B. 7
+      val players = PlayerFactory(1, 1) // RED
 
-        override def getPlayerCount = 3
-        override def getFigureCount = 1
-        override def getBoardSize = 9
-        override def getCurrentPlayer = 0
-
-        override def startGame() = this
-        override def quitGame() = this
-        override def moveUp() = this
-        override def moveDown() = this
-        override def increaseFigures() = this
-        override def decreaseFigures() = this
-        override def increaseBoardSize() = this
-        override def decreaseBoardSize() = this
-        override def playDice() = this
-        override def playNext() = this
-        override def moveFigure() = this
-      }
-
-      val output = de.htwg.se.MAEDN.aview.TextDisplay.printCover(dummy)
-      output should include("Config")
-      output should include("3 players")
-      output should include("9x9 board")
-    }
-
-    "print cover for Menu state" in {
-      val dummy = new de.htwg.se.MAEDN.model.Manager {
-        override val controller = null
-        override val moves = 5
-        override val rolled = 0
-        override val state = de.htwg.se.MAEDN.model.State.Menu
-        override val board =
-          de.htwg.se.MAEDN.model.Board(Vector.empty, Vector.empty)
-        override val players = List.empty
-
-        override def getPlayerCount = 2
-        override def getFigureCount = 1
-        override def getBoardSize = 8
-        override def getCurrentPlayer = 0
-
-        override def startGame() = this
-        override def quitGame() = this
-        override def moveUp() = this
-        override def moveDown() = this
-        override def increaseFigures() = this
-        override def decreaseFigures() = this
-        override def increaseBoardSize() = this
-        override def decreaseBoardSize() = this
-        override def playDice() = this
-        override def playNext() = this
-        override def moveFigure() = this
-      }
-
-      val output = de.htwg.se.MAEDN.aview.TextDisplay.printCover(dummy)
-      output should include("Menu")
-      output should include("2 players")
-      output should include("8x8 board")
-    }
-
-    "print cover for Running state" in {
-      val dummy = new de.htwg.se.MAEDN.model.Manager {
-        override val controller = null
-        override val moves = 10
-        override val rolled = 0
-        override val state = de.htwg.se.MAEDN.model.State.Running
-        override val board =
-          de.htwg.se.MAEDN.model.Board(Vector.empty, Vector.empty)
-        override val players = List.empty
-
-        override def getPlayerCount = 4
-        override def getFigureCount = 1
-        override def getBoardSize = 11
-        override def getCurrentPlayer = 0
-
-        override def startGame() = this
-        override def quitGame() = this
-        override def moveUp() = this
-        override def moveDown() = this
-        override def increaseFigures() = this
-        override def decreaseFigures() = this
-        override def increaseBoardSize() = this
-        override def decreaseBoardSize() = this
-        override def playDice() = this
-        override def playNext() = this
-        override def moveFigure() = this
-      }
-
-      val output = de.htwg.se.MAEDN.aview.TextDisplay.printCover(dummy)
-      output should include("Running")
-      output should include("4 players")
-      output should include("11x11 board")
-    }
-
-    //
-
-    "print config layout" in {
-      val output = TextDisplay.printConfig(2, 2, 8)
-      output should include("Press [Space] to start a new game")
-      output should include("2")
-    }
-
-    "print board with fields and homes" in {
-      val p = Player(1, List(Figure(1, null)), Color.RED)
-      val home = Field(Some(p.figures.head), FieldType.Home, Color.RED)
-      val field = Field(None, FieldType.Normal, Color.WHITE)
-      val board = Board(Vector.fill(4)(field), Vector.fill(4)(home))
-
-      val output = TextDisplay.printBoard(board)
-      output should include("Home Fields")
-      output should include("Main Board")
-      output should include("Red:")
-      output should include("F1") // die Figur-ID
-    }
-
-    "render all field colors via colorCode in printBoard" in {
-      val red = Player(1, List(Figure(1, null)), Color.RED)
-      val blue = Player(2, List(Figure(1, null)), Color.BLUE)
-      val green = Player(3, List(Figure(1, null)), Color.GREEN)
-      val yellow = Player(4, List(Figure(1, null)), Color.YELLOW)
-
-      val redField = Field(None, FieldType.Normal, Color.RED)
-      val blueField = Field(None, FieldType.Normal, Color.BLUE)
-      val greenField = Field(None, FieldType.Normal, Color.GREEN)
-      val yellowField = Field(None, FieldType.Normal, Color.YELLOW)
-
-      val board = Board(
-        fields = Vector(redField, blueField, greenField, yellowField),
-        homeFields = Vector.empty
+      val result = TextDisplay.printBoard(
+        board = board,
+        selectedFigure = -1,
+        currentPlayerIndex = -1,
+        players = players
       )
 
-      val output = TextDisplay.printBoard(board)
-
-      output should include("Red")
-      output should include("Blue")
-      output should include("Green")
-      output should include("Yellow")
+      // Suche nach dem neutralen Feld
+      val containsNeutralField = result.linesIterator.exists(_.contains("N "))
+      containsNeutralField shouldBe true
     }
 
-    "render all FieldTypes in printBoard" in {
-      val homeFields = Vector(
-        Field(None, FieldType.Home, Color.RED),
-        Field(None, FieldType.Home, Color.BLUE),
-        Field(None, FieldType.Home, Color.GREEN),
-        Field(None, FieldType.Home, Color.YELLOW)
+    "render Home and Goal sections for all five player colors" in {
+      val size = 4
+      val board = Board(size)
+      val players = PlayerFactory(5, 1)
+
+      val result = TextDisplay.printBoard(
+        board = board,
+        selectedFigure = -1,
+        currentPlayerIndex = -1,
+        players = players
       )
 
-      val startField = Field(None, FieldType.Start, Color.RED)
-      val goalField = Field(None, FieldType.Goal, Color.RED)
-
-      val board = Board(
-        fields = Vector(startField, goalField),
-        homeFields = homeFields
-      )
-
-      val output = TextDisplay.printBoard(board)
-
-      output should include("H ")
-      output should include("S ")
-      output should include("G ")
+      // Hier prüfen wir auf "RED Home:", "BLUE Goal:" usw.
+      Color.values.foreach { color =>
+        val colorName = color.toString // ergibt "RED", "BLUE", ...
+        result should include(s"$colorName Home:")
+        result should include(s"$colorName Goal:")
+      }
     }
 
-    "render fallback player labels beyond labels list" in {
-      val homeFields = Vector.fill(5)(Field(None, FieldType.Home, Color.RED))
-      val board = Board(Vector.empty, homeFields)
+    "include 'N ' for empty main track positions without start fields" in {
+      val size = 4
+      val board = Board(size)
+      val players =
+        List
+          .empty[Player] // keine Spieler → keine Figuren, keine Startpositionen
 
-      val output = TextDisplay.printBoard(board)
+      val result = TextDisplay.printBoard(
+        board = board,
+        selectedFigure = -1,
+        currentPlayerIndex = -1,
+        players = players
+      )
 
-      output should include("Player5")
+      result should include("N ")
+    }
+
+    "return ANSI code to clear terminal" in {
+      TextDisplay.clearTerminal() shouldBe "\u001b[2J\u001b[H"
+    }
+
+    "render the correct title color in printCover (green for running)" in {
+      val controller = new Controller()
+      val state = new RunningState(controller, 0, Board(4), PlayerFactory(2, 4))
+      val result = TextDisplay.printCover(state)
+      result should include("Mensch ärger dich nicht")
+      result should include("\u001b[32m") // GREEN
+    }
+
+    "render yellow title for config state" in {
+      val controller = new Controller()
+      val state = new ConfigState(controller, 0, Board(4), PlayerFactory(2, 4))
+      val result = TextDisplay.printCover(state)
+      result should include("\u001b[33m") // YELLOW
+    }
+
+    "render a flat board with correct length" in {
+      val board = Board(4)
+      val result = TextDisplay.printFlatBoard(board)
+      result should include("? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ?")
+    }
+
+    "render config screen with values" in {
+      val result = TextDisplay.printConfig(2, 4, 5)
+      result should include("2")
+      result should include("4")
+      result should include("5")
+      result should include("Press [Space] to start a new game")
+    }
+
+    "render a board with home, main, and goal sections" in {
+      val player1 = Player(1, Nil, Color.RED)
+      val player2 = Player(2, Nil, Color.BLUE)
+
+      val figures1 = List.tabulate(4)(i => Figure(i, player1, -1)) // Home
+      val figures2 = List.tabulate(4)(i => Figure(i, player2, -1)) // Home
+
+      val red = Player(1, figures1, Color.RED)
+      val blue = Player(2, figures2, Color.BLUE)
+
+      val board = Board(4)
+      val raw = TextDisplay.printBoard(
+        board,
+        selectedFigure = 1,
+        currentPlayerIndex = 0,
+        players = List(red, blue)
+      )
+      val result = stripAnsi(raw)
+
+      result should include("Home Benches")
+      result should include("RED Home")
+      result should include("BLUE Home")
+      result should include("Main Track")
+      result should include("Goal Lanes")
+      result should include(">F2<") // selectedFigure = 1 + 1
+    }
+
+    "highlight figure on main track when selected" in {
+      val boardSize = 4
+      val player = Player(1, Nil, Color.RED)
+
+      val figure = Figure(1, player, 0) // index 0 → Normal(0)
+      val red = Player(1, List(figure), Color.RED)
+
+      val board = Board(boardSize)
+
+      val result = stripAnsi(
+        TextDisplay.printBoard(
+          board,
+          selectedFigure = 0,
+          currentPlayerIndex = 0,
+          players = List(red)
+        )
+      )
+
+      result should include(">F1<")
+    }
+
+    "highlight figure in goal area when selected" in {
+      val boardSize = 4
+      val dummyPlayer = Player(1, Nil, Color.RED)
+
+      val f0 = Figure(0, dummyPlayer, -1)
+      val f1 = Figure(1, dummyPlayer, boardSize * 4 + 1)
+      val red = Player(1, List(f0, f1), Color.RED)
+      val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
+
+      val board = Board(boardSize)
+      val result = stripAnsi(
+        TextDisplay.printBoard(
+          board,
+          selectedFigure = 0,
+          currentPlayerIndex = 0,
+          players = List(fixedPlayer)
+        )
+      )
+
+      result should include(">F1<")
+    }
+
+    "render unselected figure on main track as plain F{id}" in {
+      val boardSize = 4
+      val player = Player(1, Nil, Color.RED)
+      val figure = Figure(2, player, 0) // index 0 → Position.Normal(0)
+      val red = player.copy(figures = List(figure))
+
+      val board = Board(boardSize)
+
+      val result = stripAnsi(
+        TextDisplay.printBoard(
+          board,
+          selectedFigure = -1, // nicht ausgewählt
+          currentPlayerIndex = 0,
+          players = List(red)
+        )
+      )
+
+      result should include("F2") // Zeile 88
+      result should not include (">F2<") // explizit nicht selektiert
+    }
+
+    "render figure normally in goal area when not selected" in {
+      val boardSize = 4
+      val dummyPlayer = Player(1, Nil, Color.RED)
+
+      val f0 = Figure(1, dummyPlayer, boardSize * 4)
+      val f1 = Figure(2, dummyPlayer, -1)
+      val red = Player(1, List(f0, f1), Color.RED)
+      val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
+
+      val board = Board(boardSize)
+      val result = stripAnsi(
+        TextDisplay.printBoard(
+          board,
+          selectedFigure = 1,
+          currentPlayerIndex = 0,
+          players = List(fixedPlayer)
+        )
+      )
+
+      result should include("F1")
+      result should not include (">F1<")
+    }
+
+    "TextDisplay.printBoard" should {
+      "render sections for a manually created WHITE player" in {
+        val size = 4
+        val board = Board(size)
+
+        val whitePlayer = Player(
+          id = 5,
+          figures = List(Figure(1, null, -1)), // Dummy
+          color = Color.WHITE
+        )
+
+        val fixedFigure = whitePlayer.figures.head.copy(owner = whitePlayer)
+        val fixedPlayer = whitePlayer.copy(figures = List(fixedFigure))
+
+        val result = TextDisplay.printBoard(
+          board = board,
+          selectedFigure = -1,
+          currentPlayerIndex = -1,
+          players = List(fixedPlayer)
+        )
+
+        result should include("WHITE Home:")
+        result should include("WHITE Goal:")
+      }
+    }
+
+    "render 'N ' using var board2 and assert only" in {
+      var board2 = Board(4)
+      val players = Nil
+
+      val result = TextDisplay.printBoard(
+        board = board2,
+        selectedFigure = -1,
+        currentPlayerIndex = -1,
+        players = players
+      )
+
+      assert(result.contains("N "))
     }
 
   }
-
 }

@@ -1,46 +1,115 @@
+package de.htwg.se.MAEDN.model
+
+import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model.states.MenuState
+import de.htwg.se.MAEDN.model.states._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.Manager
 
 class ManagerSpec extends AnyWordSpec with Matchers {
 
-  "The Manager object" should {
+  "A Manager (via MenuState)" should {
 
-    "create a default MenuState via apply" in {
-      val controller = new Controller()
-      val manager = Manager(controller)
+    val controller = new Controller
+    val defaultBoard = Board(8)
+    val defaultPlayers = PlayerFactory(2, 4)
 
+    val manager: Manager = MenuState(
+      controller,
+      moves = 0,
+      board = defaultBoard,
+      players = defaultPlayers
+    )
+
+    "have a default number of players" in {
       manager.getPlayerCount shouldBe 2
-      manager.getFigureCount shouldBe 4
-      manager.getBoardSize should be >= 8
     }
 
-    "have default no-op implementations in base Manager trait" in {
-        val dummy = new Manager {
-            override val controller = null
-            override val moves = 0
-            override val rolled = 0
-            override val board = null
-            override val players = Nil
-            override val state = null
+    "have a default number of figures per player" in {
+      manager.getFigureCount shouldBe 4
+    }
 
-            override def getPlayerCount = 0
-            override def getFigureCount = 0
-            override def getBoardSize = 0
-            override def getCurrentPlayer = 0
-        }
+    "have a default board size of 8" in {
+      manager.getBoardSize shouldBe 8
+    }
 
-        dummy.increaseBoardSize() shouldBe dummy
-        dummy.decreaseBoardSize() shouldBe dummy
-        dummy.increaseFigures() shouldBe dummy
-        dummy.decreaseFigures() shouldBe dummy
-        dummy.moveUp() shouldBe dummy
-        dummy.moveDown() shouldBe dummy
-        dummy.quitGame() shouldBe dummy
-        dummy.startGame() shouldBe dummy
-        dummy.moveFigure() shouldBe dummy
-        }
+    "calculate the current player based on moves" in {
+      val m0 = MenuState(
+        controller,
+        moves = 0,
+        board = defaultBoard,
+        players = defaultPlayers
+      )
+      val m1 = MenuState(
+        controller,
+        moves = 1,
+        board = defaultBoard,
+        players = defaultPlayers
+      )
+      val m2 = MenuState(
+        controller,
+        moves = 2,
+        board = defaultBoard,
+        players = defaultPlayers
+      )
 
+      m0.getCurrentPlayer shouldBe 0
+      m1.getCurrentPlayer shouldBe 1
+      m2.getCurrentPlayer shouldBe 0
+    }
+
+    "return itself or a valid next state for default implementations" in {
+      manager.increaseBoardSize().get shouldBe a[Manager]
+      manager.decreaseBoardSize().get shouldBe a[Manager]
+      manager.increaseFigures().get shouldBe a[Manager]
+      manager.decreaseFigures().get shouldBe a[Manager]
+      manager.moveUp().get shouldBe a[Manager]
+      manager.moveDown().get shouldBe a[Manager]
+      manager.playDice().get shouldBe a[Manager]
+      manager.playNext().get shouldBe a[Manager]
+      manager.quitGame().get shouldBe a[Manager]
+      manager.startGame().get shouldBe a[Manager]
+      manager.moveFigure().get shouldBe a[Manager]
+    }
+
+    "have no memento by default" in {
+      manager.createMemento shouldBe None
+    }
+  }
+
+  "A DummyManager using default Manager trait" should {
+
+    class DummyManager extends Manager {
+      override val controller: Controller = new Controller
+      override val moves: Int = 0
+      override val board: Board = Board(8)
+      override val players: List[Player] = PlayerFactory(2, 4)
+      override val rolled: Int = 0
+      override val state: State = State.Menu
+      override val selectedFigure: Int = 0
+    }
+
+    val dummy = new DummyManager
+
+    "return itself when calling quitGame or startGame" in {
+      dummy.quitGame().get shouldBe theSameInstanceAs(dummy)
+      dummy.startGame().get shouldBe theSameInstanceAs(dummy)
+    }
+
+    "have a working fallback implementation for all trait methods" in {
+      dummy.increaseBoardSize().get shouldBe theSameInstanceAs(dummy)
+      dummy.decreaseBoardSize().get shouldBe theSameInstanceAs(dummy)
+      dummy.increaseFigures().get shouldBe theSameInstanceAs(dummy)
+      dummy.decreaseFigures().get shouldBe theSameInstanceAs(dummy)
+      dummy.moveUp().get shouldBe theSameInstanceAs(dummy)
+      dummy.moveDown().get shouldBe theSameInstanceAs(dummy)
+      dummy.playDice().get shouldBe theSameInstanceAs(dummy)
+      dummy.playNext().get shouldBe theSameInstanceAs(dummy)
+      dummy.moveFigure().get shouldBe theSameInstanceAs(dummy)
+    }
+
+    "have no memento" in {
+      dummy.createMemento shouldBe None
+    }
   }
 }

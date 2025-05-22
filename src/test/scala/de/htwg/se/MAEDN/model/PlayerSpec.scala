@@ -1,25 +1,37 @@
+package de.htwg.se.MAEDN.model
+
+import de.htwg.se.MAEDN.util.Color
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.model.{Figure, Player}
-import de.htwg.se.MAEDN.util.Color
 
 class PlayerSpec extends AnyWordSpec with Matchers {
 
   "A Player" should {
-    "have an id, color, and a list of figures" in {
-      val player = Player(2, Nil, Color.YELLOW)
-      player.id shouldBe 2
-      player.color shouldBe Color.YELLOW
+
+    "have correct id, color and figures" in {
+      val player = Player(1, Nil, Color.BLUE)
+      player.id shouldBe 1
+      player.color shouldBe Color.BLUE
       player.figures shouldBe empty
     }
 
-    "contain its figures" in {
-      val dummy = Player(1, Nil, Color.BLUE)
-      val figures = List(Figure(1, dummy), Figure(2, dummy))
-      val player = dummy.copy(figures = figures)
+    "compute correct startPosition based on color offset" in {
+      val playerRed = Player(1, Nil, Color.RED)
+      val playerGreen = Player(2, Nil, Color.GREEN)
+      val playerYellow = Player(3, Nil, Color.YELLOW)
 
-      player.figures should have size 2
-      player.figures.map(_.id) should contain allOf (1, 2)
+      playerRed.startPosition(8) shouldBe 0 // RED offset = 0
+      playerGreen.startPosition(8) shouldBe 16 // GREEN offset = 2
+      playerYellow.startPosition(8) shouldBe 24 // YELLOW offset = 3
+    }
+
+    "support updating figures via copy" in {
+      val player = Player(1, Nil, Color.RED)
+      val f1 = Figure(1, player, 0)
+      val f2 = Figure(2, player, 1)
+      val updated = player.copy(figures = List(f1, f2))
+
+      updated.figures should contain allOf (f1, f2)
     }
   }
 }
