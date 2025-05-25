@@ -67,10 +67,13 @@ class UndoCommand(controller: Controller) extends Command {
     controller.undoStack.headOption match {
       case Some(memento) =>
         controller.undoStack.pop()
-        memento.restoreManager(controller) match {
+        memento
+          .restoreManager(controller) match { // stelle gespeicherten Zustand wieder her
           case Success(manager) =>
-            manager.createMemento.foreach(controller.redoStack.push)
-            controller.manager = manager
+            manager.createMemento.foreach(
+              controller.redoStack.push
+            ) // speichere akiven. Zust. in Redo-Stack
+            controller.manager = manager // dieser alte zustand ist wieder aktiv
             controller.eventQueue.enqueue(Event.UndoEvent)
             Success(manager)
           case Failure(ex) =>
@@ -91,8 +94,11 @@ case class RedoCommand(controller: Controller) extends Command {
         controller.redoStack.pop()
         memento.restoreManager(controller) match {
           case Success(manager) =>
-            manager.createMemento.foreach(controller.undoStack.push)
-            controller.manager = manager
+            manager.createMemento.foreach(
+              controller.undoStack.push
+            ) // erstelle memento vom grad wiederhergestellten zusatnd
+            controller.manager =
+              manager // übernehmen zustand, den das memento liefert
             controller.eventQueue.enqueue(Event.RedoEvent)
             Success(manager)
           case Failure(ex) =>

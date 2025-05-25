@@ -12,7 +12,9 @@ lazy val root = project
       "org.scalameta" %% "munit" % "1.0.0" % Test,
       "org.scalactic" %% "scalactic" % "3.2.14",
       "org.scalatest" %% "scalatest" % "3.2.14" % Test,
-      "org.jline" % "jline" % "3.29.0"
+      "org.jline" % "jline" % "3.29.0",
+      "org.scala-lang.modules" %% "scala-swing" % "3.0.0" //
     )
   )
+
 enablePlugins(ScoverageSbtPlugin, CoverallsPlugin)

@@ -6,5 +6,6 @@ import scala.util.Try
 
 trait Command {
   def execute(): Try[Manager]
-  def isNormal: Boolean = true
+  def isNormal: Boolean =
+    true
 }

@@ -8,12 +8,13 @@ import de.htwg.se.MAEDN.model.{Manager, IMemento}
 import de.htwg.se.MAEDN.util._
 
 class Controller extends Observable {
-  var manager: Manager = Manager(this)
+  var manager: Manager = Manager(
+    this
+  ) // Manager Instanz erzeugt, controller als paramter damit der manager events erzeugen kann
 
   val undoStack = Stack[IMemento]()
   val redoStack = Stack[IMemento]()
 
-  // Command execution
   def executeCommand(command: Command): Unit = {
     if (command.isNormal) {
       manager.createMemento.foreach { case memento: IMemento =>
