@@ -15,6 +15,24 @@ import de.htwg.se.MAEDN.model.{State, Player}
 class GUI(controller: Controller) extends MainFrame with Observer {
   controller.add(this)
 
+  private val menuImage: Option[Image] =
+    try {
+      Some(
+        javax.imageio.ImageIO.read(
+          getClass.getResource("/images/MenuStateCover.png")
+        )
+      )
+    } catch {
+      case e: Throwable =>
+        println("Could not load menu image: " + e.getMessage)
+        None
+    }
+
+  // Feste, kleinere Fenstergröße definieren
+  private val windowSize = new Dimension(800, 600) // Kleinere Größe
+  this.size = windowSize
+  this.preferredSize = windowSize
+
   // Colors
   private val backgroundColor = new Color(245, 245, 245)
   private val redColor = new Color(220, 53, 69)
@@ -25,9 +43,9 @@ class GUI(controller: Controller) extends MainFrame with Observer {
   private val blackColor = new Color(33, 37, 41)
 
   // Layout components
-  private val titleLabel = new Label("Mensch ärgere dich nicht") {
-    font = new Font("Arial", Font.BOLD, 24)
-    foreground = redColor
+  private val titleLabel = new Label("") {
+    preferredSize = new Dimension(0, 8) // dezenter Abstand
+    visible = false
   }
 
   private val statusLabel = new Label("Welcome to the game!") {
@@ -35,21 +53,29 @@ class GUI(controller: Controller) extends MainFrame with Observer {
     horizontalAlignment = Alignment.Center
   }
 
-  private val gamePanel = new GameBoardPanel()
+  private val gamePanel: GameBoardPanel = {
+    val panel = new GameBoardPanel()
+    // Panel soll die gesamte Fenstergröße nutzen
+    panel.preferredSize = windowSize
+    panel.minimumSize = windowSize
+    panel.maximumSize = windowSize
+    panel
+  }
+
   private val controlPanel = new ControlPanel()
 
   // Main layout
-  contents = new BorderPanel {
-    background = backgroundColor
-    layout(titleLabel) = BorderPanel.Position.North
-    layout(gamePanel) = BorderPanel.Position.Center
-    layout(controlPanel) = BorderPanel.Position.South
-    layout(statusLabel) = BorderPanel.Position.South
-  }
+  contents = gamePanel
+  pack()
+  centerOnScreen()
+
+  println(s"Fenstergröße: ${size.width}x${size.height}")
+  println(s"Panelgröße: ${gamePanel.size.width}x${gamePanel.size.height}")
+
+  centerOnScreen()
 
   // Window settings
   title = "Mensch ärgere dich nicht"
-  size = new Dimension(800, 700)
   centerOnScreen()
   resizable = false
 
@@ -82,20 +108,68 @@ class GUI(controller: Controller) extends MainFrame with Observer {
 
   // Game board panel
   class GameBoardPanel extends Panel {
-    preferredSize = new Dimension(600, 500)
-    background = whiteColor
 
+    private val configBackground: Option[Image] =
+      try {
+        Some(
+          javax.imageio.ImageIO.read(
+            new java.io.File("src/main/resources/images/ConfigStateCover.jpeg")
+          )
+        )
+      } catch {
+        case e: Throwable =>
+          println("Could not load config background: " + e.getMessage)
+          None
+      }
+
+    background = whiteColor
     override def paintComponent(g: Graphics2D): Unit = {
       super.paintComponent(g)
-      g.setRenderingHint(
-        RenderingHints.KEY_ANTIALIASING,
-        RenderingHints.VALUE_ANTIALIAS_ON
-      )
 
       controller.manager.state match {
-        case State.Menu    => drawMenuScreen(g)
-        case State.Config  => drawConfigScreen(g)
-        case State.Running => drawGameBoard(g)
+        case State.Config =>
+          // Hintergrundbild zeichnen
+          configBackground.foreach { img =>
+            val imgWidth = img.getWidth(null)
+            val imgHeight = img.getHeight(null)
+
+            val scaleX = size.width.toDouble / imgWidth
+            val scaleY = size.height.toDouble / imgHeight
+            val scale = Math.min(scaleX, scaleY)
+
+            val scaledWidth = (imgWidth * scale).toInt
+            val scaledHeight = (imgHeight * scale).toInt
+
+            val x = (size.width - scaledWidth) / 2
+            val y = (size.height - scaledHeight) / 2
+
+            val avgColor = getAverageColorFromImage(img)
+            g.setColor(avgColor)
+            g.fillRect(0, 0, size.width, size.height)
+
+            g.drawImage(img, x, y, scaledWidth, scaledHeight, null)
+
+          }
+
+          // Schriftfarbe und Stil
+          g.setColor(new Color(255, 235, 190)) // beige
+          g.setFont(new Font("Georgia", Font.BOLD, 36))
+
+          // Zahlen aus dem Manager
+          val players = controller.manager.getPlayerCount.toString
+          val figures = controller.manager.getFigureCount.toString
+          val boardSize = controller.manager.getBoardSize.toString
+
+          // Positionen (x, y) grob zentriert zwischen den Pfeilen – bei Bedarf leicht anpassen
+          g.drawString(players, 200, 310)
+          g.drawString(figures, 385, 300)
+          g.drawString(boardSize, 560, 310)
+
+        case State.Menu =>
+          drawMenuScreen(g)
+
+        case State.Running =>
+          drawGameBoard(g)
       }
     }
 
@@ -103,22 +177,77 @@ class GUI(controller: Controller) extends MainFrame with Observer {
       val width = size.width
       val height = size.height
 
+      // Fülle zunächst den gesamten Hintergrund
       g.setColor(backgroundColor)
       g.fillRect(0, 0, width, height)
 
-      g.setColor(blackColor)
-      g.setFont(new Font("Arial", Font.BOLD, 20))
-      val message = "Press 'N' or Space to configure game"
-      val fm = g.getFontMetrics
-      val x = (width - fm.stringWidth(message)) / 2
-      val y = height / 2
-      g.drawString(message, x, y)
+      menuImage.foreach { img =>
+        val imgWidth = img.getWidth(null)
+        val imgHeight = img.getHeight(null)
 
-      g.setFont(new Font("Arial", Font.PLAIN, 14))
-      val info =
-        s"${controller.manager.getPlayerCount} players, ${controller.manager.getFigureCount} figures, ${controller.manager.getBoardSize}x${controller.manager.getBoardSize} board"
-      val infoX = (width - g.getFontMetrics.stringWidth(info)) / 2
-      g.drawString(info, infoX, y + 30)
+        // Berechne beide Skalierungsfaktoren
+        val scaleX = width.toDouble / imgWidth
+        val scaleY = height.toDouble / imgHeight
+
+        // Nutze den kleineren Faktor, damit das ganze Bild sichtbar ist
+        val scale = Math.min(scaleX, scaleY)
+
+        // Berechne die finalen Dimensionen
+        val scaledWidth = (imgWidth * scale).toInt
+        val scaledHeight = (imgHeight * scale).toInt
+
+        // Zentriere das Bild
+        val x = (width - scaledWidth) / 2
+        val y = (height - scaledHeight) / 2
+
+        // Optional: Fülle den Hintergrund hinter dem Bild
+        // mit einer passenden Farbe
+        val avgColor = getAverageColorFromImage(img)
+        g.setColor(avgColor)
+        g.fillRect(0, 0, width, height)
+
+        // Zeichne das Bild
+        g.drawImage(img, x, y, scaledWidth, scaledHeight, null)
+      }
+    }
+
+// Hilfsmethode um die durchschnittliche Farbe des Bildes zu ermitteln
+    private def getAverageColorFromImage(img: Image): Color = {
+      val bufferedImage = img match {
+        case bi: java.awt.image.BufferedImage => bi
+        case _ => {
+          val bi = new java.awt.image.BufferedImage(
+            img.getWidth(null),
+            img.getHeight(null),
+            java.awt.image.BufferedImage.TYPE_INT_ARGB
+          )
+          val g = bi.createGraphics()
+          g.drawImage(img, 0, 0, size.width, size.height, null)
+          g.dispose()
+          bi
+        }
+      }
+
+      var sumR, sumG, sumB = 0L
+      var count = 0
+
+      // Sample nur einige Pixel für bessere Performance
+      val sampleStep = 10
+      for (y <- 0 until bufferedImage.getHeight by sampleStep) {
+        for (x <- 0 until bufferedImage.getWidth by sampleStep) {
+          val rgb = bufferedImage.getRGB(x, y)
+          sumR += (rgb >> 16) & 0xff
+          sumG += (rgb >> 8) & 0xff
+          sumB += rgb & 0xff
+          count += 1
+        }
+      }
+
+      new Color(
+        (sumR / count).toInt,
+        (sumG / count).toInt,
+        (sumB / count).toInt
+      )
     }
 
     private def drawConfigScreen(g: Graphics2D): Unit = {
@@ -192,7 +321,7 @@ class GUI(controller: Controller) extends MainFrame with Observer {
       g.setColor(whiteColor)
       g.fillRect(0, 0, width, height)
 
-      // Draw home areas
+      // Draw home areas - Positionen an kleineres Fenster angepasst
       drawHomeAreas(g, players, selectedFigure, currentPlayer)
 
       // Draw main track
@@ -211,11 +340,12 @@ class GUI(controller: Controller) extends MainFrame with Observer {
         selectedFigure: Int,
         currentPlayer: Int
     ): Unit = {
+      // Angepasste Positionen für kleineres Fenster
       val homePositions = Array(
-        (50, 50), // Red (top-left)
-        (450, 50), // Blue (top-right)
-        (450, 350), // Yellow (bottom-right)
-        (50, 350) // Green (bottom-left)
+        (30, 30), // Red (top-left)
+        (350, 30), // Blue (top-right)
+        (350, 280), // Yellow (bottom-right)
+        (30, 280) // Green (bottom-left)
       )
 
       players.zipWithIndex.foreach { case (player, idx) =>
@@ -260,13 +390,13 @@ class GUI(controller: Controller) extends MainFrame with Observer {
     ): Unit = {
       val centerX = size.width / 2
       val centerY = size.height / 2
-      val trackRadius = 150
+      val trackRadius = 120 // Kleinerer Radius für kleineres Fenster
       val totalFields = boardSize * 4
 
       for (i <- 0 until totalFields) {
         val angle = (i * 360.0 / totalFields) * Math.PI / 180.0
-        val x = (centerX + trackRadius * Math.cos(angle) - 15).toInt
-        val y = (centerY + trackRadius * Math.sin(angle) - 15).toInt
+        val x = (centerX + trackRadius * Math.cos(angle) - 12).toInt
+        val y = (centerY + trackRadius * Math.sin(angle) - 12).toInt
 
         // Check if this is a start position
         val isStartPosition = players.exists(_.startPosition(boardSize) == i)
@@ -274,14 +404,14 @@ class GUI(controller: Controller) extends MainFrame with Observer {
 
         if (isStartPosition && startPlayer.isDefined) {
           g.setColor(getPlayerColor(startPlayer.get.color))
-          g.fillOval(x, y, 30, 30)
+          g.fillOval(x, y, 24, 24) // Kleinere Felder
         } else {
           g.setColor(Color.LIGHT_GRAY)
-          g.fillOval(x, y, 30, 30)
+          g.fillOval(x, y, 24, 24)
         }
 
         g.setColor(blackColor)
-        g.drawOval(x, y, 30, 30)
+        g.drawOval(x, y, 24, 24)
 
         // Check if there's a figure on this position
         players.flatMap(_.figures).foreach { figure =>
@@ -291,8 +421,8 @@ class GUI(controller: Controller) extends MainFrame with Observer {
                 figure.owner.id - 1 == currentPlayer && figure.id == selectedFigure + 1
               drawFigure(
                 g,
-                x + 15,
-                y + 15,
+                x + 12,
+                y + 12,
                 getPlayerColor(figure.owner.color),
                 figure.id,
                 isSelected
@@ -309,11 +439,12 @@ class GUI(controller: Controller) extends MainFrame with Observer {
         selectedFigure: Int,
         currentPlayer: Int
     ): Unit = {
+      // Angepasste Positionen für kleineres Fenster
       val goalPositions = Array(
-        (200, 200), // Red
-        (350, 200), // Blue
-        (350, 280), // Yellow
-        (200, 280) // Green
+        (180, 180), // Red
+        (320, 180), // Blue
+        (320, 240), // Yellow
+        (180, 240) // Green
       )
 
       players.zipWithIndex.foreach { case (player, idx) =>
