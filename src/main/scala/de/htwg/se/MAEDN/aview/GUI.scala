@@ -9,6 +9,7 @@ import javafx.fxml.{FXML, FXMLLoader}
 import javafx.scene.{Parent, Scene}
 import javafx.scene.image.ImageView
 import javafx.scene.input.{KeyEvent, KeyCode}
+import javafx.scene.control.Label
 import javafx.stage.Stage
 
 // zentrale GUI, die Scene je nach State wechselt
@@ -158,48 +159,164 @@ class MenuController(controller: Controller) {
 // ===========================
 // ConfigView.fxml → ConfigController
 // ===========================
-class ConfigController(controller: Controller) {
+class ConfigController(controller: Controller) extends Observer {
+
+  // FXML Labels for dynamic updates
+  @FXML private var playerCountLabel: Label = _
+  @FXML private var figureCountLabel: Label = _
+  @FXML private var boardSizeLabel: Label = _
+  @FXML private var currentConfigLabel: Label = _
+  @FXML private var backgroundImage: ImageView = _
+
+  private var isRegistered = false
+
   def initialize(): Unit = {
     println("ConfigController initialized")
+
+    // Load background image
+    if (backgroundImage != null) {
+      try {
+        val imageUrl = getClass.getResource("/images/Background.png")
+        if (imageUrl != null) {
+          val image = new javafx.scene.image.Image(imageUrl.toString)
+          backgroundImage.setImage(image)
+        } else {
+          println(
+            "Warning: Background image not found at /images/Background.png"
+          )
+        }
+      } catch {
+        case e: Exception =>
+          println(s"Error loading background image: ${e.getMessage}")
+      }
+    }
+
+    // Subscribe to controller events to update labels
+    if (!isRegistered) {
+      controller.add(this)
+      isRegistered = true
+      println("ConfigController registered as observer")
+    }
+
+    // Initial update of labels - force immediate update
+    Platform.runLater(() => updateLabels())
+  }
+
+  private def updateLabels(): Unit = {
+    try {
+      println(
+        s"Updating labels - PlayerCount: ${controller.manager.getPlayerCount}, FigureCount: ${controller.manager.getFigureCount}, BoardSize: ${controller.manager.getBoardSize}"
+      )
+
+      if (playerCountLabel != null) {
+        playerCountLabel.setText(controller.manager.getPlayerCount.toString)
+        println(
+          s"PlayerCount label updated to: ${controller.manager.getPlayerCount}"
+        )
+      } else {
+        println("playerCountLabel is null!")
+      }
+
+      if (figureCountLabel != null) {
+        figureCountLabel.setText(controller.manager.getFigureCount.toString)
+        println(
+          s"FigureCount label updated to: ${controller.manager.getFigureCount}"
+        )
+      } else {
+        println("figureCountLabel is null!")
+      }
+
+      if (boardSizeLabel != null) {
+        boardSizeLabel.setText(controller.manager.getBoardSize.toString)
+        println(
+          s"BoardSize label updated to: ${controller.manager.getBoardSize}"
+        )
+      } else {
+        println("boardSizeLabel is null!")
+      }
+
+      if (currentConfigLabel != null) {
+        val config =
+          s"Current: ${controller.manager.getPlayerCount} Players, ${controller.manager.getFigureCount} Figures, ${controller.manager.getBoardSize}x${controller.manager.getBoardSize} Board"
+        currentConfigLabel.setText(config)
+        println(s"CurrentConfig label updated to: $config")
+      } else {
+        println("currentConfigLabel is null!")
+      }
+    } catch {
+      case e: Exception =>
+        println(s"Error updating labels: ${e.getMessage}")
+        e.printStackTrace()
+    }
+  }
+
+  override def processEvent(event: Event): Unit = {
+    println(s"ConfigController received event: $event")
+    event match {
+      case Event.ConfigEvent =>
+        Platform.runLater(() => {
+          println("Processing ConfigEvent - updating labels")
+          updateLabels()
+        })
+      case _ =>
+        println(s"Ignoring event: $event")
+    }
+  }
+
+  // Cleanup method - sollte aufgerufen werden wenn der Controller nicht mehr gebraucht wird
+  def cleanup(): Unit = {
+    if (isRegistered) {
+      controller.remove(this)
+      isRegistered = false
+      println("ConfigController unregistered as observer")
+    }
   }
 
   @FXML
   def onStartGame(): Unit = {
+    cleanup() // Cleanup before leaving
     controller.executeCommand(StartGameCommand(controller))
   }
 
   @FXML
   def onBackToMenu(): Unit = {
+    cleanup() // Cleanup before leaving
     controller.executeCommand(QuitGameCommand(controller))
   }
 
   @FXML
   def onIncreasePlayer(): Unit = {
+    println("Increase player button clicked")
     controller.executeCommand(MoveUpCommand(controller))
   }
 
   @FXML
   def onDecreasePlayer(): Unit = {
+    println("Decrease player button clicked")
     controller.executeCommand(MoveDownCommand(controller))
   }
 
   @FXML
   def onIncreaseFigures(): Unit = {
+    println("Increase figures button clicked")
     controller.executeCommand(IncreaseFiguresCommand(controller))
   }
 
   @FXML
   def onDecreaseFigures(): Unit = {
+    println("Decrease figures button clicked")
     controller.executeCommand(DecreaseFiguresCommand(controller))
   }
 
   @FXML
   def onIncreaseBoardSize(): Unit = {
+    println("Increase board size button clicked")
     controller.executeCommand(IncreaseBoardSizeCommand(controller))
   }
 
   @FXML
   def onDecreaseBoardSize(): Unit = {
+    println("Decrease board size button clicked")
     controller.executeCommand(DecreaseBoardSizeCommand(controller))
   }
 }
