@@ -4,13 +4,15 @@ import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.command._
-import javafx.application.Platform
-import javafx.fxml.{FXML, FXMLLoader}
-import javafx.scene.{Parent, Scene}
-import javafx.scene.image.ImageView
-import javafx.scene.input.{KeyEvent, KeyCode}
-import javafx.scene.control.Label
-import javafx.stage.Stage
+
+import scalafx.application.Platform
+import javafx.fxml.FXMLLoader
+import scalafx.scene.{Parent, Scene}
+import scalafx.scene.input.{KeyEvent, KeyCode}
+import scalafx.stage.Stage
+import scalafx.Includes._
+
+import javafx.{fxml => jfxf}
 
 // zentrale GUI, die Scene je nach State wechselt
 class GUI(controller: Controller, stage: Stage) extends Observer {
@@ -27,44 +29,48 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
         ("/view/GameView.fxml", () => new GameController(controller))
     }
 
-    Platform.runLater(new Runnable {
-      override def run(): Unit = {
-        try {
-          val loader = new FXMLLoader(getClass.getResource(resourcePath))
-          loader.setController(controllerFactory())
-          val root: Parent = loader.load()
+    Platform.runLater {
+      try {
+        // JavaFX-FXMLLoader direkt mit Location und Controller
+        val loader = new FXMLLoader(getClass.getResource(resourcePath))
+        loader.setController(controllerFactory())
+        // gibt javafx.scene.Parent zurück, wandelt durch `Includes._` in scalafx.scene.Parent
+        // 1. Lade das JavaFX-Parent
+        val jfxRoot: javafx.scene.Parent = loader.load()
+// 2. Nutze die implizite Conversion (Import scalafx.Includes._),
+//    um daraus ein scalafx.scene.Parent zu machen
+        val root: Parent = jfxRoot
 
-          val newScene = new Scene(root, 800, 600)
+        val newScene = new Scene(root, 800, 600)
 
-          // Globale Tastatur-Events für die ganze Scene
-          newScene.setOnKeyPressed((event: KeyEvent) => {
-            handleGlobalKeyEvent(event, state)
-          })
-
-          stage.setScene(newScene)
-          stage.sizeToScene()
-          stage.centerOnScreen()
-          stage.setTitle(s"MAEDN - ${state.toString}")
-          stage.setResizable(false)
-          stage.show()
-
-          // Focus auf die Scene setzen, damit KeyEvents funktionieren
-          newScene.getRoot.requestFocus()
-
-        } catch {
-          case e: Exception =>
-            println(s"Error loading FXML: ${e.getMessage}")
-            e.printStackTrace()
+        // Globale Tastatur-Events für die ganze Scene
+        newScene.onKeyPressed = (event: KeyEvent) => {
+          handleGlobalKeyEvent(event, state)
         }
+
+        stage.scene = newScene
+        stage.sizeToScene()
+        stage.centerOnScreen()
+        stage.title = s"MAEDN - ${state.toString}"
+        stage.resizable = false
+        stage.show()
+
+        // Focus auf die Scene setzen, damit KeyEvents funktionieren
+        newScene.root().requestFocus()
+
+      } catch {
+        case e: Exception =>
+          println(s"Error loading FXML: ${e.getMessage}")
+          e.printStackTrace()
       }
-    })
+    }
   }
 
   private def handleGlobalKeyEvent(event: KeyEvent, state: State): Unit = {
-    val command: Option[Command] = (event.getCode, state) match {
+    val command: Option[Command] = (event.code, state) match {
       // Menu State
-      case (KeyCode.N, State.Menu) | (KeyCode.ENTER, State.Menu) |
-          (KeyCode.SPACE, State.Menu) =>
+      case (KeyCode.N, State.Menu) | (KeyCode.Enter, State.Menu) |
+          (KeyCode.Space, State.Menu) =>
         Some(StartGameCommand(controller))
       case (KeyCode.Q, State.Menu) =>
         Some(QuitGameCommand(controller))
@@ -82,10 +88,10 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
         Some(IncreaseBoardSizeCommand(controller))
       case (KeyCode.F, State.Config) =>
         Some(DecreaseBoardSizeCommand(controller))
-      case (KeyCode.N, State.Config) | (KeyCode.ENTER, State.Config) |
-          (KeyCode.SPACE, State.Config) =>
+      case (KeyCode.N, State.Config) | (KeyCode.Enter, State.Config) |
+          (KeyCode.Space, State.Config) =>
         Some(StartGameCommand(controller))
-      case (KeyCode.Q, State.Config) | (KeyCode.ESCAPE, State.Config) =>
+      case (KeyCode.Q, State.Config) | (KeyCode.Escape, State.Config) =>
         Some(QuitGameCommand(controller))
 
       // Running State
@@ -99,7 +105,7 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
         Some(UndoCommand(controller))
       case (KeyCode.I, State.Running) =>
         Some(RedoCommand(controller))
-      case (KeyCode.Q, State.Running) | (KeyCode.ESCAPE, State.Running) =>
+      case (KeyCode.Q, State.Running) | (KeyCode.Escape, State.Running) =>
         Some(QuitGameCommand(controller))
 
       case _ => None
@@ -121,7 +127,8 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
 // MenuView.fxml → MenuController
 // ===========================
 class MenuController(controller: Controller) {
-  @FXML private var menuImage: ImageView = _
+  @jfxf.FXML
+  private var menuImage: javafx.scene.image.ImageView = _
 
   def initialize(): Unit = {
     println("MenuController initialized, image: " + menuImage)
@@ -145,12 +152,12 @@ class MenuController(controller: Controller) {
     }
   }
 
-  @FXML
+  @jfxf.FXML
   def onStartGame(): Unit = {
     controller.executeCommand(StartGameCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onQuitGame(): Unit = {
     controller.executeCommand(QuitGameCommand(controller))
   }
@@ -162,11 +169,16 @@ class MenuController(controller: Controller) {
 class ConfigController(controller: Controller) extends Observer {
 
   // FXML Labels for dynamic updates
-  @FXML private var playerCountLabel: Label = _
-  @FXML private var figureCountLabel: Label = _
-  @FXML private var boardSizeLabel: Label = _
-  @FXML private var currentConfigLabel: Label = _
-  @FXML private var backgroundImage: ImageView = _
+  @jfxf.FXML
+  private var playerCountLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  private var figureCountLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  private var boardSizeLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  private var currentConfigLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  private var backgroundImage: javafx.scene.image.ImageView = _
 
   private var isRegistered = false
 
@@ -272,49 +284,49 @@ class ConfigController(controller: Controller) extends Observer {
     }
   }
 
-  @FXML
+  @jfxf.FXML
   def onStartGame(): Unit = {
     cleanup() // Cleanup before leaving
     controller.executeCommand(StartGameCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onBackToMenu(): Unit = {
     cleanup() // Cleanup before leaving
     controller.executeCommand(QuitGameCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onIncreasePlayer(): Unit = {
     println("Increase player button clicked")
     controller.executeCommand(MoveUpCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onDecreasePlayer(): Unit = {
     println("Decrease player button clicked")
     controller.executeCommand(MoveDownCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onIncreaseFigures(): Unit = {
     println("Increase figures button clicked")
     controller.executeCommand(IncreaseFiguresCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onDecreaseFigures(): Unit = {
     println("Decrease figures button clicked")
     controller.executeCommand(DecreaseFiguresCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onIncreaseBoardSize(): Unit = {
     println("Increase board size button clicked")
     controller.executeCommand(IncreaseBoardSizeCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onDecreaseBoardSize(): Unit = {
     println("Decrease board size button clicked")
     controller.executeCommand(DecreaseBoardSizeCommand(controller))
@@ -329,32 +341,32 @@ class GameController(controller: Controller) {
     println("GameController initialized")
   }
 
-  @FXML
+  @jfxf.FXML
   def onPlayNext(): Unit = {
     controller.executeCommand(PlayNextCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onMoveUp(): Unit = {
     controller.executeCommand(MoveUpCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onMoveDown(): Unit = {
     controller.executeCommand(MoveDownCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onUndo(): Unit = {
     controller.executeCommand(UndoCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onRedo(): Unit = {
     controller.executeCommand(RedoCommand(controller))
   }
 
-  @FXML
+  @jfxf.FXML
   def onBackToMenu(): Unit = {
     controller.executeCommand(QuitGameCommand(controller))
   }
