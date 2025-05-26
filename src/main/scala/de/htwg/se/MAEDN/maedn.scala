@@ -1,10 +1,19 @@
 package de.htwg.se.MAEDN
 
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.aview.TUI
+import de.htwg.se.MAEDN.aview.GUI
+import javafx.application.Application
+import javafx.stage.Stage
 
-object maedn extends App {
-  val controller = new Controller()
-  val tui = new TUI(controller)
-  tui.run()
+class Main extends Application {
+  override def start(stage: Stage): Unit = {
+    val controller = new Controller()
+    new GUI(controller, stage)
+  }
+}
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    Application.launch(classOf[Main], args *)
+  }
 }
