@@ -1,7 +1,7 @@
 package de.htwg.se.MAEDN.aview
 
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.State
+import de.htwg.se.MAEDN.model.{State, Figure}
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.command._
 
@@ -11,8 +11,13 @@ import scalafx.scene.{Parent, Scene}
 import scalafx.scene.input.{KeyEvent, KeyCode}
 import scalafx.stage.Stage
 import scalafx.Includes._
+import de.htwg.se.MAEDN.util.Position
 
 import javafx.{fxml => jfxf}
+import scalafx.scene.layout.GridPane
+import scalafx.scene.layout.StackPane
+import scalafx.scene.layout.ColumnConstraints
+import scalafx.scene.layout.RowConstraints
 
 // zentrale GUI, die Scene je nach State wechselt
 class GUI(controller: Controller, stage: Stage) extends Observer {
@@ -307,8 +312,13 @@ class ConfigController(controller: Controller) extends Observer {
 // RunningView.fxml → GameController
 // ===========================
 class GameController(controller: Controller) {
+  @jfxf.FXML
+  var gameBoard: javafx.scene.layout.GridPane = _
+
   def initialize(): Unit = {
     println("GameController initialized")
+    val figures = controller.manager.players.flatMap(_.figures)
+    renderCrossBoard(gameBoard, controller.manager.board.size, figures)
   }
 
   @jfxf.FXML
@@ -343,10 +353,70 @@ class GameController(controller: Controller) {
 
   @jfxf.FXML
   def rollDice(): Unit = {
-    // Implement the rollDice functionality here
     println("Roll Dice button clicked")
     controller.executeCommand(
-      RedoCommand(controller)
-    ) // Example command, replace with actual logic
+      PlayNextCommand(controller)
+    )
+  }
+
+  def renderCrossBoard(
+      grid: javafx.scene.layout.GridPane,
+      size: Int,
+      figures: Seq[Figure]
+  ): Unit = {
+    grid.getChildren.clear()
+    grid.getColumnConstraints.clear()
+    grid.getRowConstraints.clear()
+
+    for (_ <- 0 until size) {
+      grid.getColumnConstraints.add(
+        new javafx.scene.layout.ColumnConstraints(32)
+      )
+      grid.getRowConstraints.add(new javafx.scene.layout.RowConstraints(32))
+    }
+
+    val armLen = size - 1
+    val totalFields = armLen * 4
+
+    // Alle Kreuzfelder erzeugen
+    for (idx <- 0 until totalFields) {
+      val (row, col) = indexToGridPos(idx, size)
+      val stack = new javafx.scene.layout.StackPane()
+      stack.setPrefSize(32, 32)
+      stack.setStyle(
+        "-fx-background-color: #FFFACD; -fx-border-color: #8B4513;"
+      )
+
+      // Figur auf diesem Feld?
+      figures.find(_.adjustedIndex(size) == Position.Normal(idx)).foreach {
+        fig =>
+          val circle = new scalafx.scene.shape.Circle {
+            radius = 12
+            fill = scalafx.scene.paint.Color.web(fig.owner.color.toString)
+          }
+          stack.getChildren.add(circle)
+      }
+
+      grid.add(stack, col, row)
+    }
+  }
+
+  def indexToGridPos(idx: Int, size: Int): (Int, Int) = {
+    val mid = size / 2
+    val len = size - 1
+
+    if (idx < len) {
+      // Unten (von unten-mitte nach rechts)
+      (len, mid + idx)
+    } else if (idx < len + len) {
+      // Rechts (von rechts-unten nach oben)
+      (len - (idx - len), size - 1)
+    } else if (idx < len * 2 + len) {
+      // Oben (von rechts-oben nach links)
+      (0, size - 1 - (idx - 2 * len))
+    } else {
+      // Links (von oben-links nach unten, bis eins vor Start)
+      (idx - 3 * len, mid)
+    }
   }
 }
