@@ -7,239 +7,240 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.shape.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RunningStateController">
-   <style>
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1"
+    xmlns:fx="http://javafx.com/fxml/1">
+    <style>
       -fx-background-color: linear-gradient(to bottom right, #f4e4bc, #e8d5a3);
-   </style>
+    </style>
 
-   <!-- Header -->
-   <top>
-      <VBox spacing="10" alignment="CENTER">
-         <padding>
-            <Insets top="20" bottom="10" left="20" right="20"/>
-         </padding>
-         
-         <!-- Spieltitel -->
-         <Label text="Mensch ärgere dich nicht" styleClass="game-title">
-            <font>
-               <Font name="Serif Bold" size="36"/>
-            </font>
-            <style>
+    <!-- Header -->
+    <top>
+        <VBox spacing="10" alignment="CENTER">
+            <padding>
+                <Insets top="20" bottom="10" left="20" right="20"/>
+            </padding>
+
+            <!-- Spieltitel -->
+            <Label text="Mensch ärgere dich nicht" styleClass="game-title">
+                <font>
+                    <Font name="Serif Bold" size="36"/>
+                </font>
+                <style>
                -fx-text-fill: #8B4513;
                -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.3), 2, 0, 2, 2);
-            </style>
-         </Label>
-         
-         <!-- Untertitel -->
-         <Label text="Spiel in vollem Gange" styleClass="game-subtitle">
-            <font>
-               <Font name="Serif Italic" size="16"/>
-            </font>
-            <style>
+                </style>
+            </Label>
+
+            <!-- Untertitel -->
+            <Label text="Spiel in vollem Gange" styleClass="game-subtitle">
+                <font>
+                    <Font name="Serif Italic" size="16"/>
+                </font>
+                <style>
                -fx-text-fill: #A0522D;
-            </style>
-         </Label>
-         
-         <!-- Spieler-Status -->
-         <HBox spacing="15" alignment="CENTER">
-            <style>
+                </style>
+            </Label>
+
+            <!-- Spieler-Status -->
+            <HBox spacing="15" alignment="CENTER">
+                <style>
                -fx-background-color: #FFF8DC;
                -fx-background-radius: 25;
                -fx-border-color: #CD853F;
                -fx-border-radius: 25;
                -fx-border-width: 2;
                -fx-padding: 10 20 10 20;
-            </style>
-            
-            <Circle fx:id="turnIndicator" radius="8" fill="#FF6B6B">
-               <style>
+                </style>
+
+                <Circle fx:id="turnIndicator" radius="8" fill="#FF6B6B">
+                    <style>
                   -fx-stroke: rgba(0,0,0,0.2);
                   -fx-stroke-width: 2;
-               </style>
-            </Circle>
-            
-            <Label fx:id="currentPlayerLabel" text="Rot ist am Zug">
-               <font>
-                  <Font name="Serif Bold" size="18"/>
-               </font>
-               <style>
+                    </style>
+                </Circle>
+
+                <Label fx:id="currentPlayerLabel" text="Rot ist am Zug">
+                    <font>
+                        <Font name="Serif Bold" size="18"/>
+                    </font>
+                    <style>
                   -fx-text-fill: #8B4513;
-               </style>
-            </Label>
-         </HBox>
-      </VBox>
-   </top>
+                    </style>
+                </Label>
+            </HBox>
+        </VBox>
+    </top>
 
-   <!-- Hauptbereich -->
-   <center>
-      <HBox spacing="30" alignment="CENTER">
-         <padding>
-            <Insets top="20" bottom="20" left="40" right="40"/>
-         </padding>
+    <!-- Hauptbereich -->
+    <center>
+        <HBox spacing="30" alignment="CENTER">
+            <padding>
+                <Insets top="20" bottom="20" left="40" right="40"/>
+            </padding>
 
-         <!-- Spielbrett Sektion -->
-         <VBox spacing="20" alignment="CENTER">
-            <!-- Ludo Spielbrett im Kreuz-Format -->
-            <StackPane>
-               <style>
+            <!-- Spielbrett Sektion -->
+            <VBox spacing="20" alignment="CENTER">
+                <!-- Ludo Spielbrett im Kreuz-Format -->
+                <StackPane>
+                    <style>
                   -fx-background-color: #FFF8DC;
                   -fx-background-radius: 15;
                   -fx-border-color: #8B4513;
                   -fx-border-radius: 15;
                   -fx-border-width: 4;
                   -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 8, 0, 0, 8);
-               </style>
-               
-               <!-- Spielbrett Grid -->
-               <GridPane fx:id="gameBoard" alignment="CENTER" hgap="2" vgap="2">
-                  <padding>
-                     <Insets top="20" bottom="20" left="20" right="20"/>
-                  </padding>
-                  
-                  <!-- Row 0: Obere Reihe -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                    </style>
 
-                  <!-- Row 1-3: Grüne Startfelder oben -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
+                    <!-- Spielbrett Grid -->
+                    <GridPane fx:id="gameBoard" alignment="CENTER" hgap="2" vgap="2">
+                        <padding>
+                            <Insets top="20" bottom="20" left="20" right="20"/>
+                        </padding>
 
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
+                        <!-- Row 0: Obere Reihe -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
 
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <!-- Row 1-3: Grüne Startfelder oben -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
 
-                  <!-- Row 4: Horizontale Spielfelder -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
 
-                  <!-- Row 5: Mittlere Reihe mit Zielfeldern -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
 
-                  <!-- Row 6: Horizontale Spielfelder -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <!-- Row 4: Horizontale Spielfelder -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="center-field"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
 
-                  <!-- Row 7-9: Rote Startfelder unten -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <!-- Row 5: Mittlere Reihe mit Zielfeldern -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="center-field"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
 
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
+                        <!-- Row 6: Horizontale Spielfelder -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="center-field"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
 
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
+                        <!-- Row 7-9: Rote Startfelder unten -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="red-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
 
-                  <!-- Row 10: Untere Reihe -->
-                  <StackPane GridPane.columnIndex="0" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="1" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="2" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="3" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="4" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="5" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                  <StackPane GridPane.columnIndex="6" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="7" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="8" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="9" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                  <StackPane GridPane.columnIndex="10" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-               </GridPane>
-            </StackPane>
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
 
-            <!-- Würfel Bereich -->
-            <VBox spacing="15" alignment="CENTER">
-               <style>
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-target"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
+
+                        <!-- Row 10: Untere Reihe -->
+                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
+                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                    </GridPane>
+                </StackPane>
+
+                <!-- Würfel Bereich -->
+                <VBox spacing="15" alignment="CENTER">
+                    <style>
                   -fx-background-color: #FFF8DC;
                   -fx-background-radius: 15;
                   -fx-border-color: #CD853F;
@@ -247,47 +248,47 @@
                   -fx-border-width: 3;
                   -fx-padding: 25;
                   -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 6, 0, 0, 6);
-               </style>
-               
-               <Button fx:id="diceButton" text="🎲" onAction="#rollDice" prefWidth="80" prefHeight="80">
-                  <font>
-                     <Font size="36"/>
-                  </font>
-                  <style>
+                    </style>
+
+                    <Button fx:id="diceButton" text="🎲" onAction="#rollDice" prefWidth="80" prefHeight="80">
+                        <font>
+                            <Font size="36"/>
+                        </font>
+                        <style>
                      -fx-background-color: #FFFACD;
                      -fx-background-radius: 12;
                      -fx-border-color: #8B4513;
                      -fx-border-radius: 12;
                      -fx-border-width: 3;
                      -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 4, 0, 0, 4);
-                  </style>
-               </Button>
-               
-               <Label text="Würfeln">
-                  <font>
-                     <Font name="Serif Bold" size="16"/>
-                  </font>
-                  <style>
-                     -fx-text-fill: #8B4513;
-                  </style>
-               </Label>
-               
-               <Label fx:id="diceResultLabel" text="">
-                  <font>
-                     <Font name="Serif Bold" size="18"/>
-                  </font>
-                  <style>
-                     -fx-text-fill: #8B4513;
-                  </style>
-               </Label>
-            </VBox>
-         </VBox>
+                        </style>
+                    </Button>
 
-         <!-- Informations Sektion -->
-         <VBox spacing="20" prefWidth="300">
-            <!-- Spieler Info -->
-            <VBox spacing="15">
-               <style>
+                    <Label text="Würfeln">
+                        <font>
+                            <Font name="Serif Bold" size="16"/>
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <Label fx:id="diceResultLabel" text="">
+                        <font>
+                            <Font name="Serif Bold" size="18"/>
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                </VBox>
+            </VBox>
+
+            <!-- Informations Sektion -->
+            <VBox spacing="20" prefWidth="300">
+                <!-- Spieler Info -->
+                <VBox spacing="15">
+                    <style>
                   -fx-background-color: #FFF8DC;
                   -fx-background-radius: 15;
                   -fx-border-color: #CD853F;
@@ -295,173 +296,180 @@
                   -fx-border-width: 3;
                   -fx-padding: 20;
                   -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 6, 0, 0, 6);
-               </style>
-               
-               <Label text="Spieler">
-                  <font>
-                     <Font name="Serif Bold" size="24"/>
-                  </font>
-                  <style>
-                     -fx-text-fill: #8B4513;
-                  </style>
-               </Label>
-               
-               <VBox fx:id="playerListContainer" spacing="12">
-                  <!-- Spieler werden dynamisch hinzugefügt -->
-                  
-                  <!-- Spieler 1 - Rot -->
-                  <HBox spacing="15" alignment="CENTER_LEFT">
-                     <style>
-                        -fx-background-color: #FFFACD;
-                        -fx-background-radius: 10;
-                        -fx-padding: 12;
-                        -fx-border-color: transparent;
-                        -fx-border-radius: 10;
-                        -fx-border-width: 2;
-                     </style>
-                     
-                     <Circle radius="20" fill="#FF6B6B">
-                        <style>
-                           -fx-stroke: rgba(0,0,0,0.2);
-                           -fx-stroke-width: 2;
-                        </style>
-                     </Circle>
-                     
-                     <VBox>
-                        <Label text="Spieler 1">
-                           <font>
-                              <Font name="Serif Bold" size="18"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #8B4513;
-                           </style>
-                        </Label>
-                        <Label text="Im Ziel: 0/4 Figuren">
-                           <font>
-                              <Font name="Serif Italic" size="14"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #A0522D;
-                           </style>
-                        </Label>
-                     </VBox>
-                  </HBox>
-                  
-                  <!-- Spieler 2 - Blau -->
-                  <HBox spacing="15" alignment="CENTER_LEFT">
-                     <style>
-                        -fx-background-color: #FFFACD;
-                        -fx-background-radius: 10;
-                        -fx-padding: 12;
-                        -fx-border-color: transparent;
-                        -fx-border-radius: 10;
-                        -fx-border-width: 2;
-                     </style>
-                     
-                     <Circle radius="20" fill="#4ECDC4">
-                        <style>
-                           -fx-stroke: rgba(0,0,0,0.2);
-                           -fx-stroke-width: 2;
-                        </style>
-                     </Circle>
-                     
-                     <VBox>
-                        <Label text="Spieler 2">
-                           <font>
-                              <Font name="Serif Bold" size="18"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #8B4513;
-                           </style>
-                        </Label>
-                        <Label text="Im Ziel: 0/4 Figuren">
-                           <font>
-                              <Font name="Serif Italic" size="14"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #A0522D;
-                           </style>
-                        </Label>
-                     </VBox>
-                  </HBox>
-                  
-                  <!-- Spieler 3 - Grün -->
-                  <HBox spacing="15" alignment="CENTER_LEFT">
-                     <style>
-                        -fx-background-color: #FFFACD;
-                        -fx-background-radius: 10;
-                        -fx-padding: 12;
-                        -fx-border-color: transparent;
-                        -fx-border-radius: 10;
-                        -fx-border-width: 2;
-                     </style>
-                     
-                     <Circle radius="20" fill="#95E1A3">
-                        <style>
-                           -fx-stroke: rgba(0,0,0,0.2);
-                           -fx-stroke-width: 2;
-                        </style>
-                     </Circle>
-                     
-                     <VBox>
-                        <Label text="Spieler 3">
-                           <font>
-                              <Font name="Serif Bold" size="18"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #8B4513;
-                           </style>
-                        </Label>
-                        <Label text="Im Ziel: 0/4 Figuren">
-                           <font>
-                              <Font name="Serif Italic" size="14"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #A0522D;
-                           </style>
-                        </Label>
-                     </VBox>
-                  </HBox>
-                  
-                  <!-- Spieler 4 - Gelb -->
-                  <HBox spacing="15" alignment="CENTER_LEFT">
-                     <style>
-                        -fx-background-color: #FFFACD;
-                        -fx-background-radius: 10;
-                        -fx-padding: 12;
-                        -fx-border-color: transparent;
-                        -fx-border-radius: 10;
-                        -fx-border-width: 2;
-                     </style>
-                     
-                     <Circle radius="20" fill="#FFE66D">
-                        <style>
-                           -fx-stroke: rgba(0,0,0,0.2);
-                           -fx-stroke-width: 2;
-                        </style>
-                     </Circle>
-                     
-                     <VBox>
-                        <Label text="Spieler 4">
-                           <font>
-                              <Font name="Serif Bold" size="18"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #8B4513;
-                           </style>
-                        </Label>
-                        <Label text="Im Ziel: 0/4 Figuren">
-                           <font>
-                              <Font name="Serif Italic" size="14"/>
-                           </font>
-                           <style>
-                              -fx-text-fill: #A0522D;
-                           </style>
-                        </Label>
-                     </VBox>
-                  </HBox>
-               </VBox>
-            </VBox>
+                    </style>
 
-            <!-- Spielverlauf -->
-            <VBox spacing="15">
+                    <Label text="Spieler">
+                        <font>
+                            <Font name="Serif Bold" size="24"/>
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <VBox fx:id="playerListContainer" spacing="12">
+                        <!-- Spieler werden dynamisch hinzugefügt -->
+
+                        <!-- Spieler 1 - Rot -->
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <style>
+                        -fx-background-color: #FFFACD;
+                        -fx-background-radius: 10;
+                        -fx-padding: 12;
+                        -fx-border-color: transparent;
+                        -fx-border-radius: 10;
+                        -fx-border-width: 2;
+                            </style>
+
+                            <Circle radius="20" fill="#FF6B6B">
+                                <style>
+                           -fx-stroke: rgba(0,0,0,0.2);
+                           -fx-stroke-width: 2;
+                                </style>
+                            </Circle>
+
+                            <VBox>
+                                <Label text="Spieler 1">
+                                    <font>
+                                        <Font name="Serif Bold" size="18"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #8B4513;
+                                    </style>
+                                </Label>
+                                <Label text="Im Ziel: 0/4 Figuren">
+                                    <font>
+                                        <Font name="Serif Italic" size="14"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #A0522D;
+                                    </style>
+                                </Label>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Spieler 2 - Blau -->
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <style>
+                        -fx-background-color: #FFFACD;
+                        -fx-background-radius: 10;
+                        -fx-padding: 12;
+                        -fx-border-color: transparent;
+                        -fx-border-radius: 10;
+                        -fx-border-width: 2;
+                            </style>
+
+                            <Circle radius="20" fill="#4ECDC4">
+                                <style>
+                           -fx-stroke: rgba(0,0,0,0.2);
+                           -fx-stroke-width: 2;
+                                </style>
+                            </Circle>
+
+                            <VBox>
+                                <Label text="Spieler 2">
+                                    <font>
+                                        <Font name="Serif Bold" size="18"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #8B4513;
+                                    </style>
+                                </Label>
+                                <Label text="Im Ziel: 0/4 Figuren">
+                                    <font>
+                                        <Font name="Serif Italic" size="14"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #A0522D;
+                                    </style>
+                                </Label>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Spieler 3 - Grün -->
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <style>
+                        -fx-background-color: #FFFACD;
+                        -fx-background-radius: 10;
+                        -fx-padding: 12;
+                        -fx-border-color: transparent;
+                        -fx-border-radius: 10;
+                        -fx-border-width: 2;
+                            </style>
+
+                            <Circle radius="20" fill="#95E1A3">
+                                <style>
+                           -fx-stroke: rgba(0,0,0,0.2);
+                           -fx-stroke-width: 2;
+                                </style>
+                            </Circle>
+
+                            <VBox>
+                                <Label text="Spieler 3">
+                                    <font>
+                                        <Font name="Serif Bold" size="18"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #8B4513;
+                                    </style>
+                                </Label>
+                                <Label text="Im Ziel: 0/4 Figuren">
+                                    <font>
+                                        <Font name="Serif Italic" size="14"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #A0522D;
+                                    </style>
+                                </Label>
+                            </VBox>
+                        </HBox>
+
+                        <!-- Spieler 4 - Gelb -->
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <style>
+                        -fx-background-color: #FFFACD;
+                        -fx-background-radius: 10;
+                        -fx-padding: 12;
+                        -fx-border-color: transparent;
+                        -fx-border-radius: 10;
+                        -fx-border-width: 2;
+                            </style>
+
+                            <Circle radius="20" fill="#FFE66D">
+                                <style>
+                           -fx-stroke: rgba(0,0,0,0.2);
+                           -fx-stroke-width: 2;
+                                </style>
+                            </Circle>
+
+                            <VBox>
+                                <Label text="Spieler 4">
+                                    <font>
+                                        <Font name="Serif Bold" size="18"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #8B4513;
+                                    </style>
+                                </Label>
+                                <Label text="Im Ziel: 0/4 Figuren">
+                                    <font>
+                                        <Font name="Serif Italic" size="14"/>
+                                    </font>
+                                    <style>
+                              -fx-text-fill: #A0522D;
+                                    </style>
+                                </Label>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+
+                <!-- Spielverlauf -->
+                <VBox spacing="15">
+                    <!-- Optional: Verlaufseinträge können hier dynamisch hinzugefügt werden -->
+                </VBox>                <!-- schließt Spielverlauf -->
+
+            </VBox>            <!-- schließt Informationssektion -->
+        </HBox>        <!-- schließt Hauptbereich -->
+    </center>    <!-- schließt center -->
+</BorderPane><!-- schließt gesamtes Layout -->

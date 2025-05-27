@@ -26,7 +26,7 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
       case State.Config =>
         ("/view/ConfigView.fxml", () => new ConfigController(controller))
       case State.Running =>
-        ("/view/GameView.fxml", () => new GameController(controller))
+        ("/view/RunningView.fxml", () => new GameController(controller))
     }
 
     Platform.runLater {
@@ -304,7 +304,7 @@ class ConfigController(controller: Controller) extends Observer {
 }
 
 // ===========================
-// GameView.fxml → GameController
+// RunningView.fxml → GameController
 // ===========================
 class GameController(controller: Controller) {
   def initialize(): Unit = {
@@ -339,5 +339,14 @@ class GameController(controller: Controller) {
   @jfxf.FXML
   def onBackToMenu(): Unit = {
     controller.executeCommand(QuitGameCommand(controller))
+  }
+
+  @jfxf.FXML
+  def rollDice(): Unit = {
+    // Implement the rollDice functionality here
+    println("Roll Dice button clicked")
+    controller.executeCommand(
+      RedoCommand(controller)
+    ) // Example command, replace with actual logic
   }
 }
