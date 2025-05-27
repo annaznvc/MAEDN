@@ -67,53 +67,23 @@ class GUI(controller: Controller, stage: Stage) extends Observer {
   }
 
   private def handleGlobalKeyEvent(event: KeyEvent, state: State): Unit = {
-    val command: Option[Command] = (event.code, state) match {
-      // Menu State
-      case (KeyCode.N, State.Menu) | (KeyCode.Enter, State.Menu) |
-          (KeyCode.Space, State.Menu) =>
+    val command: Option[Command] = event.code match {
+      case KeyCode.N | KeyCode.Enter | KeyCode.Space =>
         Some(StartGameCommand(controller))
-      case (KeyCode.Q, State.Menu) =>
-        Some(QuitGameCommand(controller))
-
-      // Config State
-      case (KeyCode.W, State.Config) =>
-        Some(MoveUpCommand(controller))
-      case (KeyCode.S, State.Config) =>
-        Some(MoveDownCommand(controller))
-      case (KeyCode.E, State.Config) =>
-        Some(IncreaseFiguresCommand(controller))
-      case (KeyCode.D, State.Config) =>
-        Some(DecreaseFiguresCommand(controller))
-      case (KeyCode.R, State.Config) =>
-        Some(IncreaseBoardSizeCommand(controller))
-      case (KeyCode.F, State.Config) =>
-        Some(DecreaseBoardSizeCommand(controller))
-      case (KeyCode.N, State.Config) | (KeyCode.Enter, State.Config) |
-          (KeyCode.Space, State.Config) =>
-        Some(StartGameCommand(controller))
-      case (KeyCode.Q, State.Config) | (KeyCode.Escape, State.Config) =>
-        Some(QuitGameCommand(controller))
-
-      // Running State
-      case (KeyCode.X, State.Running) =>
-        Some(PlayNextCommand(controller))
-      case (KeyCode.W, State.Running) =>
-        Some(MoveUpCommand(controller))
-      case (KeyCode.S, State.Running) =>
-        Some(MoveDownCommand(controller))
-      case (KeyCode.U, State.Running) =>
-        Some(UndoCommand(controller))
-      case (KeyCode.I, State.Running) =>
-        Some(RedoCommand(controller))
-      case (KeyCode.Q, State.Running) | (KeyCode.Escape, State.Running) =>
-        Some(QuitGameCommand(controller))
-
-      case _ => None
+      case KeyCode.Q | KeyCode.Escape => Some(QuitGameCommand(controller))
+      case KeyCode.W                  => Some(MoveUpCommand(controller))
+      case KeyCode.S                  => Some(MoveDownCommand(controller))
+      case KeyCode.E => Some(IncreaseFiguresCommand(controller))
+      case KeyCode.D => Some(DecreaseFiguresCommand(controller))
+      case KeyCode.R => Some(IncreaseBoardSizeCommand(controller))
+      case KeyCode.F => Some(DecreaseBoardSizeCommand(controller))
+      case KeyCode.X => Some(PlayNextCommand(controller))
+      case KeyCode.U => Some(UndoCommand(controller))
+      case KeyCode.I => Some(RedoCommand(controller))
+      case _         => None
     }
 
-    command.foreach { cmd =>
-      controller.executeCommand(cmd)
-    }
+    command.foreach(controller.executeCommand)
   }
 
   override def processEvent(event: Event): Unit = {
