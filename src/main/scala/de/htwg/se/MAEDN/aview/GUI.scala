@@ -321,42 +321,89 @@ class GameController(controller: Controller) {
     renderCrossBoard(gameBoard, controller.manager.board.size, figures)
   }
 
-  @jfxf.FXML
-  def onPlayNext(): Unit = {
-    controller.executeCommand(PlayNextCommand(controller))
-  }
+  private case class Pos(r: Int, c: Int)
 
-  @jfxf.FXML
-  def onMoveUp(): Unit = {
-    controller.executeCommand(MoveUpCommand(controller))
-  }
+  // Erzeugt einen zentralen Kreuzpfad für beliebige size (8-12 empfohlen)
+  private def generateCrossPath(size: Int, gridSize: Int = 13): Seq[Pos] = {
+    val offset = (gridSize - size) / 2
+    val half = size / 2
+    val path = scala.collection.mutable.ArrayBuffer.empty[Pos]
 
-  @jfxf.FXML
-  def onMoveDown(): Unit = {
-    controller.executeCommand(MoveDownCommand(controller))
-  }
+    // --- Teil 1: Start unten, nach oben, nach links, Ecke ---
+    val startRow1 = (size match {
+      case 8  => 10
+      case 10 => 11
+      case 12 => 12
+      case _ =>
+        throw new IllegalArgumentException("Nur size 8, 10, 12 erlaubt!")
+    })
+    val startCol1 = 5
+    path += Pos(startRow1, startCol1)
+    for (i <- 1 until half) path += Pos(startRow1 - i, startCol1)
+    val leftRow1 = startRow1 - (half - 1)
+    for (i <- 1 to (half - 1)) path += Pos(leftRow1, startCol1 - i)
+    val cornerRow1 = leftRow1 - 1
+    val cornerCol1 = startCol1 - (half - 1)
+    path += Pos(cornerRow1, cornerCol1)
 
-  @jfxf.FXML
-  def onUndo(): Unit = {
-    controller.executeCommand(UndoCommand(controller))
-  }
+    // --- Teil 2: Neues Startfeld (eine Zeile über letzter Ecke, gleiche Spalte) ---
+    val startRow2 = cornerRow1 - 1
+    val startCol2 = cornerCol1
+    path += Pos(startRow2, startCol2)
+    for (i <- 1 to (half - 1)) path += Pos(startRow2, startCol2 + i)
+    val rightCol2 = startCol2 + (half - 1)
 
-  @jfxf.FXML
-  def onRedo(): Unit = {
-    controller.executeCommand(RedoCommand(controller))
-  }
+    // --- Teil 3: Nach oben in derselben Spalte (negative Richtung!) ---
+    val startRow3 = startRow2
+    val startCol3 = rightCol2 // <- statt rightCol2 + 1
+    for (i <- 1 to (half - 1)) path += Pos(startRow3 - i, startCol3)
+    // --- Teil 4: Abschlussfeld, eine Spalte weiter rechts ---
+    path += Pos(startRow3 - (half - 1), startCol3 + 1)
 
-  @jfxf.FXML
-  def onBackToMenu(): Unit = {
-    controller.executeCommand(QuitGameCommand(controller))
-  }
+    // --- Teil 5: Neues Startfeld (gleiche Zeile wie Abschlussfeld, Spalte +1) ---
+    val startRow4 = startRow3 - (half - 1)
+    val startCol4 = startCol3 + 2
+    path += Pos(startRow4, startCol4) // <-- Das fehlte!
 
-  @jfxf.FXML
-  def rollDice(): Unit = {
-    println("Roll Dice button clicked")
-    controller.executeCommand(
-      PlayNextCommand(controller)
-    )
+    // Jetzt nach unten auffüllen (zunehmender Zeilenindex)
+    for (i <- 1 to (half - 1)) {
+      path += Pos(startRow4 + i, startCol4)
+    }
+
+    // --- Teil 6: Nach rechts auffüllen (gleiche Zeile, aufsteigender Spaltenindex) ---
+    val rightRow3 = startRow4 + (half - 1)
+    val rightCol3 = startCol4
+    for (i <- 1 to (half - 1)) {
+      path += Pos(rightRow3, rightCol3 + i)
+    }
+
+    // --- Teil 7: Abschlussfeld, eine Zeile weiter unten ---
+    path += Pos(rightRow3 + 1, rightCol3 + (half - 1))
+
+    // --- Teil 8: Neues Startfeld (eine Zeile weiter unten, gleiche Spalte) ---
+    val startRow5 =
+      rightRow3 + 2 // +1 für Abschlussfeld, +1 für neues Startfeld
+    val startCol5 = rightCol3 + (half - 1)
+    path += Pos(startRow5, startCol5)
+
+    // Nach links auffüllen (gleiche Zeile, abnehmender Spaltenindex)
+    for (i <- 1 to (half - 1)) {
+      path += Pos(startRow5, startCol5 - i)
+    }
+
+    // --- Teil 9: Nach unten auffüllen (gleiche Spalte, zunehmender Zeilenindex) ---
+    val downStartRow = startRow5
+    val downCol = startCol5 - (half - 1)
+    for (i <- 1 to (half - 1)) {
+      path += Pos(downStartRow + i, downCol)
+    }
+
+    // --- Teil 10: Nur einen Schritt nach links am Ende ---
+    val finalRow = downStartRow + (half - 1)
+    val finalColStart = downCol
+    path += Pos(finalRow, finalColStart - 1)
+
+    path.toSeq
   }
 
   def renderCrossBoard(
@@ -364,23 +411,13 @@ class GameController(controller: Controller) {
       size: Int,
       figures: Seq[Figure]
   ): Unit = {
+    val gridSize = 13
     grid.getChildren.clear()
-    grid.getColumnConstraints.clear()
-    grid.getRowConstraints.clear()
+    // KEINE Constraints mehr setzen, das macht jetzt die FXML!
 
-    for (_ <- 0 until size) {
-      grid.getColumnConstraints.add(
-        new javafx.scene.layout.ColumnConstraints(32)
-      )
-      grid.getRowConstraints.add(new javafx.scene.layout.RowConstraints(32))
-    }
+    val path = generateCrossPath(size, gridSize)
 
-    val armLen = size - 1
-    val totalFields = armLen * 4
-
-    // Alle Kreuzfelder erzeugen
-    for (idx <- 0 until totalFields) {
-      val (row, col) = indexToGridPos(idx, size)
+    for ((pos, idx) <- path.zipWithIndex) {
       val stack = new javafx.scene.layout.StackPane()
       stack.setPrefSize(32, 32)
       stack.setStyle(
@@ -397,26 +434,12 @@ class GameController(controller: Controller) {
           stack.getChildren.add(circle)
       }
 
-      grid.add(stack, col, row)
+      grid.add(stack, pos.c, pos.r)
     }
   }
 
-  def indexToGridPos(idx: Int, size: Int): (Int, Int) = {
-    val mid = size / 2
-    val len = size - 1
-
-    if (idx < len) {
-      // Unten (von unten-mitte nach rechts)
-      (len, mid + idx)
-    } else if (idx < len + len) {
-      // Rechts (von rechts-unten nach oben)
-      (len - (idx - len), size - 1)
-    } else if (idx < len * 2 + len) {
-      // Oben (von rechts-oben nach links)
-      (0, size - 1 - (idx - 2 * len))
-    } else {
-      // Links (von oben-links nach unten, bis eins vor Start)
-      (idx - 3 * len, mid)
-    }
+  @jfxf.FXML
+  def rollDice(): Unit = {
+    controller.executeCommand(PlayNextCommand(controller))
   }
 }

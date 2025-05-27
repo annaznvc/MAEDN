@@ -93,148 +93,36 @@
 
                     <!-- Spielbrett Grid -->
                     <GridPane fx:id="gameBoard" alignment="CENTER" hgap="2" vgap="2">
-                        <padding>
-                            <Insets top="20" bottom="20" left="20" right="20"/>
-                        </padding>
-
-                        <!-- Row 0: Obere Reihe -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="0" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="0" prefWidth="40" prefHeight="40"/>
-
-                        <!-- Row 1-3: Grüne Startfelder oben -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="1" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="1" prefWidth="40" prefHeight="40"/>
-
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-start"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="2" prefWidth="40" prefHeight="40" styleClass="yellow-start"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="2" prefWidth="40" prefHeight="40"/>
-
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="3" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="3" prefWidth="40" prefHeight="40"/>
-
-                        <!-- Row 4: Horizontale Spielfelder -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="4" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-
-                        <!-- Row 5: Mittlere Reihe mit Zielfeldern -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="green-target"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="yellow-target"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="5" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-
-                        <!-- Row 6: Horizontale Spielfelder -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="center-field"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="6" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-
-                        <!-- Row 7-9: Rote Startfelder unten -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="7" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="7" prefWidth="40" prefHeight="40"/>
-
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="8" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="8" prefWidth="40" prefHeight="40"/>
-
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-start"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="red-target"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="9" prefWidth="40" prefHeight="40" styleClass="blue-start"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="9" prefWidth="40" prefHeight="40"/>
-
-                        <!-- Row 10: Untere Reihe -->
-                        <StackPane GridPane.columnIndex="0" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="1" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="2" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="3" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="4" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="5" GridPane.rowIndex="10" prefWidth="40" prefHeight="40" styleClass="normal-field"/>
-                        <StackPane GridPane.columnIndex="6" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="7" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="8" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="9" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
-                        <StackPane GridPane.columnIndex="10" GridPane.rowIndex="10" prefWidth="40" prefHeight="40"/>
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                            <ColumnConstraints percentWidth="7.7"/>
+                        </columnConstraints>
+                        <rowConstraints>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                            <RowConstraints percentHeight="7.7"/>
+                        </rowConstraints>
                     </GridPane>
                 </StackPane>
 
