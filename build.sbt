@@ -1,51 +1,32 @@
-// build.sbt
-
-import sbt._
-import sbt.Keys._
-
 val scalaV = "3.5.1"
-val scalafxVersion = "22.0.0-R33"
 
 lazy val root = (project in file("."))
   .settings(
     name := "MAEDN",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scalaV,
-
-    // Test-Bibliotheken
-    libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "1.0.0" % Test,
-      "org.scalactic" %% "scalactic" % "3.2.14",
-      "org.scalatest" %% "scalatest" % "3.2.14" % Test,
-      "org.jline" % "jline" % "3.29.0",
-
-      // ScalaFX-Core für Scala 3
-      "org.scalafx" % "scalafx_3" % scalafxVersion
-    ),
-
-    // Forken, damit JavaFX-Optionen greifen
-    fork := true,
-    Compile / run / javaOptions ++= {
-      // Pfad zum JavaFX-SDK lib-Verzeichnis
-      val javafxLib = "C:/Users/annaz/Desktop/javafx-sdk-24.0.1/lib"
-
+    libraryDependencies ++= {
+      lazy val osName = System.getProperty("os.name") match {
+        case n if n.startsWith("Linux")   => "linux"
+        case n if n.startsWith("Mac")     => "mac"
+        case n if n.startsWith("Windows") => "win"
+        case _ => throw new Exception("Unknown platform!")
+      }
       Seq(
-        "--module-path",
-        javafxLib,
-        "--add-modules",
-        "javafx.controls,javafx.fxml",
-        "--add-exports",
-        "javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED",
-        "--add-exports",
-        "javafx.controls/com.sun.javafx.scene.control=ALL-UNNAMED",
-        "--add-exports",
-        "javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED",
-        "--add-exports",
-        "javafx.base/com.sun.javafx.binding=ALL-UNNAMED",
-        "--add-exports",
-        "javafx.base/com.sun.javafx.event=ALL-UNNAMED",
-        "--add-exports",
-        "javafx.graphics/com.sun.javafx.stage=ALL-UNNAMED"
-      )
-    }
+        "org.scalameta" %% "munit" % "1.0.0" % Test,
+        "org.scalactic" %% "scalactic" % "3.2.10",
+        "org.scalatest" %% "scalatest" % "3.2.10" % Test,
+        "org.scalatestplus" %% "mockito-3-4" % "3.2.9.0" % Test,
+        "org.jline" % "jline" % "3.27.1",
+        "org.scalafx" %% "scalafx" % "21.0.0-R32",
+        "org.scalafx" %% "scalafx-extras" % "0.10.1",
+        "com.google.inject" % "guice" % "5.1.0",
+        "net.codingwell" %% "scala-guice" % "7.0.0",
+        "org.playframework" %% "play-json" % "3.0.4",
+        "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
+        "com.spotify" % "docker-client" % "8.16.0"
+      ) ++ Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
+        .map(m => "org.openjfx" % s"javafx-$m" % "23" classifier osName)
+    },
+    fork := true
   )
