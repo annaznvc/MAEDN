@@ -1,8 +1,9 @@
 package de.htwg.se.MAEDN.aview
 
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.{State, Figure}
-import de.htwg.se.MAEDN.util.{Event, Observer}
+import de.htwg.se.MAEDN.model.{State, Figure, Player}
+import de.htwg.se.MAEDN.model.Manager // statt controller.Manager
+import de.htwg.se.MAEDN.util.{Event, Observer, Color}
 import de.htwg.se.MAEDN.controller.command._
 
 import scalafx.application.Platform
@@ -311,19 +312,257 @@ class ConfigController(controller: Controller) extends Observer {
 // ===========================
 // RunningView.fxml → GameController
 // ===========================
-class GameController(controller: Controller) {
+class GameController(controller: Controller) extends Observer {
+
+  // FXML UI Components
   @jfxf.FXML
   var gameBoard: javafx.scene.layout.GridPane = _
+  @jfxf.FXML
+  var currentPlayerLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  var turnIndicator: javafx.scene.shape.Circle = _
+  @jfxf.FXML
+  var diceResultLabel: javafx.scene.control.Label = _
+  @jfxf.FXML
+  var diceButton: javafx.scene.control.Button = _
+
+  // Start field GridPanes
+  @jfxf.FXML
+  var redStartFields: javafx.scene.layout.GridPane = _
+  @jfxf.FXML
+  var blueStartFields: javafx.scene.layout.GridPane = _
+  @jfxf.FXML
+  var greenStartFields: javafx.scene.layout.GridPane = _
+  @jfxf.FXML
+  var yellowStartFields: javafx.scene.layout.GridPane = _
+
+  // Goal path VBoxes
+  @jfxf.FXML
+  var redGoalPath: javafx.scene.layout.VBox = _
+  @jfxf.FXML
+  var blueGoalPath: javafx.scene.layout.VBox = _
+  @jfxf.FXML
+  var greenGoalPath: javafx.scene.layout.VBox = _
+  @jfxf.FXML
+  var yellowGoalPath: javafx.scene.layout.VBox = _
+
+  // Player status labels
+  @jfxf.FXML
+  var redPlayerStatus: javafx.scene.control.Label = _
+  @jfxf.FXML
+  var bluePlayerStatus: javafx.scene.control.Label = _
+  @jfxf.FXML
+  var greenPlayerStatus: javafx.scene.control.Label = _
+  @jfxf.FXML
+  var yellowPlayerStatus: javafx.scene.control.Label = _
+
+  private var isRegistered = false
 
   def initialize(): Unit = {
     println("GameController initialized")
-    val figures = controller.manager.players.flatMap(_.figures)
-    renderCrossBoard(gameBoard, controller.manager.board.size, figures)
+    if (!isRegistered) {
+      controller.add(this)
+      isRegistered = true
+    }
+    updateGameDisplay()
   }
 
+  private def updateGameDisplay(): Unit = {
+    Platform.runLater {
+      val manager = controller.manager
+      val figures = manager.players.flatMap(_.figures)
+      renderCrossBoard(gameBoard, manager.board.size, figures)
+      updateStartFields(manager.players)
+      updateGoalPaths(manager.players)
+      updatePlayerStatus(manager.players)
+      updateCurrentPlayerIndicator(manager)
+      updateDiceDisplay(manager.rolled)
+    }
+  }
+
+  // Beispiel für updateStartFields:
+  private def updateStartFields(players: List[Player]): Unit = {
+    val startFieldGridPanes: Map[Color, javafx.scene.layout.GridPane] = Map(
+      Color.RED -> redStartFields,
+      Color.BLUE -> blueStartFields,
+      Color.GREEN -> greenStartFields,
+      Color.YELLOW -> yellowStartFields
+    )
+    players.foreach { player =>
+      startFieldGridPanes.get(player.color.asInstanceOf[Color]).foreach {
+        gridPane =>
+          updatePlayerStartFields(gridPane, player)
+      }
+    }
+  }
+
+  private def updatePlayerStartFields(
+      gridPane: javafx.scene.layout.GridPane,
+      player: Player
+  ): Unit = {
+    gridPane.getChildren.clear()
+    val figureCount = player.figures.size
+    val gridSize = Math.ceil(Math.sqrt(figureCount)).toInt
+    for (i <- 0 until figureCount) {
+      val row = i / gridSize
+      val col = i % gridSize
+      val fieldStack = new javafx.scene.layout.StackPane()
+      fieldStack.setPrefSize(30, 30)
+      fieldStack.setStyle(
+        s"-fx-background-color: ${getPlayerLightColor(player.color)}; " +
+          s"-fx-border-color: ${getPlayerDarkColor(player.color)}; " +
+          "-fx-border-width: 1; -fx-background-radius: 5; -fx-border-radius: 5;"
+      )
+      val figureAtHome = player.figures.find { fig =>
+        fig.adjustedIndex(controller.manager.board.size) match {
+          case Position.Home(homeIndex) => homeIndex == i
+          case _                        => false
+        }
+      }
+      figureAtHome match {
+        case Some(figure) =>
+          val figureCircle = new scalafx.scene.shape.Circle {
+            radius = 10
+            fill =
+              scalafx.scene.paint.Color.web(getPlayerDarkColor(player.color))
+            stroke = scalafx.scene.paint.Color.White
+            strokeWidth = 1
+          }
+          figureCircle.onMouseClicked = _ => selectFigure(figure)
+          fieldStack.getChildren.add(figureCircle)
+        case None =>
+          val emptyIndicator = new scalafx.scene.shape.Circle {
+            radius = 6
+            fill = scalafx.scene.paint.Color.Transparent
+            stroke =
+              scalafx.scene.paint.Color.web(getPlayerDarkColor(player.color))
+            strokeWidth = 1
+            strokeType = scalafx.scene.shape.StrokeType.Inside
+          }
+          fieldStack.getChildren.add(emptyIndicator)
+      }
+      gridPane.add(fieldStack, col, row)
+    }
+  }
+
+  private def updateGoalPaths(players: List[Player]): Unit = {
+    players.foreach { player =>
+      val vbox = player.color match {
+        case Color.RED    => redGoalPath
+        case Color.BLUE   => blueGoalPath
+        case Color.GREEN  => greenGoalPath
+        case Color.YELLOW => yellowGoalPath
+      }
+      updatePlayerGoalPath(vbox, player)
+    }
+  }
+
+  private def updatePlayerGoalPath(
+      vbox: javafx.scene.layout.VBox,
+      player: Player
+  ): Unit = {
+    vbox.getChildren.clear()
+    val figureCount = player.figures.size
+    for (i <- 0 until figureCount) {
+      val fieldStack = new javafx.scene.layout.StackPane()
+      fieldStack.setPrefSize(35, 25)
+      fieldStack.setStyle(
+        s"-fx-background-color: ${getPlayerLightColor(player.color)}; " +
+          s"-fx-border-color: ${getPlayerDarkColor(player.color)}; " +
+          "-fx-border-width: 1; -fx-background-radius: 3; -fx-border-radius: 3;"
+      )
+      val figureAtGoal = player.figures.find { fig =>
+        fig.adjustedIndex(controller.manager.board.size) match {
+          case Position.Goal(goalIndex) => goalIndex == i
+          case _                        => false
+        }
+      }
+      figureAtGoal match {
+        case Some(figure) =>
+          val figureCircle = new scalafx.scene.shape.Circle {
+            radius = 8
+            fill =
+              scalafx.scene.paint.Color.web(getPlayerDarkColor(player.color))
+            stroke = scalafx.scene.paint.Color.White
+            strokeWidth = 1
+          }
+          fieldStack.getChildren.add(figureCircle)
+        case None =>
+          val emptyIndicator = new scalafx.scene.shape.Circle {
+            radius = 4
+            fill = scalafx.scene.paint.Color.Transparent
+            stroke =
+              scalafx.scene.paint.Color.web(getPlayerDarkColor(player.color))
+            strokeWidth = 1
+            strokeType = scalafx.scene.shape.StrokeType.Inside
+          }
+          fieldStack.getChildren.add(emptyIndicator)
+      }
+      vbox.getChildren.add(fieldStack)
+    }
+  }
+
+  private def updatePlayerStatus(players: List[Player]): Unit = {
+    players.foreach { player =>
+      val label = player.color match {
+        case Color.RED    => redPlayerStatus
+        case Color.BLUE   => bluePlayerStatus
+        case Color.GREEN  => greenPlayerStatus
+        case Color.YELLOW => yellowPlayerStatus
+      }
+      val figuresInGoal = player.figures.count { fig =>
+        fig.adjustedIndex(controller.manager.board.size) match {
+          case Position.Goal(_) => true
+          case _                => false
+        }
+      }
+      val totalFigures = player.figures.size
+      label.setText(s"$figuresInGoal/$totalFigures im Ziel")
+    }
+  }
+
+  private def updateCurrentPlayerIndicator(manager: Manager): Unit = {
+    val currentPlayer = manager.players(manager.getCurrentPlayer)
+    val playerColor = getPlayerDarkColor(currentPlayer.color)
+    val playerName = currentPlayer.color.toString.capitalize
+    if (currentPlayerLabel != null) {
+      currentPlayerLabel.setText(s"$playerName ist am Zug")
+    }
+    if (turnIndicator != null) {
+      turnIndicator.setFill(scalafx.scene.paint.Color.web(playerColor))
+    }
+  }
+
+  private def updateDiceDisplay(rolled: Int): Unit = {
+    if (diceResultLabel != null) {
+      diceResultLabel.setText(if (rolled > 0) rolled.toString else "---")
+    }
+  }
+
+  private def selectFigure(figure: Figure): Unit = {
+    println(s"Selected figure ${figure.id} of player ${figure.owner.color}")
+    // TODO: Update selected figure in controller/manager
+  }
+
+  private def getPlayerLightColor(color: Color): String = color match {
+    case Color.RED    => "#FFE4E1"
+    case Color.BLUE   => "#E0F6FF"
+    case Color.GREEN  => "#F0FFF0"
+    case Color.YELLOW => "#FFFACD"
+    case _            => "#FFFFFF"
+  }
+
+  private def getPlayerDarkColor(color: Color): String = color match {
+    case Color.RED    => "#FF6B6B"
+    case Color.BLUE   => "#4ECDC4"
+    case Color.GREEN  => "#95E1A3"
+    case Color.YELLOW => "#FFE66D"
+    case _            => "#000000"
+  }
+
+  // Board path generation (unchanged)
   private case class Pos(r: Int, c: Int)
 
-  // Erzeugt einen zentralen Kreuzpfad für beliebige size (8-12 empfohlen)
   private def generateCrossPath(size: Int, gridSize: Int = 13): Seq[Pos] = {
     val offset = (gridSize - size) / 2
     val normalizedSize = if (size % 2 == 1) size + 1 else size
@@ -331,7 +570,6 @@ class GameController(controller: Controller) {
     val path = scala.collection.mutable.ArrayBuffer.empty[Pos]
     val segmentFields = half - 1
 
-    // Die vier blanken Felder für size 9 und 11
     val blankFields: Set[Pos] = size match {
       case 9  => Set(Pos(6, 1), Pos(1, 6), Pos(6, 11), Pos(11, 6))
       case 11 => Set(Pos(6, 0), Pos(0, 6), Pos(6, 12), Pos(12, 6))
@@ -340,7 +578,6 @@ class GameController(controller: Controller) {
 
     def add(pos: Pos): Unit = if (!blankFields.contains(pos)) path += pos
 
-    // --- Teil 1: Start unten, nach oben, nach links, Ecke ---
     val startRow1 = (normalizedSize match {
       case 8  => 10
       case 10 => 11
@@ -414,28 +651,43 @@ class GameController(controller: Controller) {
   ): Unit = {
     val gridSize = 13
     grid.getChildren.clear()
-    // KEINE Constraints mehr setzen, das macht jetzt die FXML!
-
     val path = generateCrossPath(size, gridSize)
-
     for ((pos, idx) <- path.zipWithIndex) {
       val stack = new javafx.scene.layout.StackPane()
       stack.setPrefSize(32, 32)
       stack.setStyle(
         "-fx-background-color: #FFFACD; -fx-border-color: #8B4513;"
       )
-
-      // Figur auf diesem Feld?
       figures.find(_.adjustedIndex(size) == Position.Normal(idx)).foreach {
         fig =>
           val circle = new scalafx.scene.shape.Circle {
             radius = 12
-            fill = scalafx.scene.paint.Color.web(fig.owner.color.toString)
+            fill =
+              scalafx.scene.paint.Color.web(getPlayerDarkColor(fig.owner.color))
+            stroke = scalafx.scene.paint.Color.White
+            strokeWidth = 1
           }
+          circle.onMouseClicked = _ => selectFigure(fig)
           stack.getChildren.add(circle)
       }
-
       grid.add(stack, pos.c, pos.r)
+    }
+  }
+
+  override def processEvent(event: Event): Unit = {
+    println(s"GameController received event: $event")
+    event match {
+      case Event.PlayNextEvent(_) | Event.PlayDiceEvent(_) |
+          Event.MoveFigureEvent(_) =>
+        updateGameDisplay()
+      case _ =>
+    }
+  }
+
+  def cleanup(): Unit = {
+    if (isRegistered) {
+      controller.remove(this)
+      isRegistered = false
     }
   }
 
