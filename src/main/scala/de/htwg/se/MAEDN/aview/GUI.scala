@@ -326,82 +326,83 @@ class GameController(controller: Controller) {
   // Erzeugt einen zentralen Kreuzpfad für beliebige size (8-12 empfohlen)
   private def generateCrossPath(size: Int, gridSize: Int = 13): Seq[Pos] = {
     val offset = (gridSize - size) / 2
-    val half = size / 2
+    val normalizedSize = if (size % 2 == 1) size + 1 else size
+    val half = normalizedSize / 2
     val path = scala.collection.mutable.ArrayBuffer.empty[Pos]
+    val segmentFields = half - 1
+
+    // Die vier blanken Felder für size 9 und 11
+    val blankFields: Set[Pos] = size match {
+      case 9  => Set(Pos(6, 1), Pos(1, 6), Pos(6, 11), Pos(11, 6))
+      case 11 => Set(Pos(6, 0), Pos(0, 6), Pos(6, 12), Pos(12, 6))
+      case _  => Set.empty
+    }
+
+    def add(pos: Pos): Unit = if (!blankFields.contains(pos)) path += pos
 
     // --- Teil 1: Start unten, nach oben, nach links, Ecke ---
-    val startRow1 = (size match {
+    val startRow1 = (normalizedSize match {
       case 8  => 10
       case 10 => 11
       case 12 => 12
       case _ =>
-        throw new IllegalArgumentException("Nur size 8, 10, 12 erlaubt!")
+        throw new IllegalArgumentException(
+          "Nur size 8, 10, 12 (bzw. 9 wie 10, 11 wie 12) erlaubt!"
+        )
     })
     val startCol1 = 5
-    path += Pos(startRow1, startCol1)
-    for (i <- 1 until half) path += Pos(startRow1 - i, startCol1)
-    val leftRow1 = startRow1 - (half - 1)
-    for (i <- 1 to (half - 1)) path += Pos(leftRow1, startCol1 - i)
-    val cornerRow1 = leftRow1 - 1
-    val cornerCol1 = startCol1 - (half - 1)
-    path += Pos(cornerRow1, cornerCol1)
+    add(Pos(startRow1, startCol1))
+    for (i <- 1 to segmentFields) add(Pos(startRow1 - i, startCol1))
+    val leftRow1 = startRow1 - segmentFields
+    for (i <- 1 to segmentFields) add(Pos(leftRow1, startCol1 - i))
 
-    // --- Teil 2: Neues Startfeld (eine Zeile über letzter Ecke, gleiche Spalte) ---
+    // Verbindungsfeld/Ecke
+    val cornerRow1 = leftRow1 - 1
+    val cornerCol1 = startCol1 - segmentFields
+    add(Pos(cornerRow1, cornerCol1))
+
+    // --- Teil 2: Neues Startfeld ---
     val startRow2 = cornerRow1 - 1
     val startCol2 = cornerCol1
-    path += Pos(startRow2, startCol2)
-    for (i <- 1 to (half - 1)) path += Pos(startRow2, startCol2 + i)
-    val rightCol2 = startCol2 + (half - 1)
+    add(Pos(startRow2, startCol2))
+    for (i <- 1 to segmentFields) add(Pos(startRow2, startCol2 + i))
+    val rightCol2 = startCol2 + segmentFields
 
-    // --- Teil 3: Nach oben in derselben Spalte (negative Richtung!) ---
+    // --- Teil 3: Nach oben in derselben Spalte ---
     val startRow3 = startRow2
-    val startCol3 = rightCol2 // <- statt rightCol2 + 1
-    for (i <- 1 to (half - 1)) path += Pos(startRow3 - i, startCol3)
-    // --- Teil 4: Abschlussfeld, eine Spalte weiter rechts ---
-    path += Pos(startRow3 - (half - 1), startCol3 + 1)
+    val startCol3 = rightCol2
+    for (i <- 1 to segmentFields) add(Pos(startRow3 - i, startCol3))
 
-    // --- Teil 5: Neues Startfeld (gleiche Zeile wie Abschlussfeld, Spalte +1) ---
-    val startRow4 = startRow3 - (half - 1)
+    add(Pos(startRow3 - segmentFields, startCol3 + 1))
+
+    // --- Teil 4: Neues Startfeld ---
+    val startRow4 = startRow3 - segmentFields
     val startCol4 = startCol3 + 2
-    path += Pos(startRow4, startCol4) // <-- Das fehlte!
+    add(Pos(startRow4, startCol4))
+    for (i <- 1 to segmentFields) add(Pos(startRow4 + i, startCol4))
 
-    // Jetzt nach unten auffüllen (zunehmender Zeilenindex)
-    for (i <- 1 to (half - 1)) {
-      path += Pos(startRow4 + i, startCol4)
-    }
-
-    // --- Teil 6: Nach rechts auffüllen (gleiche Zeile, aufsteigender Spaltenindex) ---
-    val rightRow3 = startRow4 + (half - 1)
+    // --- Teil 5: Nach rechts auffüllen ---
+    val rightRow3 = startRow4 + segmentFields
     val rightCol3 = startCol4
-    for (i <- 1 to (half - 1)) {
-      path += Pos(rightRow3, rightCol3 + i)
-    }
+    for (i <- 1 to segmentFields) add(Pos(rightRow3, rightCol3 + i))
 
-    // --- Teil 7: Abschlussfeld, eine Zeile weiter unten ---
-    path += Pos(rightRow3 + 1, rightCol3 + (half - 1))
+    add(Pos(rightRow3 + 1, rightCol3 + segmentFields))
 
-    // --- Teil 8: Neues Startfeld (eine Zeile weiter unten, gleiche Spalte) ---
-    val startRow5 =
-      rightRow3 + 2 // +1 für Abschlussfeld, +1 für neues Startfeld
-    val startCol5 = rightCol3 + (half - 1)
-    path += Pos(startRow5, startCol5)
+    // --- Teil 6: Neues Startfeld ---
+    val startRow5 = rightRow3 + 2
+    val startCol5 = rightCol3 + segmentFields
+    add(Pos(startRow5, startCol5))
+    for (i <- 1 to segmentFields) add(Pos(startRow5, startCol5 - i))
 
-    // Nach links auffüllen (gleiche Zeile, abnehmender Spaltenindex)
-    for (i <- 1 to (half - 1)) {
-      path += Pos(startRow5, startCol5 - i)
-    }
-
-    // --- Teil 9: Nach unten auffüllen (gleiche Spalte, zunehmender Zeilenindex) ---
+    // --- Teil 7: Nach unten auffüllen ---
     val downStartRow = startRow5
-    val downCol = startCol5 - (half - 1)
-    for (i <- 1 to (half - 1)) {
-      path += Pos(downStartRow + i, downCol)
-    }
+    val downCol = startCol5 - segmentFields
+    for (i <- 1 to segmentFields) add(Pos(downStartRow + i, downCol))
 
-    // --- Teil 10: Nur einen Schritt nach links am Ende ---
-    val finalRow = downStartRow + (half - 1)
+    // --- Teil 8: Abschlussfeld nach links ---
+    val finalRow = downStartRow + segmentFields
     val finalColStart = downCol
-    path += Pos(finalRow, finalColStart - 1)
+    add(Pos(finalRow, finalColStart - 1))
 
     path.toSeq
   }
