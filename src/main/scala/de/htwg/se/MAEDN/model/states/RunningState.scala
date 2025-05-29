@@ -33,7 +33,7 @@ case class RunningState(
   override def playDice(): Try[Manager] = {
     val newRolled = Dice.roll()
     controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
-    Try(copy(rolled = newRolled))
+    Try(copy(rolled = newRolled, selectedFigure = getNextMovableFigure()))
   }
 
   override def playNext(): Try[Manager] = {
@@ -45,7 +45,8 @@ case class RunningState(
         Try(
           copy(
             moves = moves + 1,
-            rolled = 0
+            rolled = 0,
+            selectedFigure = getNextMovableFigure()
           )
         )
       }
@@ -70,7 +71,8 @@ case class RunningState(
       return Try(
         copy(
           rolled = 0,
-          moves = moves + 1
+          moves = moves + 1,
+          selectedFigure = getNextMovableFigure()
         )
       )
     }
@@ -114,4 +116,13 @@ case class RunningState(
         rolled
       )
     )
+
+  private def getNextMovableFigure(): Int = {
+    players(getCurrentPlayer).figures.zipWithIndex.find { case (figure, _) =>
+      board.canFigureMove(figure, players.flatMap(_.figures), rolled)
+    } match {
+      case Some((_, index)) => index
+      case None             => 0
+    }
+  }
 }

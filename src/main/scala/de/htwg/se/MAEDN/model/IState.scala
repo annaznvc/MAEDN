@@ -27,6 +27,7 @@ trait IState {
   def playNext(): Try[Manager]
   def moveFigure(): Try[Manager]
 
+  def getPlayers: List[Player]
   def getPlayerCount: Int
   def getFigureCount: Int
   def getBoardSize: Int

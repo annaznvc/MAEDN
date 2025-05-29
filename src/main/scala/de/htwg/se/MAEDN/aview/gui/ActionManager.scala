@@ -3,60 +3,77 @@ package de.htwg.se.MAEDN.aview.gui
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.controller.command._
 import javafx.event.ActionEvent
-import javafx.scene.input.{KeyCode, KeyEvent}
+import javafx.scene.input.{KeyCode}
+import javafx.scene.input.KeyEvent
+
+import javafx.fxml.FXML
 
 class ActionManager(controller: Controller) {
 
   // Method to handle GUI actions (buttons, menu items, etc.)
-  def executePlayNext(): Unit = {
+  @FXML
+  def onPlayNext(): Unit = {
     controller.executeCommand(PlayNextCommand(controller))
   }
 
-  def executeMoveUp(): Unit = {
+  @FXML
+  def onMoveUp(): Unit = {
     controller.executeCommand(MoveUpCommand(controller))
   }
 
-  def executeMoveDown(): Unit = {
+  @FXML
+  def onMoveDown(): Unit = {
     controller.executeCommand(MoveDownCommand(controller))
   }
 
-  def executeIncreaseFigures(): Unit = {
+  @FXML
+  def onIncreaseFigures(): Unit = {
     controller.executeCommand(IncreaseFiguresCommand(controller))
   }
 
-  def executeDecreaseFigures(): Unit = {
+  @FXML
+  def onDecreaseFigures(): Unit = {
     controller.executeCommand(DecreaseFiguresCommand(controller))
   }
 
-  def executeIncreaseBoardSize(): Unit = {
+  @FXML
+  def onIncreaseBoardSize(): Unit = {
     controller.executeCommand(IncreaseBoardSizeCommand(controller))
   }
 
-  def executeDecreaseBoardSize(): Unit = {
+  @FXML
+  def onDecreaseBoardSize(): Unit = {
     controller.executeCommand(DecreaseBoardSizeCommand(controller))
   }
 
-  def executeQuitGame(): Unit = {
+  @FXML
+  def onQuitGame(): Unit = {
     controller.executeCommand(QuitGameCommand(controller))
   }
 
-  def executeStartGame(): Unit = {
+  @FXML
+  def onStartGame(): Unit = {
     controller.executeCommand(StartGameCommand(controller))
   }
 
-  def executeUndo(): Unit = {
+  @FXML
+  def onUndo(): Unit = {
     controller.executeCommand(UndoCommand(controller))
   }
 
-  def executeRedo(): Unit = {
+  @FXML
+  def onRedo(): Unit = {
     controller.executeCommand(RedoCommand(controller))
   }
-  def executeBackToMenu(): Unit = {
+
+  @FXML
+  def onBackToMenu(): Unit = {
     // Use QuitGameCommand to go back to menu (based on ConfigState.quitGame implementation)
     controller.executeCommand(QuitGameCommand(controller))
   }
 
-  def executeOpenConfiguration(): Unit = {
+  @FXML
+  def onOpenConfiguration(): Unit = {
     // Use StartGameCommand to go to config (based on MenuState.startGame implementation)
     controller.executeCommand(StartGameCommand(controller))
   }
@@ -64,39 +81,19 @@ class ActionManager(controller: Controller) {
   // Handle keyboard shortcuts
   def handleKeyEvent(event: KeyEvent): Unit = {
     event.getCode match {
-      case KeyCode.X => executePlayNext()
-      case KeyCode.W => executeMoveUp()
-      case KeyCode.S => executeMoveDown()
-      case KeyCode.E => executeIncreaseFigures()
-      case KeyCode.D => executeDecreaseFigures()
-      case KeyCode.R => executeIncreaseBoardSize()
-      case KeyCode.F => executeDecreaseBoardSize()
-      case KeyCode.Q => executeQuitGame()
-      case KeyCode.N => executeStartGame()
-      case KeyCode.U => executeUndo()
-      case KeyCode.I => executeRedo()
+      case KeyCode.X => onPlayNext()
+      case KeyCode.W => onMoveUp()
+      case KeyCode.S => onMoveDown()
+      case KeyCode.E => onIncreaseFigures()
+      case KeyCode.D => onDecreaseFigures()
+      case KeyCode.R => onIncreaseBoardSize()
+      case KeyCode.F => onDecreaseBoardSize()
+      case KeyCode.Q => onQuitGame()
+      case KeyCode.N => onStartGame()
+      case KeyCode.U => onUndo()
+      case KeyCode.I => onRedo()
       case _         => // No action for other keys
     }
     event.consume()
-  }
-
-  // Handle action events from buttons
-  def handleActionEvent(action: String): Unit = {
-    action.toLowerCase match {
-      case "playnext"          => executePlayNext()
-      case "moveup"            => executeMoveUp()
-      case "movedown"          => executeMoveDown()
-      case "increasefigures"   => executeIncreaseFigures()
-      case "decreasefigures"   => executeDecreaseFigures()
-      case "increaseboardsize" => executeIncreaseBoardSize()
-      case "decreaseboardsize" => executeDecreaseBoardSize()
-      case "quitgame"          => executeQuitGame()
-      case "startgame"         => executeStartGame()
-      case "undo"              => executeUndo()
-      case "redo"              => executeRedo()
-      case "backtomenu"        => executeBackToMenu()
-      case "openconfiguration" => executeOpenConfiguration()
-      case _                   => // No action for unknown commands
-    }
   }
 }

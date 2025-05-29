@@ -47,7 +47,14 @@ case class ConfigState(
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newFigureCount = Math.min(board.size, players.head.figures.size + 1)
     val newPlayers = players.map(player =>
-      player.copy(figures = List.fill(newFigureCount)(player.figures.head))
+      player.copy(figures =
+        (0 until newFigureCount)
+          .map(i =>
+            player.figures.head
+              .copy(id = i, figureCount = newFigureCount, index = -1)
+          )
+          .toList
+      )
     )
     copy(players = newPlayers)
   }
@@ -56,7 +63,11 @@ case class ConfigState(
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newFigureCount = Math.max(1, players.head.figures.size - 1)
     val newPlayers = players.map(player =>
-      player.copy(figures = List.fill(newFigureCount)(player.figures.head))
+      player.copy(figures =
+        player.figures
+          .take(newFigureCount)
+          .map(_.copy(figureCount = newFigureCount))
+      )
     )
     copy(players = newPlayers)
   }

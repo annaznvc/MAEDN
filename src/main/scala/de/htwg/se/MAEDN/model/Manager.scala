@@ -32,6 +32,7 @@ trait Manager extends IState with IOriginator {
   def getFigureCount: Int = players.head.figures.size
   def getBoardSize: Int = board.size
   def getCurrentPlayer: Int = moves % players.size
+  def getPlayers: List[Player] = players
 }
 
 object Manager {
