@@ -10,7 +10,12 @@ class KickFigureStrategy extends IMoveStrategy {
       rolled: Int
   ): List[Figure] = {
     figures.map { f =>
-      if (f.checkForCollision(figure, size) == Collision.EnemyCollision) {
+      if (
+        figure.checkForCollision(
+          f,
+          size
+        ) == Collision.EnemyCollision && f.isOnBoard && f.owner != figure.owner
+      ) {
         // Move the enemy figure back to home
         f.copy(index = -1)
       } else {

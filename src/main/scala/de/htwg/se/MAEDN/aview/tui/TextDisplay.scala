@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import de.htwg.se.MAEDN.model.{Board, Figure, IState}
 import de.htwg.se.MAEDN.model.states.RunningState

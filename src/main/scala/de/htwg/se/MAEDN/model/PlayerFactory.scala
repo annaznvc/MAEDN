@@ -12,7 +12,9 @@ object PlayerFactory {
         val id = idx + 1
         val player = Player(id, Nil, color)
         val figs =
-          (1 to figuresPerPlayer).map(i => Figure(i, player, -1)).toList
+          (1 to figuresPerPlayer)
+            .map(i => Figure(i, player, -1, figuresPerPlayer))
+            .toList
         player.copy(figures = figs)
       }
       .toList

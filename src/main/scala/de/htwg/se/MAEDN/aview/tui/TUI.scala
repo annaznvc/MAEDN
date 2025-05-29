@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.jline.terminal.{TerminalBuilder, Terminal}
 import scala.io.AnsiColor.{RED, RESET}

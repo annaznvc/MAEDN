@@ -36,7 +36,14 @@ class NormalMoveStrategy extends IMoveStrategy {
             figure.newAdjustedIndex(size, rolled)
           ) == Collision.OwnCollision
         )
-      case Position.Goal(steps) => steps < figures.size / 4
+      case Position.Goal(_) =>
+        !figures.exists(f =>
+          f.checkForPossibleCollision(
+            figure,
+            size,
+            figure.newAdjustedIndex(size, rolled)
+          ) == Collision.OwnCollision
+        )
       case Position.OffBoard(_) => false
       case Position.Home(_)     => false
     }

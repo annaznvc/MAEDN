@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <style>
+      -fx-background-color: linear-gradient(to bottom right, #f4e4bc, #e8d5a3);
+    </style>
+
+    <!-- Kompakter Header -->
+    <top>
+        <HBox alignment="CENTER" spacing="20">
+            <padding>
+                <Insets bottom="10" left="20" right="20" top="10" />
+            </padding>
+
+            <!-- Titel -->
+            <Label text="Mensch ärgere dich nicht">
+                <font>
+                    <Font name="Serif Bold" size="24" />
+                </font>
+                <style>
+               -fx-text-fill: #8B4513;
+                </style>
+            </Label>
+
+            <!-- Aktueller Spieler -->
+            <HBox fx:id="currentPlayerHBox" alignment="CENTER" spacing="10">
+                <style>
+               -fx-background-color: #FFF8DC;
+               -fx-background-radius: 15;
+               -fx-border-color: #CD853F;
+               -fx-border-radius: 15;
+               -fx-border-width: 1;
+               -fx-padding: 5 15 5 15;
+                </style>
+
+                <Circle fx:id="turnIndicator" fill="#FF6B6B" radius="6" />
+                <Label fx:id="currentPlayerLabel" text="Rot ist am Zug">
+                    <font>
+                        <Font name="Serif Bold" size="14" />
+                    </font>
+                    <style>
+                  -fx-text-fill: #8B4513;
+                    </style>
+                </Label>
+            </HBox>
+
+            <!-- Würfel mit Ergebnis -->
+            <HBox alignment="CENTER" spacing="10">
+                <VBox alignment="CENTER" spacing="5">
+                    <Button fx:id="rollDiceButton" onAction="#onPlayNext" prefHeight="55.0" prefWidth="70.0" text="🎲">
+                        <font>
+                            <Font size="24" />
+                        </font>
+                        <style>
+                         -fx-background-color: #FFFACD;
+                         -fx-background-radius: 8;
+                         -fx-border-color: #8B4513;
+                         -fx-border-radius: 8;
+                         -fx-border-width: 2;
+                        </style>
+                  <VBox.margin>
+                     <Insets top="10.0" />
+                  </VBox.margin>
+                  <padding>
+                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  </padding>
+                    </Button>
+                    <Label text="Würfeln">
+                        <font>
+                            <Font name="Serif" size="10" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                </VBox>
+
+                <!-- Würfelergebnis -->
+                <VBox alignment="CENTER" spacing="5">
+                    <Label fx:id="diceResultLabel" alignment="CENTER" prefHeight="55.0" prefWidth="70.0" text="---" textAlignment="CENTER" textOverrun="CENTER_WORD_ELLIPSIS">
+                        <font>
+                            <Font name="Serif Bold" size="28" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #FF6B6B;
+                     -fx-background-color: #FFFACD;
+                     -fx-background-radius: 8;
+                     -fx-border-color: #8B4513;
+                     -fx-border-radius: 8;
+                     -fx-border-width: 2;
+                     -fx-padding: 8 12 8 12;
+                        </style>
+                  <VBox.margin>
+                     <Insets top="10.0" />
+                  </VBox.margin>
+                  <padding>
+                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                  </padding>
+                    </Label>
+                    <Label text="Ergebnis">
+                        <font>
+                            <Font name="Serif" size="10" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                </VBox>
+            </HBox>
+        </HBox>
+    </top>
+
+    <!-- Hauptspielbereich -->
+    <center>
+        <HBox alignment="CENTER" fillHeight="true" spacing="15">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="10" />
+            </padding>
+
+            <!-- Linke Seite: Start-Felder -->
+            <VBox alignment="TOP_CENTER" prefWidth="180" spacing="20">
+
+                <!-- Rote Start-Felder -->
+                <VBox fx:id="redStartVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #FFE4E1;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #FF6B6B;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🏠 Rot Start">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <!-- Start-Felder als Grid für Figuren -->
+                    <GridPane fx:id="redStartGridPane" alignment="CENTER" hgap="3" vgap="3">
+                        <!-- Dynamisch gefüllt - jedes Feld kann eine Spielfigur enthalten -->
+                    </GridPane>
+                </VBox>
+
+                <!-- Blaue Start-Felder -->
+                <VBox fx:id="blueStartVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #E0F6FF;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #4ECDC4;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🏠 Blau Start">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <GridPane fx:id="blueStartGridPane" alignment="CENTER" hgap="3" vgap="3">
+                        <!-- Dynamisch gefüllt - jedes Feld kann eine Spielfigur enthalten -->
+                    </GridPane>
+                </VBox>
+
+                <!-- Grüne Start-Felder -->
+                <VBox fx:id="greenStartVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #F0FFF0;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #95E1A3;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🏠 Grün Start">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <GridPane fx:id="greenStartGridPane" alignment="CENTER" hgap="3" vgap="3">
+                        <!-- Dynamisch gefüllt - jedes Feld kann eine Spielfigur enthalten -->
+                    </GridPane>
+                </VBox>
+
+                <!-- Gelbe Start-Felder -->
+                <VBox fx:id="yellowStartVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #FFFACD;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #FFE66D;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🏠 Gelb Start">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+
+                    <GridPane fx:id="yellowStartGridPane" alignment="CENTER" hgap="3" vgap="3">
+                        <!-- Dynamisch gefüllt - jedes Feld kann eine Spielfigur enthalten -->
+                    </GridPane>
+                </VBox>
+            </VBox>
+
+            <!-- Mitte: Hauptspielfeld -->
+            <StackPane fx:id="girdHolderStackPane" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                <style>
+              -fx-background-color: #FFF8DC;
+              -fx-background-radius: 15;
+              -fx-border-color: #8B4513;
+              -fx-border-radius: 15;
+              -fx-border-width: 4;
+              -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 8, 0, 0, 8);
+                </style>
+   
+                <!-- Hauptspielfeld Grid - nimmt maximalen verfügbaren Platz ein -->
+                <GridPane fx:id="gameBoardGridPane" alignment="CENTER" maxHeight="Infinity" maxWidth="Infinity">
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+   
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                        <ColumnConstraints percentWidth="7.7" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                        <RowConstraints percentHeight="7.7" />
+                    </rowConstraints>
+                </GridPane>
+            </StackPane>
+
+            <!-- Rechte Seite: Ziel-Pfade -->
+            <VBox alignment="TOP_CENTER" prefWidth="180" spacing="20">
+
+                <!-- Roter Ziel-Pfad -->
+                <VBox fx:id="redGoalVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #FFE4E1;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #FF6B6B;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🎯 Rot Ziel">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+               <GridPane fx:id="redGoalGridPane" alignment="CENTER" hgap="3" vgap="3" />
+                </VBox>
+
+                <!-- Blauer Ziel-Pfad -->
+                <VBox fx:id="blueGoalVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #E0F6FF;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #4ECDC4;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🎯 Blau Ziel">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+               <GridPane fx:id="blueGoalGridPane" alignment="CENTER" hgap="3" vgap="3" />
+                </VBox>
+
+                <!-- Grüner Ziel-Pfad -->
+                <VBox fx:id="greenGoalVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #F0FFF0;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #95E1A3;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🎯 Grün Ziel">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+               <GridPane fx:id="greenGoalGridPane" alignment="CENTER" hgap="3" vgap="3" />
+                </VBox>
+
+                <!-- Gelber Ziel-Pfad -->
+                <VBox fx:id="yellowGoalVBox" alignment="CENTER" spacing="8">
+                    <style>
+                  -fx-background-color: #FFFACD;
+                  -fx-background-radius: 10;
+                  -fx-border-color: #FFE66D;
+                  -fx-border-radius: 10;
+                  -fx-border-width: 2;
+                  -fx-padding: 12;
+                    </style>
+
+                    <Label text="🎯 Gelb Ziel">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                     -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+               <GridPane fx:id="yellowGoalGridPane" alignment="CENTER" hgap="3" vgap="3" />
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- Kompakte Spielerinformation unten -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="20">
+            <padding>
+                <Insets bottom="15" left="20" right="20" top="10" />
+            </padding>
+
+            <style>
+          -fx-background-color: #FFF8DC;
+          -fx-background-radius: 15;
+          -fx-border-color: #CD853F;
+          -fx-border-radius: 15;
+          -fx-border-width: 2;
+          -fx-padding: 10;
+            </style>
+
+            <!-- Spieler 1 - Rot -->
+            <HBox fx:id="redStatusHBox" alignment="CENTER" spacing="8">
+                <Circle fill="#FF6B6B" radius="12" />
+                <VBox>
+                    <Label text="Spieler 1">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                    <Label fx:id="redPlayerStatusLabel" text="0/4 im Ziel">
+                        <font>
+                            <Font name="Serif Italic" size="10" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #A0522D;
+                        </style>
+                    </Label>
+                </VBox>
+            </HBox>
+
+            <!-- Spieler 2 - Blau -->
+            <HBox fx:id="blueStatusHBox" alignment="CENTER" spacing="8">
+                <Circle fill="#4ECDC4" radius="12" />
+                <VBox>
+                    <Label text="Spieler 2">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                    <Label fx:id="bluePlayerStatusLabel" text="0/4 im Ziel">
+                        <font>
+                            <Font name="Serif Italic" size="10" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #A0522D;
+                        </style>
+                    </Label>
+                </VBox>
+            </HBox>
+
+            <!-- Spieler 3 - Grün -->
+            <HBox fx:id="greenStatusHBox" alignment="CENTER" spacing="8">
+                <Circle fill="#95E1A3" radius="12" />
+                <VBox>
+                    <Label text="Spieler 3">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                    <Label fx:id="greenPlayerStatusLabel" text="0/4 im Ziel">
+                        <font>
+                            <Font name="Serif Italic" size="10" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #A0522D;
+                        </style>
+                    </Label>
+                </VBox>
+            </HBox>
+
+            <!-- Spieler 4 - Gelb -->
+            <HBox fx:id="yellowStatusHBox" alignment="CENTER" spacing="8">
+                <Circle fill="#FFE66D" radius="12" />
+                <VBox>
+                    <Label text="Spieler 4">
+                        <font>
+                            <Font name="Serif Bold" size="12" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #8B4513;
+                        </style>
+                    </Label>
+                    <Label fx:id="yellowPlayerStatusLabel" text="0/4 im Ziel">
+                        <font>
+                            <Font name="Serif Italic" size="10" />
+                        </font>
+                        <style>
+                      -fx-text-fill: #A0522D;
+                        </style>
+                    </Label>
+                </VBox>
+            </HBox>
+        </HBox>
+    </bottom>
+</BorderPane>

@@ -28,7 +28,9 @@ case class Board(
           rolled
         ) // Move to board
       return KickFigureStrategy.moveFigure(
-        newFigureList.find(_.owner == figure.owner).get,
+        newFigureList
+          .find(f => f.id == figure.id && f.owner.id == figure.owner.id)
+          .get,
         newFigureList,
         size,
         rolled
@@ -37,7 +39,9 @@ case class Board(
       val newFigureList =
         moveStrategy.moveFigure(figure, figures, size, rolled) // Move on board
       return KickFigureStrategy.moveFigure(
-        newFigureList.find(_.owner == figure.owner).get,
+        newFigureList
+          .find(f => f.id == figure.id && f.owner.id == figure.owner.id)
+          .get,
         newFigureList,
         size,
         rolled
@@ -57,6 +61,18 @@ case class Board(
       } else {
         moveStrategy.canMove(figure, figures, size, rolled)
       }
+    }
+  }
+
+  def canFigureMove(
+      figure: Figure,
+      figures: List[Figure],
+      rolled: Int
+  ): Boolean = {
+    if (!figure.isOnBoard) {
+      toBoardStrategy.canMove(figure, figures, size, rolled)
+    } else {
+      moveStrategy.canMove(figure, figures, size, rolled)
     }
   }
 }
