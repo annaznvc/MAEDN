@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -11,6 +11,8 @@ import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.model.Board
+import de.htwg.se.MAEDN.aview.tui.InputManager
+import de.htwg.se.MAEDN.aview.tui.TextDisplay
 
 class InputManagerSpec extends AnyWordSpec with Matchers {
 

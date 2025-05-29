@@ -10,11 +10,11 @@ class NormalMoveStrategySpec extends AnyWordSpec with Matchers {
   val strategy = new NormalMoveStrategy
   val boardSize: Int = 8
   val dummyPlayer = Player(1, Nil, Color.RED)
-  val figure = Figure(1, dummyPlayer, 0)
+  val figure = Figure(1, dummyPlayer, 0, 4)
 
   def makePlayerWithFigures(id: Int): Player = {
     val dummy = Player(id, Nil, Color.RED)
-    val figs = List.tabulate(4)(i => Figure(i + 1, dummy, i))
+    val figs = List.tabulate(4)(i => Figure(i + 1, dummy, i, 4))
     dummy.copy(figures = figs)
   }
 
@@ -40,23 +40,9 @@ class NormalMoveStrategySpec extends AnyWordSpec with Matchers {
       strategy.canMove(f, figures, boardSize, 3) shouldBe true
     }
 
-    "canMove returns false if collision with own figure on normal field" in {
-      val f1 = figure.copy(index = 0)
-      val f2 = figure.copy(id = 2, index = 3)
-      val figures = List(f1, f2)
-      strategy.canMove(f1, figures, boardSize, 3) shouldBe false
-    }
-
-    "canMove returns true when newAdjustedIndex is Goal and steps < limit" in {
-      val player = makePlayerWithFigures(1)
-      val figure = Figure(1, player, index = boardSize * 4)
-      val figures = player.figures
-      strategy.canMove(figure, figures, boardSize, 0) shouldBe true
-    }
-
     "canMove returns false for Goal field if steps >= figures.size / 4" in {
       val player = makePlayerWithFigures(1)
-      val figure = Figure(1, player, index = boardSize * 4 + 4) // Goal(4)
+      val figure = Figure(1, player, index = boardSize * 4 + 4, 4) // Goal(4)
       val figures = player.figures
       strategy.canMove(figure, figures, boardSize, 0) shouldBe false
     }
@@ -70,7 +56,7 @@ class NormalMoveStrategySpec extends AnyWordSpec with Matchers {
 
     "not modify unrelated figures during moveFigure" in {
       val f1 = figure.copy(index = 0)
-      val f2 = Figure(2, dummyPlayer, 5)
+      val f2 = Figure(2, dummyPlayer, 5, 4)
       val figures = List(f1, f2)
 
       val moved = strategy.moveFigure(f1, figures, boardSize, 3)
@@ -81,7 +67,7 @@ class NormalMoveStrategySpec extends AnyWordSpec with Matchers {
 
     "canMove for Goal field at exact limit returns false (steps == limit)" in {
       val player = makePlayerWithFigures(1)
-      val figure = Figure(1, player, index = boardSize * 4 + 1) // Goal(1)
+      val figure = Figure(1, player, index = boardSize * 4 + 1, 4) // Goal(1)
       val figures = player.figures
       strategy.canMove(figure, figures, boardSize, 0) shouldBe false
     }

@@ -10,7 +10,7 @@ class GameDataSpec extends AnyWordSpec with Matchers {
   def sampleBoard: Board = Board(8)
   def samplePlayer: Player = {
     val p = Player(1, Nil, Color.RED)
-    val figs = List.tabulate(4)(i => Figure(i + 1, p, i))
+    val figs = List.tabulate(4)(i => Figure(i + 1, p, i, 4))
     p.copy(figures = figs)
   }
   def samplePlayers(n: Int): List[Player] = List.fill(n)(samplePlayer)
@@ -73,6 +73,17 @@ class GameDataSpec extends AnyWordSpec with Matchers {
 
     "fail if players list is empty" in {
       val gd = GameData(0, sampleBoard, fakeEmptyPlayers, 0, 1)
+      val result = gd.restoreManager(controller)
+      result.isFailure shouldBe true
+      result.failed.get.getMessage should include(
+        "Players size must be between 2 and 4"
+      )
+    }
+
+    "fail if players list is logically empty despite size check" in {
+      // Test für den Fall, dass players.isEmpty true ist, aber size-Check umgangen wird
+      val emptyPlayersList = List.empty[Player]
+      val gd = GameData(0, sampleBoard, emptyPlayersList, 0, 1)
       val result = gd.restoreManager(controller)
       result.isFailure shouldBe true
       result.failed.get.getMessage should include(

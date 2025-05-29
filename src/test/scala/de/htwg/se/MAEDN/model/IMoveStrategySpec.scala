@@ -14,7 +14,7 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val strategy = new NormalMoveStrategy
       val size = 4
       val goalCount = 4
-      val fig = Figure(0, player, index = 13) // 16 - 4 = 12 → true
+      val fig = Figure(0, player, index = 13, 4) // <--- figureCount ergänzt!
 
       strategy.isOnGoal(fig, goalCount, size) shouldBe true
     }
@@ -23,7 +23,7 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val strategy = new NormalMoveStrategy
       val size = 4
       val goalCount = 4
-      val fig = Figure(0, player, index = 10)
+      val fig = Figure(0, player, index = 10, 4) // <--- figureCount ergänzt!
 
       strategy.isOnGoal(fig, goalCount, size) shouldBe false
     }
@@ -32,8 +32,8 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
   "collidingFigure (from IMoveStrategy)" should {
     "find another figure on the same adjusted position" in {
       val strategy = new NormalMoveStrategy
-      val fig1 = Figure(0, player, index = 3)
-      val fig2 = Figure(1, player, index = 3)
+      val fig1 = Figure(0, player, index = 3, 4)
+      val fig2 = Figure(1, player, index = 3, 4)
       val figures = List(fig1, fig2)
 
       strategy.collidingFigure(fig1, figures, size = 4) shouldBe Some(fig2)
@@ -41,8 +41,8 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
 
     "return None if no collision" in {
       val strategy = new NormalMoveStrategy
-      val fig1 = Figure(0, player, index = 3)
-      val fig2 = Figure(1, player, index = 7)
+      val fig1 = Figure(0, player, index = 3, 4)
+      val fig2 = Figure(1, player, index = 7, 4)
       val figures = List(fig1, fig2)
 
       strategy.collidingFigure(fig1, figures, size = 4) shouldBe None
@@ -55,7 +55,12 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val strategy = new NormalMoveStrategy
       val size = 4
       val goalCount = 4
-      val fig = Figure(0, player, index = size * 4 - 1) // = 15
+      val fig = Figure(
+        0,
+        player,
+        index = size * 4 - 1,
+        4
+      ) // <--- figureCount ergänzt! // = 15
 
       strategy.isOnLastPossibleField(
         fig,
@@ -71,10 +76,10 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val goalCount = 4
       val goalStart = size * 4 - size // = 12
 
-      val fig0 = Figure(0, player, index = goalStart + 0)
-      val fig1 = Figure(1, player, index = goalStart + 1)
-      val fig2 = Figure(2, player, index = goalStart + 2)
-      val fig3 = Figure(3, player, index = goalStart + 3)
+      val fig0 = Figure(0, player, index = goalStart + 0, 4)
+      val fig1 = Figure(1, player, index = goalStart + 1, 4)
+      val fig2 = Figure(2, player, index = goalStart + 2, 4)
+      val fig3 = Figure(3, player, index = goalStart + 3, 4)
 
       val figures = List(fig0, fig1, fig2, fig3)
 
@@ -90,7 +95,7 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val strategy = new NormalMoveStrategy
       val size = 4
       val goalCount = 4
-      val fig = Figure(0, player, index = 10)
+      val fig = Figure(0, player, index = 10, 4)
 
       strategy.isOnLastPossibleField(
         fig,
@@ -106,10 +111,11 @@ class IMoveStrategySpec extends AnyWordSpec with Matchers {
       val goalCount = 4
       val goalStart = size * 4 - size // = 12
 
-      val fig0 = Figure(0, player, index = goalStart + 0) // 12
+      val fig0 = Figure(0, player, index = goalStart + 0, 4) // 12
       // Lücke bei 13
-      val fig2 = Figure(1, player, index = goalStart + 2) // 14
-      val fig3 = Figure(2, player, index = goalStart + 3) // 15 – wird getestet
+      val fig2 = Figure(1, player, index = goalStart + 2, 4) // 14
+      val fig3 =
+        Figure(2, player, index = goalStart + 3, 4) // 15 – wird getestet
 
       // ❗ fig3 darf nicht auf 15 (lastFieldIndex)! Sonst greift: index == 15 ⇒ true
       val testFig = fig3.copy(index =

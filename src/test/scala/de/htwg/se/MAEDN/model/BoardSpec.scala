@@ -71,7 +71,7 @@ class BoardSpec extends AnyWordSpec with Matchers {
   "Board" should {
     "use moveStrategy and KickFigureStrategy if figure is on board" in {
       val redPlayer = Player(1, Nil, Color.RED)
-      val movedFigure = Figure(0, redPlayer, 6) // ← moved result
+      val movedFigure = Figure(0, redPlayer, 6, 4) // ← moved result
 
       val moveStrategy = new DummyStrategy(moves = List(movedFigure))
       val kickStrategy =
@@ -84,7 +84,7 @@ class BoardSpec extends AnyWordSpec with Matchers {
         kickFigureStrategy = kickStrategy
       )
 
-      val startFigure = Figure(0, redPlayer, 0)
+      val startFigure = Figure(0, redPlayer, 0, 4)
 
       val result = board.moveFigure(startFigure, List(startFigure), rolled = 6)
 
@@ -95,7 +95,7 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
     "call moveStrategy.canMove for on-board figure in checkIfMoveIsPossible" in {
       val redPlayer = Player(1, Nil, Color.RED)
-      val figure = Figure(0, redPlayer, 0) // index = 0 → isOnBoard = true
+      val figure = Figure(0, redPlayer, 0, 4) // index = 0 → isOnBoard = true
 
       val moveStrategy = new DummyStrategy(canMoveReturn = true)
       val board = Board(
@@ -107,6 +107,24 @@ class BoardSpec extends AnyWordSpec with Matchers {
 
       val result =
         board.checkIfMoveIsPossible(List(figure), rolled = 1, color = Color.RED)
+
+      moveStrategy.canMoveCalled shouldBe true
+      result shouldBe true
+    }
+
+    "call moveStrategy.canMove for on-board figure in canFigureMove" in {
+      val redPlayer = Player(1, Nil, Color.RED)
+      val figure = Figure(0, redPlayer, 0, 4) // index = 0 → isOnBoard = true
+
+      val moveStrategy = new DummyStrategy(canMoveReturn = true)
+      val board = Board(
+        size = 4,
+        moveStrategy = moveStrategy,
+        toBoardStrategy = new DummyStrategy(),
+        kickFigureStrategy = new DummyStrategy()
+      )
+
+      val result = board.canFigureMove(figure, List(figure), rolled = 1)
 
       moveStrategy.canMoveCalled shouldBe true
       result shouldBe true

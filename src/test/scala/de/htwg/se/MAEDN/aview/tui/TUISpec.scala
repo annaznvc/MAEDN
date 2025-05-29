@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -7,6 +7,7 @@ import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.model.states._
 import de.htwg.se.MAEDN.util.Color
 import de.htwg.se.MAEDN.model.{Board, PlayerFactory}
+import de.htwg.se.MAEDN.aview.tui.TUI
 
 class TUISpec extends AnyWordSpec with Matchers {
 

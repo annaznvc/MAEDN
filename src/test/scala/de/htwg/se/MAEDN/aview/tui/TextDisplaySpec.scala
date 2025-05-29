@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -7,7 +7,7 @@ import de.htwg.se.MAEDN.model.states._
 import de.htwg.se.MAEDN.util._
 import de.htwg.se.MAEDN.controller._
 import de.htwg.se.MAEDN.util.Color
-import de.htwg.se.MAEDN.aview.TextDisplay
+import de.htwg.se.MAEDN.aview.tui.TextDisplay
 import scala.io.AnsiColor
 import de.htwg.se.MAEDN.model.PlayerFactory
 import de.htwg.se.MAEDN.model.Board
@@ -111,8 +111,8 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val player1 = Player(1, Nil, Color.RED)
       val player2 = Player(2, Nil, Color.BLUE)
 
-      val figures1 = List.tabulate(4)(i => Figure(i, player1, -1)) // Home
-      val figures2 = List.tabulate(4)(i => Figure(i, player2, -1)) // Home
+      val figures1 = List.tabulate(4)(i => Figure(i, player1, -1, 4)) // Home
+      val figures2 = List.tabulate(4)(i => Figure(i, player2, -1, 4)) // Home
 
       val red = Player(1, figures1, Color.RED)
       val blue = Player(2, figures2, Color.BLUE)
@@ -138,7 +138,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val player = Player(1, Nil, Color.RED)
 
-      val figure = Figure(1, player, 0) // index 0 → Normal(0)
+      val figure = Figure(1, player, 0, 4) // index 0 → Normal(0)
       val red = Player(1, List(figure), Color.RED)
 
       val board = Board(boardSize)
@@ -159,8 +159,8 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val dummyPlayer = Player(1, Nil, Color.RED)
 
-      val f0 = Figure(0, dummyPlayer, -1)
-      val f1 = Figure(1, dummyPlayer, boardSize * 4 + 1)
+      val f0 = Figure(0, dummyPlayer, -1, 4)
+      val f1 = Figure(1, dummyPlayer, boardSize * 4 + 1, 4)
       val red = Player(1, List(f0, f1), Color.RED)
       val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
 
@@ -180,7 +180,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     "render unselected figure on main track as plain F{id}" in {
       val boardSize = 4
       val player = Player(1, Nil, Color.RED)
-      val figure = Figure(2, player, 0) // index 0 → Position.Normal(0)
+      val figure = Figure(2, player, 0, 4) // index 0 → Position.Normal(0)
       val red = player.copy(figures = List(figure))
 
       val board = Board(boardSize)
@@ -202,8 +202,8 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val dummyPlayer = Player(1, Nil, Color.RED)
 
-      val f0 = Figure(1, dummyPlayer, boardSize * 4)
-      val f1 = Figure(2, dummyPlayer, -1)
+      val f0 = Figure(1, dummyPlayer, boardSize * 4, 4)
+      val f1 = Figure(2, dummyPlayer, -1, 4)
       val red = Player(1, List(f0, f1), Color.RED)
       val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
 
@@ -228,7 +228,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
 
         val whitePlayer = Player(
           id = 5,
-          figures = List(Figure(1, null, -1)), // Dummy
+          figures = List(Figure(1, null, -1, 4)), // Dummy
           color = Color.WHITE
         )
 
