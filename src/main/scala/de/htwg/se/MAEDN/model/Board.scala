@@ -11,7 +11,7 @@ case class Board(
     size: Int = 8,
     moveStrategy: IMoveStrategy,
     toBoardStrategy: IMoveStrategy,
-    KickFigureStrategy: IMoveStrategy
+    kickFigureStrategy: IMoveStrategy
 ) {
 
   def moveFigure(
@@ -19,34 +19,19 @@ case class Board(
       figures: List[Figure],
       rolled: Int
   ): List[Figure] = {
-    if (!figure.isOnBoard) {
-      val newFigureList =
-        toBoardStrategy.moveFigure(
-          figure,
-          figures,
-          size,
-          rolled
-        ) // Move to board
-      return KickFigureStrategy.moveFigure(
-        newFigureList
-          .find(f => f.id == figure.id && f.owner.id == figure.owner.id)
-          .get,
-        newFigureList,
-        size,
-        rolled
-      )
-    } else {
-      val newFigureList =
-        moveStrategy.moveFigure(figure, figures, size, rolled) // Move on board
-      return KickFigureStrategy.moveFigure(
-        newFigureList
-          .find(f => f.id == figure.id && f.owner.id == figure.owner.id)
-          .get,
-        newFigureList,
-        size,
-        rolled
-      ) // Check for collision and handles kicking
-    }
+    val newFigureList =
+      if (!figure.isOnBoard)
+        toBoardStrategy.moveFigure(figure, figures, size, rolled)
+      else
+        moveStrategy.moveFigure(figure, figures, size, rolled)
+    kickFigureStrategy.moveFigure(
+      newFigureList
+        .find(f => f.id == figure.id && f.owner.id == figure.owner.id)
+        .get,
+      newFigureList,
+      size,
+      rolled
+    )
   }
 
   def checkIfMoveIsPossible(
@@ -56,11 +41,10 @@ case class Board(
   ): Boolean = {
     val playerFigures = figures.filter(_.owner.color == color)
     playerFigures.exists { figure =>
-      if (!figure.isOnBoard) {
+      if (!figure.isOnBoard)
         toBoardStrategy.canMove(figure, figures, size, rolled)
-      } else {
+      else
         moveStrategy.canMove(figure, figures, size, rolled)
-      }
     }
   }
 
@@ -69,7 +53,18 @@ case class Board(
       figures: List[Figure],
       rolled: Int
   ): Boolean = {
-    if (!figure.isOnBoard) {
+    val size = this.size
+    val figureCount = figure.figureCount
+    val currentIndex = figure.index
+    val newIndex = currentIndex + rolled
+    if (currentIndex >= size * 4) {
+      if (newIndex >= size * 4 && newIndex < size * 4 + figureCount) {
+        val targetOccupied = figures.exists(f =>
+          f.owner == figure.owner && f.index == newIndex && f != figure
+        )
+        !targetOccupied
+      } else false
+    } else if (!figure.isOnBoard) {
       toBoardStrategy.canMove(figure, figures, size, rolled)
     } else {
       moveStrategy.canMove(figure, figures, size, rolled)

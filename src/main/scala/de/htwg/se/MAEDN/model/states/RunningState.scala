@@ -33,71 +33,102 @@ case class RunningState(
   override def playDice(): Try[Manager] = {
     val newRolled = Dice.roll()
     controller.eventQueue.enqueue(Event.PlayDiceEvent(newRolled))
-    Try(copy(rolled = newRolled, selectedFigure = getNextMovableFigure()))
+    val nextFigure = getNextMovableFigure(newRolled)
+    Success(
+      copy(
+        rolled = newRolled,
+        selectedFigure = if (nextFigure == -1) 0 else nextFigure
+      )
+    )
   }
 
-  override def playNext(): Try[Manager] = {
-    rolled match {
-      case -1 => {
+  override def playNext(): Try[Manager] = rolled match {
+    case -1 =>
+      controller.eventQueue.enqueue(
+        Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+      )
+      Success(copy(moves = moves + 1, rolled = 0, selectedFigure = 0))
+    case 0 =>
+      playDice()
+    case _ =>
+      val canMoveAny = players(getCurrentPlayer).figures.exists { figure =>
+        board.canFigureMove(figure, players.flatMap(_.figures), rolled)
+      }
+      if (!canMoveAny) {
         controller.eventQueue.enqueue(
           Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
         )
-        Try(
-          copy(
-            moves = moves + 1,
-            rolled = 0,
-            selectedFigure = getNextMovableFigure()
-          )
-        )
+        Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0))
+      } else {
+        moveFigure() match {
+          case s @ Success(_) => s
+          case Failure(_) =>
+            val stillCanMove = players(getCurrentPlayer).figures.exists {
+              figure =>
+                board.canFigureMove(figure, players.flatMap(_.figures), rolled)
+            }
+            if (!stillCanMove) {
+              controller.eventQueue.enqueue(
+                Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+              )
+              Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0))
+            } else {
+              Failure(new IllegalArgumentException("Invalid move!"))
+            }
+        }
       }
-      case 0 => playDice()
-      case _ => moveFigure()
-    }
   }
 
   override def moveFigure(): Try[Manager] = {
-    if (
-      !board.checkIfMoveIsPossible(
-        players.flatMap(_.figures),
-        rolled,
-        players(getCurrentPlayer).color
-      )
-    ) {
-      controller.eventQueue.enqueue(
-        Event.PlayNextEvent(
-          (getCurrentPlayer + 1) % players.size
-        )
-      )
-      return Try(
-        copy(
-          rolled = 0,
-          moves = moves + 1,
-          selectedFigure = getNextMovableFigure()
-        )
-      )
+    val currentFigures = players(getCurrentPlayer).figures
+    val movableIndices = currentFigures.zipWithIndex.collect {
+      case (figure, idx)
+          if board.canFigureMove(figure, players.flatMap(_.figures), rolled) =>
+        idx
     }
-
-    val figures = players.flatMap(_.figures)
-    val figure = players(getCurrentPlayer).figures(selectedFigure)
-
-    val newFigures = board.moveFigure(figure, figures, rolled)
-
-    if (newFigures == figures) {
-      Failure(new IllegalArgumentException("Invalid move!"))
-    } else {
-      // Update the players with the new figures
-      controller.eventQueue.enqueue(Event.MoveFigureEvent(figure.id))
-      val updatedPlayers = players.zipWithIndex.map { case (player, index) =>
-        val playerFigures = newFigures.filter(_.owner.id == player.id)
-        player.copy(figures = playerFigures)
-      }
-
-      Success(
-        copy(
-          players = updatedPlayers,
-          rolled = if (rolled == 6) 0 else -1
-        )
+    if (movableIndices.isEmpty) {
+      controller.eventQueue.enqueue(
+        Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
       )
+      return Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0))
+    }
+    val selectedIdx =
+      if (movableIndices.size == 1) movableIndices.head else selectedFigure
+    val selectedFig = currentFigures(selectedIdx)
+    if (!board.canFigureMove(selectedFig, players.flatMap(_.figures), rolled)) {
+      if (movableIndices.isEmpty) {
+        controller.eventQueue.enqueue(
+          Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+        )
+        Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0))
+      } else {
+        Success(copy(selectedFigure = movableIndices.head))
+      }
+    } else {
+      val figures = players.flatMap(_.figures)
+      val newFigures = board.moveFigure(selectedFig, figures, rolled)
+      if (newFigures == figures) {
+        if (movableIndices.isEmpty) {
+          controller.eventQueue.enqueue(
+            Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+          )
+          Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0))
+        } else {
+          Success(copy(selectedFigure = movableIndices.head))
+        }
+      } else {
+        controller.eventQueue.enqueue(Event.MoveFigureEvent(selectedFig.id))
+        val updatedPlayers = players.map { player =>
+          player.copy(figures = newFigures.filter(_.owner.id == player.id))
+        }
+        Success(
+          copy(
+            players = updatedPlayers,
+            rolled = if (rolled == 6) 0 else -1,
+            selectedFigure = 0
+          )
+        )
+      }
     }
   }
 
@@ -117,12 +148,11 @@ case class RunningState(
       )
     )
 
-  private def getNextMovableFigure(): Int = {
-    players(getCurrentPlayer).figures.zipWithIndex.find { case (figure, _) =>
-      board.canFigureMove(figure, players.flatMap(_.figures), rolled)
-    } match {
-      case Some((_, index)) => index
-      case None             => 0
-    }
-  }
+  private def getNextMovableFigure(rolledValue: Int = rolled): Int =
+    players(getCurrentPlayer).figures.zipWithIndex
+      .find { case (figure, _) =>
+        board.canFigureMove(figure, players.flatMap(_.figures), rolledValue)
+      }
+      .map(_._2)
+      .getOrElse(-1)
 }

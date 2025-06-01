@@ -10,15 +10,18 @@ class NormalMoveStrategy extends IMoveStrategy {
       size: Int,
       rolled: Int
   ): List[Figure] = {
-    if (canMove(figure, figures, size, rolled)) {
-      // Move the figure to the new position
-      figures.map { f =>
-        if (f == figure) f.copy(index = figure.index + rolled)
-        else f
+    val newPos = figure.newAdjustedIndex(size, rolled)
+    val ownCollision = figures.exists(f =>
+      f != figure && f.owner.color == figure.owner.color && f.adjustedIndex(
+        size
+      ) == newPos
+    )
+    if (canMove(figure, figures, size, rolled) && !ownCollision) {
+      figures.map {
+        case f if f == figure => f.copy(index = figure.index + rolled)
+        case f                => f
       }
-    } else {
-      figures
-    }
+    } else figures
   }
 
   override def canMove(
@@ -27,25 +30,32 @@ class NormalMoveStrategy extends IMoveStrategy {
       size: Int,
       rolled: Int
   ): Boolean = {
-    figure.newAdjustedIndex(size, rolled) match {
-      case Position.Normal(_) =>
-        !figures.exists(f =>
-          f.checkForPossibleCollision(
-            figure,
-            size,
-            figure.newAdjustedIndex(size, rolled)
-          ) == Collision.OwnCollision
+    val newIndex = figure.index + rolled
+    val figureCount = figure.figureCount
+    if (newIndex >= 4 * size + figureCount) return false
+    if (
+      figure.index < 4 * size && newIndex >= 4 * size && newIndex >= 4 * size + figureCount
+    ) return false
+    val targetPos = figure.newAdjustedIndex(size, rolled)
+    targetPos match {
+      case Position.Goal(goalIdx) =>
+        val ownInGoal = figures.exists(f =>
+          f.owner == figure.owner && f.index == newIndex && f != figure
         )
-      case Position.Goal(_) =>
-        !figures.exists(f =>
-          f.checkForPossibleCollision(
-            figure,
-            size,
-            figure.newAdjustedIndex(size, rolled)
-          ) == Collision.OwnCollision
-        )
-      case Position.OffBoard(_) => false
-      case Position.Home(_)     => false
+        if (ownInGoal) return false
+      case _ =>
+    }
+    val ownCollision = figures.exists(f =>
+      f.checkForPossibleCollision(
+        figure,
+        size,
+        targetPos
+      ) == Collision.OwnCollision
+    )
+    if (ownCollision) return false
+    targetPos match {
+      case Position.Normal(_) | Position.Goal(_) => true
+      case _                                     => false
     }
   }
 }
