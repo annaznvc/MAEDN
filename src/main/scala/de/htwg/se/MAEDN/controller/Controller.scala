@@ -6,15 +6,17 @@ import scala.util.{Success, Failure}
 import de.htwg.se.MAEDN.controller.command.{Command, UndoCommand, RedoCommand}
 import de.htwg.se.MAEDN.model.{Manager, IMemento}
 import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.model.IManager
+import scala.collection.mutable.PriorityQueue
+import de.htwg.se.MAEDN.util.Event
 
-class Controller extends Observable {
-  var manager: Manager = Manager(this)
+class Controller extends Observable with IController {
+  var manager: IManager = Manager(this)
 
   val undoStack = Stack[IMemento]()
   val redoStack = Stack[IMemento]()
 
-  // Command execution
-  def executeCommand(command: Command): Unit = {
+  override def executeCommand(command: Command): Unit = {
     if (command.isNormal) {
       manager.createMemento.foreach { case memento: IMemento =>
         undoStack.push(memento)
@@ -29,5 +31,9 @@ class Controller extends Observable {
         manager = newManager
     }
     notifyObservers()
+  }
+
+  override def enqueueEvent(event: Event): Unit = {
+    super.enqueueEvent(event)
   }
 }

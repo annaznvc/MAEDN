@@ -10,6 +10,8 @@ import javafx.scene.shape.{Circle, Rectangle}
 import javafx.scene.paint.Paint
 import javafx.geometry.{Insets, Pos}
 import javafx.application.Platform
+import de.htwg.se.MAEDN.model.IManager
+import de.htwg.se.MAEDN.controller.IController
 
 /** Dynamic GUI renderer for Mensch ärgere dich nicht game. Updates all GUI
   * elements based on the current game state.
@@ -113,12 +115,10 @@ object DynamicRenderer {
 
   /** Updates the entire GUI rendering based on current controller state
     */
-  def updateRender(controller: Controller, sceneRoot: Parent): Unit = {
+  def updateRender(controller: IController, sceneRoot: Parent): Unit = {
     Platform.runLater(() => {
       try {
         val manager = controller.manager
-
-        // Only render if in Running state
         if (manager.state == State.Running) {
           renderPlayerStatus(manager, sceneRoot)
           renderCurrentPlayer(manager, sceneRoot)
@@ -138,7 +138,7 @@ object DynamicRenderer {
 
   /** Renders player status information (figures in goal)
     */
-  private def renderPlayerStatus(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderPlayerStatus(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val statusId = player.color match {
         case Color.RED    => "redPlayerStatus"
@@ -166,7 +166,10 @@ object DynamicRenderer {
 
   /** Renders current player indicator
     */
-  private def renderCurrentPlayer(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderCurrentPlayer(
+      manager: IManager,
+      sceneRoot: Parent
+  ): Unit = {
     // Update current player label
     NodeFinder.findNodeById(sceneRoot, "currentPlayerLabel") match {
       case Some(label: Label) =>
@@ -187,7 +190,7 @@ object DynamicRenderer {
 
   /** Renders dice result and updates dice button state
     */
-  private def renderDiceResult(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderDiceResult(manager: IManager, sceneRoot: Parent): Unit = {
     // Update dice result label
     NodeFinder.findNodeById(sceneRoot, "diceResultLabel") match {
       case Some(label: Label) =>
@@ -207,7 +210,7 @@ object DynamicRenderer {
     * make moves
     */
   private def updateDiceButtonState(
-      manager: Manager,
+      manager: IManager,
       sceneRoot: Parent
   ): Unit = {
     NodeFinder.findNodeById(sceneRoot, "diceButton") match {
@@ -229,7 +232,7 @@ object DynamicRenderer {
 
   /** Renders start fields for all players
     */
-  private def renderStartFields(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderStartFields(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val gridId = player.color match {
         case Color.RED    => "redStartGridPane"
@@ -256,7 +259,7 @@ object DynamicRenderer {
 
   /** Renders goal paths for all players
     */
-  private def renderGoalPaths(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderGoalPaths(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val pathId = player.color match {
         case Color.RED    => "redGoalGridPane"
@@ -293,7 +296,10 @@ object DynamicRenderer {
 
   /** Renders the main game board
     */
-  private def renderMainGameBoard(manager: Manager, sceneRoot: Parent): Unit = {
+  private def renderMainGameBoard(
+      manager: IManager,
+      sceneRoot: Parent
+  ): Unit = {
     NodeFinder.findNodeById(sceneRoot, "gameBoardGridPane") match {
       case Some(gridPane: GridPane) =>
         renderGameBoardGrid(manager, gridPane)
@@ -304,7 +310,7 @@ object DynamicRenderer {
   /** Updates visibility of player areas based on number of active players
     */
   private def updatePlayerAreaVisibility(
-      manager: Manager,
+      manager: IManager,
       sceneRoot: Parent
   ): Unit = {
     val allColors = List(Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW)
@@ -503,7 +509,7 @@ object DynamicRenderer {
   /** Renders the main game board grid using cross-path layout
     */
   private def renderGameBoardGrid(
-      manager: Manager,
+      manager: IManager,
       gridPane: GridPane
   ): Unit = {
     gridPane.getChildren.clear()

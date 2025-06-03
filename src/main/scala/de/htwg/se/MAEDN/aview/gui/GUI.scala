@@ -2,6 +2,8 @@
 package de.htwg.se.MAEDN.aview.gui
 
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.command._
@@ -26,7 +28,7 @@ import scalafx.Includes._
 import scalafx.scene.Node
 import scala.collection.mutable.Map
 
-class GUI(controller: Controller) extends JFXApp3 with Observer {
+class GUI(controller: IController) extends JFXApp3 with Observer {
 
   controller.add(this)
 

@@ -4,8 +4,10 @@ import org.jline.terminal.Terminal
 import org.jline.keymap.{BindingReader, KeyMap}
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.controller.command._
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 
-class InputManager(val controller: Controller, val terminal: Terminal) {
+class InputManager(val controller: IController, val terminal: Terminal) {
 
   private val bindingReader = new BindingReader(terminal.reader())
   private val keyMap = new KeyMap[Command]()

@@ -5,11 +5,12 @@ import scala.io.AnsiColor.{RED, RESET}
 
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.model.states.RunningState
 
-class TUI(controller: Controller) extends Observer {
+class TUI(controller: IController) extends Observer {
 
   var continue = true
   controller.add(this)

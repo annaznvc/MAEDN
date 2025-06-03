@@ -2,21 +2,22 @@ package de.htwg.se.MAEDN.model.states
 
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.{Event, Color}
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 
 import scala.util.Try
 
 case class ConfigState(
-    override val controller: Controller,
+    override val controller: IController,
     override val moves: Int,
     override val board: Board,
     override val players: List[Player],
     override val rolled: Int = 0
-) extends Manager {
+) extends IManager {
 
   override val state: State = State.Config
 
-  override def startGame(): Try[Manager] = Try {
+  override def startGame(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.StartGameEvent)
     RunningState(
       controller,
@@ -28,22 +29,22 @@ case class ConfigState(
     )
   }
 
-  override def quitGame(): Try[Manager] = Try {
+  override def quitGame(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.BackToMenuEvent)
     MenuState(controller, moves, board, players)
   }
 
-  override def increaseBoardSize(): Try[Manager] = Try {
+  override def increaseBoardSize(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     copy(board = Board(Math.min(12, getBoardSize + 1)))
   }
 
-  override def decreaseBoardSize(): Try[Manager] = Try {
+  override def decreaseBoardSize(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     copy(board = Board(Math.max(8, getBoardSize - 1)))
   }
 
-  override def increaseFigures(): Try[Manager] = Try {
+  override def increaseFigures(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newFigureCount = Math.min(board.size, players.head.figures.size + 1)
     val newPlayers = players.map(player =>
@@ -59,7 +60,7 @@ case class ConfigState(
     copy(players = newPlayers)
   }
 
-  override def decreaseFigures(): Try[Manager] = Try {
+  override def decreaseFigures(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newFigureCount = Math.max(1, players.head.figures.size - 1)
     val newPlayers = players.map(player =>
@@ -72,7 +73,7 @@ case class ConfigState(
     copy(players = newPlayers)
   }
 
-  override def moveUp(): Try[Manager] = Try {
+  override def moveUp(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newPlayerCount = Math.min(4, players.size + 1)
     val newPlayers =
@@ -80,10 +81,24 @@ case class ConfigState(
     copy(players = newPlayers)
   }
 
-  override def moveDown(): Try[Manager] = Try {
+  override def moveDown(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
     val newPlayerCount = Math.max(2, players.size - 1)
     val newPlayers = players.take(newPlayerCount)
     copy(players = newPlayers)
   }
+
+  // Getter
+  override def getPlayerCount: Int = players.size
+  override def getFigureCount: Int =
+    players.headOption.map(_.figures.size).getOrElse(0)
+  override def getBoardSize: Int = board.size
+  override def getCurrentPlayer: Int = 0
+  override def getPlayers: List[Player] = players
+  override def createMemento: Option[GameData] = None
+  override val selectedFigure: Int = 0
+  override def moveFigure(): Try[IManager] = Try(this)
+  override def playDice(): Try[IManager] = Try(this)
+  override def playNext(): Try[IManager] = Try(this)
+
 }

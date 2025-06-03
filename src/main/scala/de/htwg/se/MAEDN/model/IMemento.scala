@@ -1,6 +1,8 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 
 import scala.util.Try
 
@@ -14,6 +16,12 @@ trait IMemento {
     *   the restored Manager
     */
   def restoreManager(controller: Controller): Try[Manager]
+
+  /** Restores and returns RunningManager instance from the memento.
+    * @return
+    *   the restored Manager
+    */
+  def restoreIManager(controller: IController): Try[IManager]
 }
 
 /** Trait representing an Originator in the Memento design pattern. Provides a

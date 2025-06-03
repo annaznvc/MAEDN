@@ -4,6 +4,8 @@ import de.htwg.se.MAEDN.model.IMemento
 import de.htwg.se.MAEDN.model.states.RunningState
 import scala.util.{Try, Success, Failure}
 import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 
 case class GameData(
     moves: Int,
@@ -13,7 +15,7 @@ case class GameData(
     rolled: Int
 ) extends IMemento {
 
-  def restoreManager(controller: Controller): Try[Manager] = {
+  def restoreManager(controller: IController): Try[IManager] = {
     (players.size, selectedFigure, rolled, players.isEmpty) match {
       case (size, _, _, _) if size < 2 || size > 4 =>
         Failure(
@@ -42,4 +44,12 @@ case class GameData(
         )
     }
   }
+
+  // Implementierung für IMemento
+  override def restoreIManager(controller: IController): Try[IManager] =
+    restoreManager(controller)
+
+  override def restoreManager(controller: Controller): Try[Manager] =
+    restoreManager(controller.asInstanceOf[IController])
+      .map(_.asInstanceOf[Manager])
 }

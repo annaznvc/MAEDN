@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.aview.gui
 
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 import de.htwg.se.MAEDN.controller.command._
 import javafx.event.ActionEvent
 import javafx.scene.input.{KeyCode}
@@ -8,7 +9,7 @@ import javafx.scene.input.KeyEvent
 
 import javafx.fxml.FXML
 
-class ActionManager(controller: Controller) {
+class ActionManager(controller: IController) {
 
   // Method to handle GUI actions (buttons, menu items, etc.)
   @FXML
