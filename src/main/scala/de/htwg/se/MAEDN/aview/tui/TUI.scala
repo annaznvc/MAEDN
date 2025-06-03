@@ -10,7 +10,7 @@ import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.model.states.RunningState
 
-class TUI(controller: IController) extends Observer {
+class TUI(controller: IController) extends Observer with ITUI {
 
   var continue = true
   controller.add(this)

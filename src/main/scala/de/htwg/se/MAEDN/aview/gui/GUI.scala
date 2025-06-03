@@ -28,7 +28,7 @@ import scalafx.Includes._
 import scalafx.scene.Node
 import scala.collection.mutable.Map
 
-class GUI(controller: IController) extends JFXApp3 with Observer {
+class GUI(controller: IController) extends JFXApp3 with Observer with IGUI {
 
   controller.add(this)
 
@@ -197,4 +197,7 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
     overlayVisible = false
     // Hide any visible overlays
   }
+
+  override def main(args: Array[String]): Unit = super.main(args)
+
 }
