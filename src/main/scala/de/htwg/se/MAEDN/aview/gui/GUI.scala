@@ -28,7 +28,7 @@ import scalafx.Includes._
 import scalafx.scene.Node
 import scala.collection.mutable.Map
 
-class GUI(controller: IController) extends JFXApp3 with Observer with IGUI {
+class GUI(controller: IController) extends JFXApp3 with Observer {
 
   controller.add(this)
 
@@ -129,6 +129,8 @@ class GUI(controller: IController) extends JFXApp3 with Observer with IGUI {
           showStatusMessage(s"${event.toString} executed!")
         case Event.BackToMenuEvent =>
           switchToScene(State.Menu)
+        case Event.WinEvent(playerId) =>
+          showWinDialog(playerId)
         case Event.ErrorEvent(message) =>
           showErrorMessage(s"Error: $message")
         case Event.QuitGameEvent =>
@@ -196,6 +198,62 @@ class GUI(controller: IController) extends JFXApp3 with Observer with IGUI {
   def hideOverlay(): Unit = {
     overlayVisible = false
     // Hide any visible overlays
+  }
+
+  def showWinDialog(playerId: Int): Unit = {
+    val winner = controller.manager.players(playerId)
+    val playerName = s"Player ${playerId + 1}"
+    val playerColor = winner.color.toString
+
+    // Create overlay content
+    val overlayPane = new StackPane() {
+      style = "-fx-background-color: rgba(0, 0, 0, 0.7);"
+
+      val contentPane = new StackPane() {
+        style =
+          "-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 30; -fx-border-radius: 10;"
+        maxWidth = 400
+        maxHeight = 200
+
+        val winLabel = new scalafx.scene.control.Label {
+          text =
+            s"🎉 Congratulations! 🎉\n\n$playerName ($playerColor) has won the game!\n\nPress ENTER to return to the main menu."
+          style = "-fx-font-size: 16; -fx-text-alignment: center;"
+          wrapText = true
+        }
+
+        children = winLabel
+      }
+
+      children = contentPane
+
+      // Handle key events to close overlay
+      onKeyPressed = (event: KeyEvent) => {
+        import javafx.scene.input.KeyCode
+        if (event.getCode == KeyCode.ENTER || event.getCode == KeyCode.ESCAPE) {
+          hideWinOverlay()
+          switchToScene(State.Menu)
+        }
+      }
+
+      focusTraversable = true
+    }
+
+    // Add overlay to root pane
+    Platform.runLater {
+      rootPane.children.add(overlayPane)
+      overlayPane.requestFocus()
+      overlayVisible = true
+    }
+  }
+
+  def hideWinOverlay(): Unit = {
+    Platform.runLater {
+      rootPane.children.removeIf(node =>
+        node.style.value.contains("rgba(0, 0, 0, 0.7)")
+      )
+      overlayVisible = false
+    }
   }
 
   override def main(args: Array[String]): Unit = super.main(args)

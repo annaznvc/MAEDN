@@ -1,20 +1,20 @@
 package de.htwg.se.MAEDN
 
-import de.htwg.se.MAEDN.controller.{Controller, IController}
-import de.htwg.se.MAEDN.aview.tui.{TUI, ITUI}
-import de.htwg.se.MAEDN.aview.gui.{GUI, IGUI}
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.aview.gui.GUI
+import de.htwg.se.MAEDN.aview.tui.TUI
 
 object App {
-  val controller: IController = new Controller()
+  val controller: IController = IController()
 
   def main(args: Array[String]): Unit = {
     new Thread(new Runnable {
       override def run(): Unit = {
-        val tui: ITUI = new TUI(controller)
+        val tui: TUI = new TUI(controller)
         tui.run()
       }
     }).start()
-    val gui: IGUI = new GUI(controller)
+    val gui: GUI = new GUI(controller)
     gui.main(args)
   }
 }

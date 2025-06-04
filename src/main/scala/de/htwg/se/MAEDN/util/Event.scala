@@ -17,6 +17,7 @@ enum Event {
   case PlayDiceEvent(rolled: Int)
   case MoveFigureEvent(figureId: Int)
   case KickFigureEvent
+  case WinEvent(playerId: Int)
 
   // Command events
   case UndoEvent
@@ -24,16 +25,16 @@ enum Event {
 
   // Error events
   case ErrorEvent(message: String)
-
   // Default priority (lower value = higher priority)
   def priority: Int = this match {
     case StartGameEvent | QuitGameEvent | BackToMenuEvent | ConfigEvent => 0
-    case PlayNextEvent(_)                                               => 1
-    case PlayDiceEvent(_)                                               => 2
-    case MoveFigureEvent(_)                                             => 3
-    case ChangeSelectedFigureEvent(_)                                   => 4
-    case KickFigureEvent                                                => 5
-    case UndoEvent | RedoEvent                                          => 6
-    case ErrorEvent(_)                                                  => 7
+    case WinEvent(_)                                                    => 1
+    case PlayNextEvent(_)                                               => 2
+    case PlayDiceEvent(_)                                               => 3
+    case MoveFigureEvent(_)                                             => 4
+    case ChangeSelectedFigureEvent(_)                                   => 5
+    case KickFigureEvent                                                => 6
+    case UndoEvent | RedoEvent                                          => 7
+    case ErrorEvent(_)                                                  => 8
   }
 }

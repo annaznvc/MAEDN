@@ -1,16 +1,14 @@
-package de.htwg.se.MAEDN.model
+package de.htwg.se.MAEDN.model.GameDataImp
 
-import de.htwg.se.MAEDN.model.IMemento
-import de.htwg.se.MAEDN.model.states.RunningState
-import scala.util.{Try, Success, Failure}
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.model.{IMemento, IManager, IPlayer, IBoard}
 import de.htwg.se.MAEDN.controller.IController
-import de.htwg.se.MAEDN.model.IManager
+
+import scala.util.{Try, Success, Failure}
 
 case class GameData(
     moves: Int,
-    board: Board,
-    players: List[Player],
+    board: IBoard,
+    players: List[IPlayer],
     selectedFigure: Int,
     rolled: Int
 ) extends IMemento {
@@ -33,13 +31,13 @@ case class GameData(
         Failure(new IllegalArgumentException("Players list must not be empty"))
       case _ =>
         Success(
-          RunningState(
+          IManager.createRunningState(
             controller,
             moves,
             board,
             players,
-            rolled,
-            selectedFigure
+            selectedFigure,
+            rolled
           )
         )
     }
@@ -48,8 +46,4 @@ case class GameData(
   // Implementierung für IMemento
   override def restoreIManager(controller: IController): Try[IManager] =
     restoreManager(controller)
-
-  override def restoreManager(controller: Controller): Try[Manager] =
-    restoreManager(controller.asInstanceOf[IController])
-      .map(_.asInstanceOf[Manager])
 }

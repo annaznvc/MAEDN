@@ -1,8 +1,9 @@
 package de.htwg.se.MAEDN.aview.gui
 
-import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.util.{NodeFinder, Color, Position}
-import de.htwg.se.MAEDN.model.{Figure, Player, State, Manager}
+import de.htwg.se.MAEDN.model._
+import de.htwg.se.MAEDN.controller.IController
+
 import javafx.scene.{Parent, Node}
 import javafx.scene.control.Label
 import javafx.scene.layout.{GridPane, VBox, HBox, StackPane}
@@ -10,8 +11,6 @@ import javafx.scene.shape.{Circle, Rectangle}
 import javafx.scene.paint.Paint
 import javafx.geometry.{Insets, Pos}
 import javafx.application.Platform
-import de.htwg.se.MAEDN.model.IManager
-import de.htwg.se.MAEDN.controller.IController
 
 /** Dynamic GUI renderer for Mensch ärgere dich nicht game. Updates all GUI
   * elements based on the current game state.
@@ -372,7 +371,7 @@ object DynamicRenderer {
   /** Renders a start field grid for a specific player
     */
   private def renderStartFieldGrid(
-      player: Player,
+      player: IPlayer,
       gridPane: GridPane,
       selectedFigure: Int,
       isCurrentPlayer: Boolean
@@ -403,7 +402,7 @@ object DynamicRenderer {
   /** Renders a goal path VBox for a specific player
     */
   private def renderGoalPathVBox(
-      player: Player,
+      player: IPlayer,
       vbox: VBox,
       boardSize: Int,
       selectedFigure: Int,
@@ -434,7 +433,7 @@ object DynamicRenderer {
   /** Renders a goal path GridPane for a specific player (horizontal layout)
     */
   private def renderGoalPathGridPane(
-      player: Player,
+      player: IPlayer,
       gridPane: GridPane,
       boardSize: Int,
       selectedFigure: Int,
@@ -470,7 +469,7 @@ object DynamicRenderer {
   /** Renders a goal path VBox with horizontal arrangement
     */
   private def renderGoalPathVBoxHorizontal(
-      player: Player,
+      player: IPlayer,
       vbox: VBox,
       boardSize: Int,
       selectedFigure: Int,

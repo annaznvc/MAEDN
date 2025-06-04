@@ -1,6 +1,6 @@
-package de.htwg.se.MAEDN.model.states
+package de.htwg.se.MAEDN.model.StatesImp
 
-import de.htwg.se.MAEDN.model.{IManager, Board, Player, State, GameData}
+import de.htwg.se.MAEDN.model.{IManager, IBoard, State, IMemento, IPlayer}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.IController
 
@@ -9,8 +9,8 @@ import scala.util.{Try, Success, Failure}
 case class RunningState(
     override val controller: IController,
     override val moves: Int,
-    override val board: Board,
-    override val players: List[Player],
+    override val board: IBoard,
+    override val players: List[IPlayer],
     override val rolled: Int = 0,
     override val selectedFigure: Int = 0
 ) extends IManager {
@@ -88,63 +88,72 @@ case class RunningState(
       controller.enqueueEvent(
         Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
       )
-      return Success(
-        copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
-      )
-    }
-    val selectedIdx =
-      if (movableIndices.size == 1) movableIndices.head else selectedFigure
-    val selectedFig = currentFigures(selectedIdx)
-    if (!board.canFigureMove(selectedFig, players.flatMap(_.figures), rolled)) {
-      if (movableIndices.isEmpty) {
-        controller.enqueueEvent(
-          Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
-        )
-        Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0)).get
-      } else {
-        copy(selectedFigure = movableIndices.head)
-      }
+      copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
     } else {
-      val figures = players.flatMap(_.figures)
-      val newFigures = board.moveFigure(selectedFig, figures, rolled)
-      if (newFigures == figures) {
+      val selectedIdx =
+        if (movableIndices.size == 1) movableIndices.head else selectedFigure
+      val selectedFig = currentFigures(selectedIdx)
+      if (
+        !board.canFigureMove(selectedFig, players.flatMap(_.figures), rolled)
+      ) {
         if (movableIndices.isEmpty) {
           controller.enqueueEvent(
             Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
           )
-          Success(copy(rolled = 0, moves = moves + 1, selectedFigure = 0)).get
+          copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
         } else {
           copy(selectedFigure = movableIndices.head)
         }
       } else {
-        controller.enqueueEvent(Event.MoveFigureEvent(selectedFig.id))
-        val updatedPlayers = players.map { player =>
-          player.copy(figures = newFigures.filter(_.owner.id == player.id))
+        val figures = players.flatMap(_.figures)
+        val newFigures = board.moveFigure(selectedFig, figures, rolled)
+        if (newFigures == figures) {
+          if (movableIndices.isEmpty) {
+            controller.enqueueEvent(
+              Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+            )
+            copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
+          } else {
+            copy(selectedFigure = movableIndices.head)
+          }
+        } else {
+          controller.enqueueEvent(Event.MoveFigureEvent(selectedFig.id))
+          val updatedPlayers = players.map { player =>
+            player.copy(figures = newFigures.filter(_.owner.id == player.id))
+          }
+          // Check for win condition after successful move
+          val currentPlayerId = getCurrentPlayer
+          val newState = copy(
+            players = updatedPlayers,
+            rolled = if (rolled == 6) 0 else -1,
+            selectedFigure = 0
+          )
+
+          // Check win condition using the updated players
+          val updatedPlayer = updatedPlayers(currentPlayerId)
+          val boardSize = getBoardSize
+          if (
+            updatedPlayer.figures.nonEmpty && updatedPlayer.figures.forall(
+              _.isOnGoal(boardSize)
+            )
+          ) {
+            controller.enqueueEvent(Event.WinEvent(currentPlayerId))
+          }
+
+          newState
         }
-        copy(
-          players = updatedPlayers,
-          rolled = if (rolled == 6) 0 else -1,
-          selectedFigure = 0
-        )
       }
     }
   }
 
   override def quitGame(): Try[IManager] = Try {
     controller.enqueueEvent(Event.BackToMenuEvent)
-    // Hier ggf. MenuState(controller, ...) zurückgeben, falls sinnvoll
-    this
+    MenuState(controller, moves, board, players)
   }
 
-  override def startGame(): Try[IManager] = Try(this)
-  override def increaseBoardSize(): Try[IManager] = Try(this)
-  override def decreaseBoardSize(): Try[IManager] = Try(this)
-  override def increaseFigures(): Try[IManager] = Try(this)
-  override def decreaseFigures(): Try[IManager] = Try(this)
-
-  override def createMemento: Option[GameData] =
+  override def createMemento: Option[IMemento] =
     Some(
-      GameData(
+      IMemento(
         moves,
         board,
         players,
@@ -158,7 +167,7 @@ case class RunningState(
     players.headOption.map(_.figures.size).getOrElse(0)
   override def getBoardSize: Int = board.size
   override def getCurrentPlayer: Int = moves % players.size
-  override def getPlayers: List[Player] = players
+  override def getPlayers: List[IPlayer] = players
 
   private def getNextMovableFigure(rolledValue: Int = rolled): Int =
     players(getCurrentPlayer).figures.zipWithIndex

@@ -1,6 +1,6 @@
-package de.htwg.se.MAEDN.model.strategy
+package de.htwg.se.MAEDN.model.StrategyImp
 
-import de.htwg.se.MAEDN.model.{Board, Figure, IMoveStrategy, Collision}
+import de.htwg.se.MAEDN.model.{IBoard, IMoveStrategy, IFigure, Collision}
 import de.htwg.se.MAEDN.util.Position
 
 /** The OnBoardStrategy is responsible for moving a figure from home to the
@@ -9,11 +9,11 @@ import de.htwg.se.MAEDN.util.Position
   */
 class ToBoardStrategy extends IMoveStrategy {
   override def moveFigure(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       size: Int,
       rolled: Int
-  ): List[Figure] = {
+  ): List[IFigure] = {
     if (!canMove(figure, figures, size, rolled)) {
       figures
     } else {
@@ -29,8 +29,8 @@ class ToBoardStrategy extends IMoveStrategy {
   }
 
   override def canMove(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       size: Int,
       rolled: Int
   ): Boolean = {

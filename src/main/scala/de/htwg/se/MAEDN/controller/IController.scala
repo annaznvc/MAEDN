@@ -18,3 +18,7 @@ trait IController {
   def enqueueEvent(event: Event): Unit
 
 }
+
+object IController {
+  def apply(): IController = new Controller()
+}
