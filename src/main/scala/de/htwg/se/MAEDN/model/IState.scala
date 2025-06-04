@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.model
 
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 
 import scala.util.Try
 
@@ -11,23 +12,23 @@ enum State {
 trait IState {
   val moves: Int
   val state: State
-  val controller: Controller
+  val controller: IController
   val rolled: Int
   val selectedFigure: Int
 
-  def startGame(): Try[Manager]
-  def quitGame(): Try[Manager]
-  def moveUp(): Try[Manager]
-  def moveDown(): Try[Manager]
-  def increaseFigures(): Try[Manager]
-  def decreaseFigures(): Try[Manager]
-  def increaseBoardSize(): Try[Manager]
-  def decreaseBoardSize(): Try[Manager]
-  def playDice(): Try[Manager]
-  def playNext(): Try[Manager]
-  def moveFigure(): Try[Manager]
+  def startGame(): Try[IManager]
+  def quitGame(): Try[IManager]
+  def moveUp(): Try[IManager]
+  def moveDown(): Try[IManager]
+  def increaseFigures(): Try[IManager]
+  def decreaseFigures(): Try[IManager]
+  def increaseBoardSize(): Try[IManager]
+  def decreaseBoardSize(): Try[IManager]
+  def playDice(): Try[IManager]
+  def playNext(): Try[IManager]
+  def moveFigure(): Try[IManager]
 
-  def getPlayers: List[Player]
+  def getPlayers: List[IPlayer]
   def getPlayerCount: Int
   def getFigureCount: Int
   def getBoardSize: Int

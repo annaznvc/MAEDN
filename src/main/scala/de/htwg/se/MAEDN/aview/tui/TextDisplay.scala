@@ -1,9 +1,6 @@
 package de.htwg.se.MAEDN.aview.tui
 
-import de.htwg.se.MAEDN.model.{Board, Figure, IState}
-import de.htwg.se.MAEDN.model.states.RunningState
-import de.htwg.se.MAEDN.model.State
-import de.htwg.se.MAEDN.model.Player
+import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.{Color, Position}
 import scala.io.AnsiColor._
 
@@ -40,13 +37,13 @@ object TextDisplay {
 
   /** Renders the game board: home benches, main track, and goal lanes */
   def printBoard(
-      board: Board,
+      board: IBoard,
       selectedFigure: Int = -1,
       currentPlayerIndex: Int = -1,
-      players: List[Player] = Nil
+      players: List[IPlayer] = Nil
   ): String = {
     val size = board.size
-    val figures: Seq[Figure] = players.flatMap(_.figures)
+    val figures: Seq[IFigure] = players.flatMap(_.figures)
 
     def colorCode(c: Color): String = c match {
       case Color.RED    => RED
@@ -141,7 +138,7 @@ object TextDisplay {
   }
 
   /** Simple flat view of the main track */
-  def printFlatBoard(board: Board): String = {
+  def printFlatBoard(board: IBoard): String = {
     val size = board.size
     val fields = (0 until size * 4).map(_ => "?").mkString(" ")
     s"${BOLD}Main Track:${RESET}\n$fields\n"
@@ -154,7 +151,7 @@ object TextDisplay {
       boardSize: Int
   ): String = {
     s"""
-         Players       Figures       Board size
+         Players       Figures       IBoard size
         ${CYAN}/\\ 'w'${RESET}       ${GREEN}/\\ 'e'${RESET}         ${YELLOW}/\\ 'r'${RESET}
          |             |              |
         ${CYAN}$playerCount${RESET}             ${GREEN}$figureCount${RESET}              ${YELLOW}$boardSize${RESET}

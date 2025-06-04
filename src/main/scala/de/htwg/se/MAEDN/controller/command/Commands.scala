@@ -1,73 +1,73 @@
 package de.htwg.se.MAEDN.controller.command
 
-import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model.Manager
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.model.IManager
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.util.Event
 
 import scala.util.{Try, Success, Failure}
 
-case class DecreaseBoardSizeCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class DecreaseBoardSizeCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.decreaseBoardSize()
   }
 }
 
-case class DecreaseFiguresCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class DecreaseFiguresCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.decreaseFigures()
   }
 }
 
-case class IncreaseBoardSizeCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class IncreaseBoardSizeCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.increaseBoardSize()
   }
 }
 
-case class IncreaseFiguresCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class IncreaseFiguresCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.increaseFigures()
   }
 }
 
-case class MoveDownCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class MoveDownCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.moveDown()
   }
 }
 
-case class MoveUpCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class MoveUpCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.moveUp()
   }
 }
 
-case class PlayNextCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class PlayNextCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.playNext()
   }
 }
 
-case class QuitGameCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class QuitGameCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.quitGame()
   }
 }
 
-case class StartGameCommand(controller: Controller) extends Command {
-  override def execute(): Try[Manager] = {
+case class StartGameCommand(controller: IController) extends Command {
+  override def execute(): Try[IManager] = {
     controller.manager.startGame()
   }
 }
 
-class UndoCommand(controller: Controller) extends Command {
+class UndoCommand(controller: IController) extends Command {
   override def isNormal: Boolean = false
-  override def execute(): Try[Manager] = {
+  override def execute(): Try[IManager] = {
     controller.undoStack.headOption match {
       case Some(memento) =>
         controller.undoStack.pop()
-        memento.restoreManager(controller) match {
+        memento.restoreIManager(controller) match {
           case Success(manager) =>
             manager.createMemento.foreach(controller.redoStack.push)
             controller.manager = manager
@@ -83,13 +83,13 @@ class UndoCommand(controller: Controller) extends Command {
   }
 }
 
-case class RedoCommand(controller: Controller) extends Command {
+case class RedoCommand(controller: IController) extends Command {
   override def isNormal: Boolean = false
-  override def execute(): Try[Manager] = {
+  override def execute(): Try[IManager] = {
     controller.redoStack.headOption match {
       case Some(memento) =>
         controller.redoStack.pop()
-        memento.restoreManager(controller) match {
+        memento.restoreIManager(controller) match {
           case Success(manager) =>
             manager.createMemento.foreach(controller.undoStack.push)
             controller.manager = manager

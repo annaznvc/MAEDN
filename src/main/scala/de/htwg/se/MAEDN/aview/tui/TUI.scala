@@ -1,15 +1,15 @@
 package de.htwg.se.MAEDN.aview.tui
 
 import org.jline.terminal.{TerminalBuilder, Terminal}
-import scala.io.AnsiColor.{RED, RESET}
+import scala.io.AnsiColor.{RED, RESET, GREEN, YELLOW}
 
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
+import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.controller.command._
-import de.htwg.se.MAEDN.model.states.RunningState
 
-class TUI(controller: Controller) extends Observer {
+class TUI(controller: IController) extends Observer {
 
   var continue = true
   controller.add(this)
@@ -100,11 +100,20 @@ class TUI(controller: Controller) extends Observer {
             )
           case _ =>
             printBoard(TextDisplay.printCover(controller.manager), "")
-        }
-      // ----------------------------------------------------------------------
+        } // ----------------------------------------------------------------------
       case Event.BackToMenuEvent =>
         writeline(TextDisplay.clearTerminal())
         writeline(TextDisplay.printCover(controller.manager))
+      // ----------------------------------------------------------------------
+      case Event.WinEvent(playerId) =>
+        writeline(TextDisplay.clearTerminal())
+        val playerName = s"Player ${playerId + 1}"
+        val winMessage = s"🎉 ${GREEN}$playerName has won the game!${RESET} 🎉"
+        printBoard(TextDisplay.printCover(controller.manager), winMessage)
+        writeline("")
+        writeline(
+          s"${YELLOW}Congratulations! Press any key to return to menu...${RESET}"
+        )
       // ----------------------------------------------------------------------
       case Event.ErrorEvent(message) =>
         writeline(TextDisplay.clearTerminal())

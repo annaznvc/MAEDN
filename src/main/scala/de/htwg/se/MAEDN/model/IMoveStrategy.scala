@@ -1,35 +1,42 @@
 package de.htwg.se.MAEDN.model
 
+import de.htwg.se.MAEDN.model.IFigure
+import de.htwg.se.MAEDN.model.StrategyImp.{
+  KickFigureStrategy,
+  NormalMoveStrategy,
+  ToBoardStrategy
+}
+
 trait IMoveStrategy {
   def moveFigure(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       size: Int,
       rolled: Int
-  ): List[Figure]
+  ): List[IFigure]
 
   def canMove(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       size: Int,
       rolled: Int
   ): Boolean
 
-  def isOnGoal(figure: Figure, goalCount: Int, size: Int): Boolean =
+  def isOnGoal(figure: IFigure, goalCount: Int, size: Int): Boolean =
     figure.index >= size * 4 - goalCount
 
   def collidingFigure(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       size: Int
-  ): Option[Figure] = {
+  ): Option[IFigure] = {
     val adjustedIndex = figure.adjustedIndex(size)
     figures.find(f => f.adjustedIndex(size) == adjustedIndex && f != figure)
   }
 
   def isOnLastPossibleField(
-      figure: Figure,
-      figures: List[Figure],
+      figure: IFigure,
+      figures: List[IFigure],
       goalCount: Int,
       size: Int
   ): Boolean = {
@@ -52,5 +59,21 @@ trait IMoveStrategy {
     } else {
       false
     }
+  }
+}
+
+object IMoveStrategy {
+  def createKickFigureStrategy(): IMoveStrategy = {
+    new KickFigureStrategy()
+  }
+  def createToBoardStrategy(): IMoveStrategy = {
+    new ToBoardStrategy()
+  }
+  def createNormalMoveStrategy(): IMoveStrategy = {
+    new NormalMoveStrategy()
+  }
+
+  def apply(): IMoveStrategy = {
+    new NormalMoveStrategy()
   }
 }
