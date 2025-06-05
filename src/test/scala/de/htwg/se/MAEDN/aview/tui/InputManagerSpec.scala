@@ -1,4 +1,4 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
@@ -7,21 +7,40 @@ import org.jline.terminal.impl.DumbTerminal
 import org.jline.keymap.{BindingReader, KeyMap}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.charset.StandardCharsets
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.util.{Event, Observer}
-import de.htwg.se.MAEDN.model.Board
+import de.htwg.se.MAEDN.model.IBoard
+import de.htwg.se.MAEDN.aview.tui.InputManager
+import de.htwg.se.MAEDN.aview.tui.TextDisplay
+import de.htwg.se.MAEDN.model.StatesImp.{RunningState, ConfigState, MenuState}
+import de.htwg.se.MAEDN.model.State
+import de.htwg.se.MAEDN.util.Observable
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class InputManagerSpec extends AnyWordSpec with Matchers {
 
-  // Test-Controller mit minimalen Implementierungen
-  class TestController extends Controller {
-    var lastCommand: Option[Command] = None
+  // Test-IController mit minimalen Implementierungen
+  class TestController extends IController {
+    private val observable = new Observable()
+    def add(observer: Observer): Unit = observable.add(observer)
+    def remove(observer: Observer): Unit = observable.remove(observer)
+    def enqueueEvent(event: Event): Unit = observable.enqueueEvent(event)
+    def instantNotifyObservers(event: Event): Unit =
+      observable.instantNotifyObservers(event)
 
-    override def executeCommand(command: Command): Unit = {
-      lastCommand = Some(command)
-      notifyObservers() // Muss aufgerufen werden, damit Manager gesetzt wird
-    }
+    // Dummy-Implementierungen für alle abstrakten IController-Member:
+    def eventQueue = new scala.collection.mutable.PriorityQueue[Event]()(
+      Ordering.by(_.hashCode())
+    )
+    def executeCommand(
+        command: de.htwg.se.MAEDN.controller.command.Command
+    ): Unit = ()
+    var manager: de.htwg.se.MAEDN.model.IManager = null
+    def redoStack =
+      new scala.collection.mutable.Stack[de.htwg.se.MAEDN.model.IMemento]()
+    def undoStack =
+      new scala.collection.mutable.Stack[de.htwg.se.MAEDN.model.IMemento]()
   }
 
   // Mock-Terminal mit konfigurierbarem Input-Stream
@@ -201,7 +220,7 @@ class InputManagerSpec extends AnyWordSpec with Matchers {
     }
 
     "execute else content by rendering 'N ' for a neutral field" in {
-      val board2 = Board(4)
+      val board2 = IBoard(4)
       val result = TextDisplay.printBoard(
         board = board2,
         selectedFigure = -1,

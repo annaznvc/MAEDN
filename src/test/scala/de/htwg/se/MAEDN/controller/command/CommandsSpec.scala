@@ -1,19 +1,29 @@
 package de.htwg.se.MAEDN.controller.command
 
+import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.controller.Controller
-import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.model.states.RunningState
+import de.htwg.se.MAEDN.model.IManager
+import de.htwg.se.MAEDN.model.StatesImp.RunningState
+import de.htwg.se.MAEDN.model.BoardImp.Board
+import de.htwg.se.MAEDN.util.PlayerFactory
+import de.htwg.se.MAEDN.model.GameDataImp.GameData
 import de.htwg.se.MAEDN.util._
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
 import scala.util.{Success, Failure}
+import de.htwg.se.MAEDN.model.IMoveStrategy
 
 class CommandsSpec extends AnyWordSpec with Matchers {
 
-  def makeRestorableManager(controller: Controller): Manager = {
+  def makeRestorableManager(controller: Controller): IManager = {
     val players = PlayerFactory(2, 4)
-    val board = Board(8)
+    val board = Board(
+      8,
+      IMoveStrategy.createNormalMoveStrategy(),
+      IMoveStrategy.createToBoardStrategy(),
+      IMoveStrategy.createKickFigureStrategy()
+    )
     RunningState(
       controller,
       moves = 0,
@@ -95,8 +105,19 @@ class CommandsSpec extends AnyWordSpec with Matchers {
     }
 
     "fail if restoreManager fails (Zeile 77) and cover isNormal = false (Zeile 65)" in {
-      val badMemento = new GameData(0, Board(8), PlayerFactory(2, 4), 0, 0) {
-        override def restoreManager(controller: Controller) =
+      val badMemento = new GameData(
+        0,
+        Board(
+          8,
+          IMoveStrategy.createNormalMoveStrategy(),
+          IMoveStrategy.createToBoardStrategy(),
+          IMoveStrategy.createKickFigureStrategy()
+        ),
+        PlayerFactory(2, 4),
+        0,
+        0
+      ) {
+        override def restoreManager(controller: IController) =
           Failure(new RuntimeException("fail"))
       }
 
@@ -130,8 +151,19 @@ class CommandsSpec extends AnyWordSpec with Matchers {
     }
 
     "fail if restoreManager fails (Zeile 99) and cover isNormal = false (Zeile 87)" in {
-      val badMemento = new GameData(0, Board(8), PlayerFactory(2, 4), 0, 0) {
-        override def restoreManager(controller: Controller) =
+      val badMemento = new GameData(
+        0,
+        Board(
+          8,
+          IMoveStrategy.createNormalMoveStrategy(),
+          IMoveStrategy.createToBoardStrategy(),
+          IMoveStrategy.createKickFigureStrategy()
+        ),
+        PlayerFactory(2, 4),
+        0,
+        0
+      ) {
+        override def restoreManager(controller: IController) =
           Failure(new RuntimeException("fail"))
       }
 

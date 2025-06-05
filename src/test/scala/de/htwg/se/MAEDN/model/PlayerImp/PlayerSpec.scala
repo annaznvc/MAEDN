@@ -1,6 +1,8 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.util.Color
+import de.htwg.se.MAEDN.model.PlayerImp.Player
+import de.htwg.se.MAEDN.model.FigureImp.Figure
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -27,8 +29,8 @@ class PlayerSpec extends AnyWordSpec with Matchers {
 
     "support updating figures via copy" in {
       val player = Player(1, Nil, Color.RED)
-      val f1 = Figure(1, player, 0)
-      val f2 = Figure(2, player, 1)
+      val f1 = Figure(1, player, 0, 4)
+      val f2 = Figure(2, player, 1, 4)
       val updated = player.copy(figures = List(f1, f2))
 
       updated.figures should contain allOf (f1, f2)

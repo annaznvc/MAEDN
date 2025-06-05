@@ -34,8 +34,7 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
 
   val actionManager = new ActionManager(controller)
   var currentSceneContent: Parent = uninitialized
-  var sceneCache: Map[State, Parent] =
-    Map.empty
+  var sceneCache: Map[String, Parent] = Map.empty
   var overlayVisible: Boolean = false
   val rootPane = new StackPane() // Placeholder for root pane
 
@@ -56,36 +55,32 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
       }
     }
     // Initialize with the menu scene
-    switchToScene(State.Menu)
+    switchToScene("Menu")
     stage.show()
   }
 
-  def switchToScene(state: State): Unit = {
-    val sceneContent = sceneCache.getOrElse(state, createSceneContent(state))
-    sceneCache += (state -> sceneContent)
+  def switchToScene(sceneKey: String): Unit = {
+    val sceneContent =
+      sceneCache.getOrElse(sceneKey, createSceneContent(sceneKey))
+    sceneCache += (sceneKey -> sceneContent)
     currentSceneContent = sceneContent
 
-    // Update the rootPane content
     Platform.runLater {
       rootPane.children.clear()
       rootPane.children.add(sceneContent)
       sceneContent.requestFocus()
 
       // Trigger initial render for running state
-      if (state == State.Running) {
+      if (sceneKey == "Running") {
         updateRender()
       }
     }
   }
-  def createSceneContent(state: State): Parent = {
-    val sceneId = state match {
-      case State.Menu    => "menu"
-      case State.Config  => "config"
-      case State.Running => "running"
-    }
 
+  def createSceneContent(sceneKey: String): Parent = {
+    val sceneId = sceneKey.toLowerCase // "menu", "config", "running"
     val fxmlPath = s"/fxml/${sceneId}.fxml"
-    val loader = FXMLLoader(getClass.getResource(s"/fxml/${sceneId}.fxml"))
+    val loader = new FXMLLoader(getClass.getResource(fxmlPath))
     loader.setController(actionManager)
     loader.load[Parent]()
   }
@@ -108,10 +103,10 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
       event match {
         case Event.StartGameEvent | Event.MoveFigureEvent(_) |
             Event.ChangeSelectedFigureEvent(_) =>
-          switchToScene(State.Running)
+          switchToScene("Running")
           updateRender() // Update GUI after game state changes
         case Event.ConfigEvent =>
-          switchToScene(State.Config)
+          switchToScene("Config")
           updateConfigRender() // Update configuration labels when config changes
         case Event.PlayDiceEvent(rolled) =>
           updateRender() // Update GUI to show dice result
@@ -128,7 +123,7 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
           updateRender() // Update GUI after undo/redo
           showStatusMessage(s"${event.toString} executed!")
         case Event.BackToMenuEvent =>
-          switchToScene(State.Menu)
+          switchToScene("Menu")
         case Event.WinEvent(playerId) =>
           showWinDialog(playerId)
         case Event.ErrorEvent(message) =>
@@ -232,7 +227,7 @@ class GUI(controller: IController) extends JFXApp3 with Observer {
         import javafx.scene.input.KeyCode
         if (event.getCode == KeyCode.ENTER || event.getCode == KeyCode.ESCAPE) {
           hideWinOverlay()
-          switchToScene(State.Menu)
+          switchToScene("Menu")
         }
       }
 

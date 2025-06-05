@@ -1,16 +1,19 @@
-package de.htwg.se.MAEDN.aview
+package de.htwg.se.MAEDN.aview.tui
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.model.states._
 import de.htwg.se.MAEDN.util._
 import de.htwg.se.MAEDN.controller._
 import de.htwg.se.MAEDN.util.Color
-import de.htwg.se.MAEDN.aview.TextDisplay
+import de.htwg.se.MAEDN.aview.tui.TextDisplay
 import scala.io.AnsiColor
-import de.htwg.se.MAEDN.model.PlayerFactory
-import de.htwg.se.MAEDN.model.Board
+import de.htwg.se.MAEDN.model.BoardImp.Board
+import de.htwg.se.MAEDN.model.IBoard
+import de.htwg.se.MAEDN.model.PlayerImp.Player
+import de.htwg.se.MAEDN.model.FigureImp.Figure
+import de.htwg.se.MAEDN.util.PlayerFactory
+import de.htwg.se.MAEDN.model.StatesImp.{RunningState, ConfigState}
 
 class TextDisplaySpec extends AnyWordSpec with Matchers {
 
@@ -20,8 +23,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
 
     "render 'N ' for a field with no figure and no start field" in {
       val size = 4
-      val board = Board(size)
-
+      val board = IBoard(size)
       // Spieler mit Startfeld z. B. auf Position 0 → wir testen eine andere, z. B. 7
       val players = PlayerFactory(1, 1) // RED
 
@@ -39,7 +41,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
 
     "render Home and Goal sections for all five player colors" in {
       val size = 4
-      val board = Board(size)
+      val board = IBoard(size)
       val players = PlayerFactory(5, 1)
 
       val result = TextDisplay.printBoard(
@@ -49,9 +51,8 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
         players = players
       )
 
-      // Hier prüfen wir auf "RED Home:", "BLUE Goal:" usw.
       Color.values.foreach { color =>
-        val colorName = color.toString // ergibt "RED", "BLUE", ...
+        val colorName = color.toString
         result should include(s"$colorName Home:")
         result should include(s"$colorName Goal:")
       }
@@ -59,10 +60,8 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
 
     "include 'N ' for empty main track positions without start fields" in {
       val size = 4
-      val board = Board(size)
-      val players =
-        List
-          .empty[Player] // keine Spieler → keine Figuren, keine Startpositionen
+      val board = IBoard(size)
+      val players = List.empty[Player] // keine Spieler
 
       val result = TextDisplay.printBoard(
         board = board,
@@ -79,22 +78,22 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     }
 
     "render the correct title color in printCover (green for running)" in {
-      val controller = new Controller()
-      val state = new RunningState(controller, 0, Board(4), PlayerFactory(2, 4))
+      val controller = new DummyController()
+      val state = RunningState(controller, 0, IBoard(4), PlayerFactory(2, 4))
       val result = TextDisplay.printCover(state)
       result should include("Mensch ärger dich nicht")
       result should include("\u001b[32m") // GREEN
     }
 
     "render yellow title for config state" in {
-      val controller = new Controller()
-      val state = new ConfigState(controller, 0, Board(4), PlayerFactory(2, 4))
+      val controller = new DummyController()
+      val state = ConfigState(controller, 0, IBoard(4), PlayerFactory(2, 4))
       val result = TextDisplay.printCover(state)
       result should include("\u001b[33m") // YELLOW
     }
 
     "render a flat board with correct length" in {
-      val board = Board(4)
+      val board = IBoard(4)
       val result = TextDisplay.printFlatBoard(board)
       result should include("? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ?")
     }
@@ -111,13 +110,13 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val player1 = Player(1, Nil, Color.RED)
       val player2 = Player(2, Nil, Color.BLUE)
 
-      val figures1 = List.tabulate(4)(i => Figure(i, player1, -1)) // Home
-      val figures2 = List.tabulate(4)(i => Figure(i, player2, -1)) // Home
+      val figures1 = List.tabulate(4)(i => Figure(i, player1, -1, 4)) // Home
+      val figures2 = List.tabulate(4)(i => Figure(i, player2, -1, 4)) // Home
 
       val red = Player(1, figures1, Color.RED)
       val blue = Player(2, figures2, Color.BLUE)
 
-      val board = Board(4)
+      val board = IBoard(4)
       val raw = TextDisplay.printBoard(
         board,
         selectedFigure = 1,
@@ -138,10 +137,10 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val player = Player(1, Nil, Color.RED)
 
-      val figure = Figure(1, player, 0) // index 0 → Normal(0)
+      val figure = Figure(1, player, 0, 4) // index 0 → Normal(0)
       val red = Player(1, List(figure), Color.RED)
 
-      val board = Board(boardSize)
+      val board = IBoard(boardSize)
 
       val result = stripAnsi(
         TextDisplay.printBoard(
@@ -159,12 +158,12 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val dummyPlayer = Player(1, Nil, Color.RED)
 
-      val f0 = Figure(0, dummyPlayer, -1)
-      val f1 = Figure(1, dummyPlayer, boardSize * 4 + 1)
+      val f0 = Figure(0, dummyPlayer, -1, 4)
+      val f1 = Figure(1, dummyPlayer, boardSize * 4 + 1, 4)
       val red = Player(1, List(f0, f1), Color.RED)
       val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
 
-      val board = Board(boardSize)
+      val board = IBoard(boardSize)
       val result = stripAnsi(
         TextDisplay.printBoard(
           board,
@@ -180,10 +179,10 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     "render unselected figure on main track as plain F{id}" in {
       val boardSize = 4
       val player = Player(1, Nil, Color.RED)
-      val figure = Figure(2, player, 0) // index 0 → Position.Normal(0)
+      val figure = Figure(2, player, 0, 4) // index 0 → Position.Normal(0)
       val red = player.copy(figures = List(figure))
 
-      val board = Board(boardSize)
+      val board = IBoard(boardSize)
 
       val result = stripAnsi(
         TextDisplay.printBoard(
@@ -202,12 +201,12 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
       val boardSize = 4
       val dummyPlayer = Player(1, Nil, Color.RED)
 
-      val f0 = Figure(1, dummyPlayer, boardSize * 4)
-      val f1 = Figure(2, dummyPlayer, -1)
+      val f0 = Figure(1, dummyPlayer, boardSize * 4, 4)
+      val f1 = Figure(2, dummyPlayer, -1, 4)
       val red = Player(1, List(f0, f1), Color.RED)
       val fixedPlayer = red.copy(figures = red.figures.map(_.copy(owner = red)))
 
-      val board = Board(boardSize)
+      val board = IBoard(boardSize)
       val result = stripAnsi(
         TextDisplay.printBoard(
           board,
@@ -224,11 +223,10 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     "TextDisplay.printBoard" should {
       "render sections for a manually created WHITE player" in {
         val size = 4
-        val board = Board(size)
-
+        val board = IBoard(size)
         val whitePlayer = Player(
           id = 5,
-          figures = List(Figure(1, null, -1)), // Dummy
+          figures = List(Figure(1, null, -1, 4)), // Dummy
           color = Color.WHITE
         )
 
@@ -248,7 +246,7 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     }
 
     "render 'N ' using var board2 and assert only" in {
-      var board2 = Board(4)
+      var board2 = IBoard(4)
       val players = Nil
 
       val result = TextDisplay.printBoard(
@@ -262,4 +260,22 @@ class TextDisplaySpec extends AnyWordSpec with Matchers {
     }
 
   }
+}
+
+class DummyController extends IController {
+  var manager = null
+  def executeCommand(
+      command: de.htwg.se.MAEDN.controller.command.Command
+  ): Unit = ()
+  def add(observer: de.htwg.se.MAEDN.util.Observer): Unit = ()
+  def remove(observer: de.htwg.se.MAEDN.util.Observer): Unit = ()
+  def undoStack =
+    new scala.collection.mutable.Stack[de.htwg.se.MAEDN.model.IMemento]()
+  def redoStack =
+    new scala.collection.mutable.Stack[de.htwg.se.MAEDN.model.IMemento]()
+  def eventQueue =
+    new scala.collection.mutable.PriorityQueue[de.htwg.se.MAEDN.util.Event]()(
+      Ordering.by(_.hashCode())
+    )
+  def enqueueEvent(event: de.htwg.se.MAEDN.util.Event): Unit = ()
 }

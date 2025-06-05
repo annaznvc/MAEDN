@@ -1,8 +1,9 @@
-package de.htwg.se.MAEDN.model.states
+package de.htwg.se.MAEDN.model.StatesImp
 
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.util.Event
+import de.htwg.se.MAEDN.model.BoardImp.Board
+import de.htwg.se.MAEDN.util.PlayerFactory
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,7 +12,17 @@ class MenuStateSpec extends AnyWordSpec with Matchers {
   "A MenuState" should {
 
     val controller = new Controller
-    val state = MenuState(controller, 0, Board(8), PlayerFactory(2, 4))
+    val state = MenuState(
+      controller,
+      0,
+      Board(
+        8,
+        IMoveStrategy.createNormalMoveStrategy(),
+        IMoveStrategy.createToBoardStrategy(),
+        IMoveStrategy.createKickFigureStrategy()
+      ),
+      PlayerFactory(2, 4)
+    )
 
     "have state == Menu" in {
       state.state shouldBe State.Menu

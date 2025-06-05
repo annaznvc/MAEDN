@@ -1,8 +1,9 @@
-package de.htwg.se.MAEDN.model.states
+package de.htwg.se.MAEDN.model.StatesImp
 
 import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.util.Event
+import de.htwg.se.MAEDN.model.BoardImp.Board
+import de.htwg.se.MAEDN.util.PlayerFactory
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -11,9 +12,14 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
   "A ConfigState" should {
 
     val controller = new Controller
-    val board = Board(8)
-    val players = PlayerFactory(2, 4)
-    val state = ConfigState(controller, 0, board, players)
+    def board(size: Int) = Board(
+      size,
+      IMoveStrategy.createNormalMoveStrategy(),
+      IMoveStrategy.createToBoardStrategy(),
+      IMoveStrategy.createKickFigureStrategy()
+    )
+    def players(count: Int, figures: Int) = PlayerFactory(count, figures)
+    val state = ConfigState(controller, 0, board(8), players(2, 4))
 
     "have state == Config" in {
       state.state shouldBe State.Config
@@ -32,7 +38,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "increase board size but not exceed 12" in {
-      val newState = state.copy(board = Board(11)).increaseBoardSize()
+      val newState = state.copy(board = board(11)).increaseBoardSize()
       newState.isSuccess shouldBe true
       newState.get.board.size shouldBe 12
 
@@ -41,7 +47,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "decrease board size but not go below 8" in {
-      val newState = state.copy(board = Board(9)).decreaseBoardSize()
+      val newState = state.copy(board = board(9)).decreaseBoardSize()
       newState.isSuccess shouldBe true
       newState.get.board.size shouldBe 8
 
@@ -50,7 +56,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "increase number of figures per player but not exceed board size" in {
-      val s = state.copy(players = PlayerFactory(2, 7), board = Board(8))
+      val s = state.copy(players = players(2, 7), board = board(8))
       val newState = s.increaseFigures()
       newState.isSuccess shouldBe true
       newState.get.players.head.figures should have size 8
@@ -60,7 +66,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "decrease number of figures per player but not go below 1" in {
-      val s = state.copy(players = PlayerFactory(2, 2))
+      val s = state.copy(players = players(2, 2))
       val newState = s.decreaseFigures()
       newState.isSuccess shouldBe true
       newState.get.players.head.figures should have size 1
@@ -70,7 +76,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "increase number of players up to 4" in {
-      val s = state.copy(players = PlayerFactory(2, 3))
+      val s = state.copy(players = players(2, 3))
       val newState = s.moveUp()
       newState.isSuccess shouldBe true
       newState.get.players should have size 3
@@ -80,7 +86,7 @@ class ConfigStateSpec extends AnyWordSpec with Matchers {
     }
 
     "decrease number of players down to 2" in {
-      val s = state.copy(players = PlayerFactory(4, 3))
+      val s = state.copy(players = players(4, 3))
       val newState = s.moveDown()
       newState.isSuccess shouldBe true
       newState.get.players should have size 3

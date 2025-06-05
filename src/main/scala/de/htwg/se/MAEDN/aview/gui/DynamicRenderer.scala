@@ -17,14 +17,14 @@ import javafx.application.Platform
   */
 object DynamicRenderer {
 
-  private val FIGURE_SIZE = 20.0
-  private val BOARD_CELL_SIZE = 30.0
+  val FIGURE_SIZE = 20.0
+  val BOARD_CELL_SIZE = 30.0
 
   /** Position case class for board coordinates */
   case class BoardPos(r: Int, c: Int)
 
   /** Generates a central cross path for any size (8-12 recommended) */
-  private def generateCrossPath(
+  def generateCrossPath(
       size: Int,
       gridSize: Int = 13
   ): Seq[BoardPos] = {
@@ -137,7 +137,7 @@ object DynamicRenderer {
 
   /** Renders player status information (figures in goal)
     */
-  private def renderPlayerStatus(manager: IManager, sceneRoot: Parent): Unit = {
+  def renderPlayerStatus(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val statusId = player.color match {
         case Color.RED    => "redPlayerStatus"
@@ -165,7 +165,7 @@ object DynamicRenderer {
 
   /** Renders current player indicator
     */
-  private def renderCurrentPlayer(
+  def renderCurrentPlayer(
       manager: IManager,
       sceneRoot: Parent
   ): Unit = {
@@ -189,7 +189,7 @@ object DynamicRenderer {
 
   /** Renders dice result and updates dice button state
     */
-  private def renderDiceResult(manager: IManager, sceneRoot: Parent): Unit = {
+  def renderDiceResult(manager: IManager, sceneRoot: Parent): Unit = {
     // Update dice result label
     NodeFinder.findNodeById(sceneRoot, "diceResultLabel") match {
       case Some(label: Label) =>
@@ -208,7 +208,7 @@ object DynamicRenderer {
   /** Updates the dice button enabled/disabled state based on whether player can
     * make moves
     */
-  private def updateDiceButtonState(
+  def updateDiceButtonState(
       manager: IManager,
       sceneRoot: Parent
   ): Unit = {
@@ -231,7 +231,7 @@ object DynamicRenderer {
 
   /** Renders start fields for all players
     */
-  private def renderStartFields(manager: IManager, sceneRoot: Parent): Unit = {
+  def renderStartFields(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val gridId = player.color match {
         case Color.RED    => "redStartGridPane"
@@ -258,7 +258,7 @@ object DynamicRenderer {
 
   /** Renders goal paths for all players
     */
-  private def renderGoalPaths(manager: IManager, sceneRoot: Parent): Unit = {
+  def renderGoalPaths(manager: IManager, sceneRoot: Parent): Unit = {
     manager.players.foreach { player =>
       val pathId = player.color match {
         case Color.RED    => "redGoalGridPane"
@@ -295,7 +295,7 @@ object DynamicRenderer {
 
   /** Renders the main game board
     */
-  private def renderMainGameBoard(
+  def renderMainGameBoard(
       manager: IManager,
       sceneRoot: Parent
   ): Unit = {
@@ -308,7 +308,7 @@ object DynamicRenderer {
 
   /** Updates visibility of player areas based on number of active players
     */
-  private def updatePlayerAreaVisibility(
+  def updatePlayerAreaVisibility(
       manager: IManager,
       sceneRoot: Parent
   ): Unit = {
@@ -370,7 +370,7 @@ object DynamicRenderer {
 
   /** Renders a start field grid for a specific player
     */
-  private def renderStartFieldGrid(
+  def renderStartFieldGrid(
       player: IPlayer,
       gridPane: GridPane,
       selectedFigure: Int,
@@ -401,7 +401,7 @@ object DynamicRenderer {
 
   /** Renders a goal path VBox for a specific player
     */
-  private def renderGoalPathVBox(
+  def renderGoalPathVBox(
       player: IPlayer,
       vbox: VBox,
       boardSize: Int,
@@ -432,7 +432,7 @@ object DynamicRenderer {
 
   /** Renders a goal path GridPane for a specific player (horizontal layout)
     */
-  private def renderGoalPathGridPane(
+  def renderGoalPathGridPane(
       player: IPlayer,
       gridPane: GridPane,
       boardSize: Int,
@@ -468,7 +468,7 @@ object DynamicRenderer {
 
   /** Renders a goal path VBox with horizontal arrangement
     */
-  private def renderGoalPathVBoxHorizontal(
+  def renderGoalPathVBoxHorizontal(
       player: IPlayer,
       vbox: VBox,
       boardSize: Int,
@@ -507,7 +507,7 @@ object DynamicRenderer {
 
   /** Renders the main game board grid using cross-path layout
     */
-  private def renderGameBoardGrid(
+  def renderGameBoardGrid(
       manager: IManager,
       gridPane: GridPane
   ): Unit = {
@@ -566,7 +566,7 @@ object DynamicRenderer {
 
   /** Creates a figure node (circle representing a game piece)
     */
-  private def createFigureNode(
+  def createFigureNode(
       color: Color,
       figureId: Int,
       isSelected: Boolean
@@ -590,7 +590,7 @@ object DynamicRenderer {
   /** Creates a larger figure node for goal areas (horizontal rectangle with
     * circle)
     */
-  private def createFigureNodeLarge(
+  def createFigureNodeLarge(
       color: Color,
       figureId: Int,
       isSelected: Boolean
@@ -613,7 +613,7 @@ object DynamicRenderer {
 
   /** Creates an empty field node
     */
-  private def createEmptyFieldNode(): Node = {
+  def createEmptyFieldNode(): Node = {
     val rect = new Rectangle(FIGURE_SIZE, FIGURE_SIZE)
     rect.setFill(Paint.valueOf("#F0F0F0"))
     rect.setStroke(Paint.valueOf("#CCCCCC"))
@@ -623,7 +623,7 @@ object DynamicRenderer {
 
   /** Creates a goal field node (empty goal slot)
     */
-  private def createGoalFieldNode(color: Color): Node = {
+  def createGoalFieldNode(color: Color): Node = {
     val rect = new Rectangle(FIGURE_SIZE, FIGURE_SIZE)
     rect.setFill(getLightColorPaint(color))
     rect.setStroke(getColorPaint(color))
@@ -633,7 +633,7 @@ object DynamicRenderer {
 
   /** Creates a larger goal field node (horizontal rectangle for goal areas)
     */
-  private def createGoalFieldNodeLarge(color: Color): Node = {
+  def createGoalFieldNodeLarge(color: Color): Node = {
     val rect = new Rectangle(BOARD_CELL_SIZE * 1.5, BOARD_CELL_SIZE)
     rect.setFill(getLightColorPaint(color))
     rect.setStroke(getColorPaint(color))
@@ -643,7 +643,7 @@ object DynamicRenderer {
 
   /** Creates a start field node
     */
-  private def createStartFieldNode(color: Color): Node = {
+  def createStartFieldNode(color: Color): Node = {
     val rect = new Rectangle(BOARD_CELL_SIZE, BOARD_CELL_SIZE)
     rect.setFill(getLightColorPaint(color))
     rect.setStroke(getColorPaint(color))
@@ -653,7 +653,7 @@ object DynamicRenderer {
 
   /** Creates a normal field node
     */
-  private def createNormalFieldNode(): Node = {
+  def createNormalFieldNode(): Node = {
     val rect = new Rectangle(BOARD_CELL_SIZE, BOARD_CELL_SIZE)
     rect.setFill(Paint.valueOf("#FFFFFF"))
     rect.setStroke(Paint.valueOf("#8B4513"))
@@ -663,7 +663,7 @@ object DynamicRenderer {
 
   /** Gets the paint color for a player color
     */
-  private def getColorPaint(color: Color): Paint = color match {
+  def getColorPaint(color: Color): Paint = color match {
     case Color.RED    => Paint.valueOf("#FF6B6B")
     case Color.BLUE   => Paint.valueOf("#4ECDC4")
     case Color.GREEN  => Paint.valueOf("#95E1A3")
@@ -673,7 +673,7 @@ object DynamicRenderer {
 
   /** Gets a lighter version of the color for backgrounds
     */
-  private def getLightColorPaint(color: Color): Paint = color match {
+  def getLightColorPaint(color: Color): Paint = color match {
     case Color.RED    => Paint.valueOf("#FFE4E1")
     case Color.BLUE   => Paint.valueOf("#E0F6FF")
     case Color.GREEN  => Paint.valueOf("#F0FFF0")

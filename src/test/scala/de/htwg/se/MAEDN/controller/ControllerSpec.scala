@@ -1,14 +1,24 @@
 package de.htwg.se.MAEDN.controller
 
-import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.controller.command.Command
-import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.model.GameDataImp.GameData
+import de.htwg.se.MAEDN.model.BoardImp.Board
+import de.htwg.se.MAEDN.util.PlayerFactory
+import de.htwg.se.MAEDN.model.IManager
+import de.htwg.se.MAEDN.model.State
+
+import de.htwg.se.MAEDN.model.StrategyImp.{KickFigureStrategy, NormalMoveStrategy, ToBoardStrategy}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.Eventually
-
-import scala.util.{Success, Failure, Try}
-import scala.concurrent.duration.*
+import org.scalatest.time.{Millis, Seconds, Span}
+import scala.concurrent.duration._
+import scala.util.{Try, Success, Failure}
+import de.htwg.se.MAEDN.util.{Event, Observer}
+import de.htwg.se.MAEDN.controller.command.Command
+// Dummy-Strategien für Tests
+val DefaultMoveStrategy = new NormalMoveStrategy()
+val DefaultToBoardStrategy = new ToBoardStrategy()
+val DefaultKickFigureStrategy = new KickFigureStrategy()
 
 class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
 
@@ -98,7 +108,7 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
 
   val dummyGameData: GameData = GameData(
     moves = 0,
-    board = Board(8),
+    board = Board(8, DefaultMoveStrategy, DefaultToBoardStrategy, DefaultKickFigureStrategy),
     players = PlayerFactory(2, 4),
     selectedFigure = 0,
     rolled = 0
@@ -107,16 +117,34 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
   class DummyManager(
       override val controller: Controller,
       memento: Option[GameData] = Some(dummyGameData)
-  ) extends Manager {
+  ) extends IManager {
     override val rolled: Int = 0
     override val state: State = State.Menu
     override def createMemento: Option[GameData] = memento
+    // Dummy-Implementierungen für alle abstrakten Methoden von IManager:
+    override def startGame() = ???
+    override def quitGame() = ???
+    override def moveUp() = ???
+    override def moveDown() = ???
+    override def increaseFigures() = ???
+    override def decreaseFigures() = ???
+    override def increaseBoardSize() = ???
+    override def decreaseBoardSize() = ???
+    override def playDice() = ???
+    override def playNext() = ???
+    override def moveFigure() = ???
+    override def getPlayers = Nil
+    override def getPlayerCount = 0
+    override def getFigureCount = 0
+    override def getBoardSize = 0
+    override def getCurrentPlayer = 0
+    override val selectedFigure: Int = 0
   }
 
   class DummyCommand(
       override val isNormal: Boolean,
-      val result: Try[Manager]
+      val result: Try[IManager]
   ) extends Command {
-    override def execute(): Try[Manager] = result
+    override def execute(): Try[IManager] = result
   }
 }
