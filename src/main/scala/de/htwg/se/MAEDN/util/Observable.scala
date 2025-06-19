@@ -36,6 +36,7 @@ package de.htwg.se.MAEDN.util
 import scala.collection.mutable.PriorityQueue
 import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Try, Failure, Success}
+import de.htwg.se.MAEDN.module.Injectable
 
 // Observer trait remains unchanged
 trait Observer {
@@ -51,7 +52,8 @@ object Observable {
   }
 }
 
-class Observable(using ec: ExecutionContext = ExecutionContext.global) {
+class Observable(using ec: ExecutionContext = ExecutionContext.global)
+    extends Injectable {
   import Observable._
 
   private var subscribers: Vector[Observer] = Vector()

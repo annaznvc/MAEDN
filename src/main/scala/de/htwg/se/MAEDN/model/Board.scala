@@ -1,21 +1,19 @@
-package de.htwg.se.MAEDN.model.BoardImp
+package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.util.Color
 
-import de.htwg.se.MAEDN.model.{IBoard, IFigure, IMoveStrategy}
-
 case class Board(
     size: Int = 8,
-    moveStrategy: IMoveStrategy,
-    toBoardStrategy: IMoveStrategy,
-    kickFigureStrategy: IMoveStrategy
-) extends IBoard {
+    moveStrategy: MoveStrategy,
+    toBoardStrategy: MoveStrategy,
+    kickFigureStrategy: MoveStrategy
+) {
 
   def moveFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       rolled: Int
-  ): List[IFigure] = {
+  ): List[Figure] = {
     val newFigureList =
       if (!figure.isOnBoard)
         toBoardStrategy.moveFigure(figure, figures, size, rolled)
@@ -32,7 +30,7 @@ case class Board(
   }
 
   def checkIfMoveIsPossible(
-      figures: List[IFigure],
+      figures: List[Figure],
       rolled: Int,
       color: Color
   ): Boolean = {
@@ -46,8 +44,8 @@ case class Board(
   }
 
   def canFigureMove(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       rolled: Int
   ): Boolean = {
     val size = this.size
@@ -66,5 +64,25 @@ case class Board(
     } else {
       moveStrategy.canMove(figure, figures, size, rolled)
     }
+  }
+}
+
+object Board {
+  def apply(
+      size: Int,
+      moveStrategy: MoveStrategy,
+      toBoardStrategy: MoveStrategy,
+      kickFigureStrategy: MoveStrategy
+  ): Board = {
+    new Board(size, moveStrategy, toBoardStrategy, kickFigureStrategy)
+  }
+
+  def apply(size: Int): Board = {
+    new Board(
+      size,
+      MoveStrategy.createNormalMoveStrategy(),
+      MoveStrategy.createToBoardStrategy(),
+      MoveStrategy.createKickFigureStrategy()
+    )
   }
 }

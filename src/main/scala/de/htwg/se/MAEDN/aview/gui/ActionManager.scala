@@ -3,80 +3,81 @@ package de.htwg.se.MAEDN.aview.gui
 import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.model.IManager
 import de.htwg.se.MAEDN.controller.command._
+import de.htwg.se.MAEDN.module.Injectable
 import javafx.event.ActionEvent
 import javafx.scene.input.{KeyCode}
 import javafx.scene.input.KeyEvent
 
 import javafx.fxml.FXML
 
-class ActionManager(controller: IController) {
+class ActionManager(controller: IController) extends Injectable {
 
   // Method to handle GUI actions (buttons, menu items, etc.)
   @FXML
   def onPlayNext(): Unit = {
-    controller.executeCommand(PlayNextCommand(controller))
+    controller.executeCommand(inject[PlayNextCommand])
   }
 
   @FXML
   def onMoveUp(): Unit = {
-    controller.executeCommand(MoveUpCommand(controller))
+    controller.executeCommand(inject[MoveUpCommand])
   }
 
   @FXML
   def onMoveDown(): Unit = {
-    controller.executeCommand(MoveDownCommand(controller))
+    controller.executeCommand(inject[MoveDownCommand])
   }
 
   @FXML
   def onIncreaseFigures(): Unit = {
-    controller.executeCommand(IncreaseFiguresCommand(controller))
+    controller.executeCommand(inject[IncreaseFiguresCommand])
   }
 
   @FXML
   def onDecreaseFigures(): Unit = {
-    controller.executeCommand(DecreaseFiguresCommand(controller))
+    controller.executeCommand(inject[DecreaseFiguresCommand])
   }
 
   @FXML
   def onIncreaseBoardSize(): Unit = {
-    controller.executeCommand(IncreaseBoardSizeCommand(controller))
+    controller.executeCommand(inject[IncreaseBoardSizeCommand])
   }
 
   @FXML
   def onDecreaseBoardSize(): Unit = {
-    controller.executeCommand(DecreaseBoardSizeCommand(controller))
+    controller.executeCommand(inject[DecreaseBoardSizeCommand])
   }
 
   @FXML
   def onQuitGame(): Unit = {
-    controller.executeCommand(QuitGameCommand(controller))
+    controller.executeCommand(inject[QuitGameCommand])
   }
 
   @FXML
   def onStartGame(): Unit = {
-    controller.executeCommand(StartGameCommand(controller))
+    controller.executeCommand(inject[StartGameCommand])
   }
 
   @FXML
   def onUndo(): Unit = {
-    controller.executeCommand(UndoCommand(controller))
+    controller.executeCommand(inject[UndoCommand])
   }
 
   @FXML
   def onRedo(): Unit = {
-    controller.executeCommand(RedoCommand(controller))
+    controller.executeCommand(inject[RedoCommand])
   }
 
   @FXML
   def onBackToMenu(): Unit = {
     // Use QuitGameCommand to go back to menu (based on ConfigState.quitGame implementation)
-    controller.executeCommand(QuitGameCommand(controller))
+    controller.executeCommand(inject[QuitGameCommand])
   }
 
   @FXML
   def onOpenConfiguration(): Unit = {
     // Use StartGameCommand to go to config (based on MenuState.startGame implementation)
-    controller.executeCommand(StartGameCommand(controller))
+    controller.executeCommand(inject[StartGameCommand])
   }
 
   // Handle keyboard shortcuts

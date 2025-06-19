@@ -1,16 +1,18 @@
-package de.htwg.se.MAEDN.model.FigureImp
+package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.util.Position
-import de.htwg.se.MAEDN.model.{IFigure, IPlayer, Collision}
+
+enum Collision:
+  case NoCollision, OwnCollision, EnemyCollision
 
 // A Figure belongs to a Player and moves across Fields
 case class Figure(
     id: Int,
-    owner: IPlayer,
+    owner: Player,
     index: Int,
     figureCount: Int
-) extends IFigure {
-  override def adjustedIndex(size: Int): Position = {
+) {
+  def adjustedIndex(size: Int): Position = {
     if (index == -1) Position.Home(id)
     else if (index < 4 * size)
       Position.Normal((index + owner.color.offset * size) % (size * 4))
@@ -19,7 +21,7 @@ case class Figure(
     else
       Position.OffBoard(0)
   }
-  override def newAdjustedIndex(size: Int, rolled: Int): Position = {
+  def newAdjustedIndex(size: Int, rolled: Int): Position = {
     if (index == -1) Position.Home(id)
     else if (index + rolled < 4 * size)
       Position.Normal((index + rolled + owner.color.offset * size) % (size * 4))
@@ -29,13 +31,13 @@ case class Figure(
       Position.OffBoard(0)
   }
 
-  override def isOnBoard: Boolean = index >= 0
-  override def isOnStart: Boolean = index == 0
-  override def isOnGoal(size: Int): Boolean =
+  def isOnBoard: Boolean = index >= 0
+  def isOnStart: Boolean = index == 0
+  def isOnGoal(size: Int): Boolean =
     index >= (size * 4) && index < (size * 4 + figureCount)
 
-  override def checkForCollision(
-      other: IFigure,
+  def checkForCollision(
+      other: Figure,
       size: Int
   ): Collision = {
     if (this == other) {
@@ -51,8 +53,8 @@ case class Figure(
     }
   }
 
-  override def checkForPossibleCollision(
-      other: IFigure,
+  def checkForPossibleCollision(
+      other: Figure,
       size: Int,
       newPosition: Position
   ): Collision = {

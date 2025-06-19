@@ -1,15 +1,16 @@
-package de.htwg.se.MAEDN.model.StrategyImp
+package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{IBoard, IFigure, IMoveStrategy, Collision}
+import de.htwg.se.MAEDN.model.{Board, Figure, MoveStrategy, Collision}
 import de.htwg.se.MAEDN.util.Position
+import de.htwg.se.MAEDN.module.Injectable
 
-class KickFigureStrategy extends IMoveStrategy {
+class KickFigureStrategy extends MoveStrategy with Injectable {
   override def moveFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
-  ): List[IFigure] = {
+  ): List[Figure] = {
     figures.map { f =>
       val movingPos = figure.adjustedIndex(size)
       val targetPos = f.adjustedIndex(size)
@@ -29,8 +30,8 @@ class KickFigureStrategy extends IMoveStrategy {
 
   // Checks if there are collisions with other figures
   override def canMove(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
   ): Boolean =

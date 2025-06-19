@@ -1,19 +1,21 @@
-package de.htwg.se.MAEDN.model.StatesImp
+package de.htwg.se.MAEDN.model.statesImp
 
-import de.htwg.se.MAEDN.model.{IManager, IBoard, State, IMemento, IPlayer}
+import de.htwg.se.MAEDN.model.{IManager, Board, State, IMemento, Player}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.module.Injectable
 
 import scala.util.{Try, Success, Failure}
 
 case class RunningState(
     override val controller: IController,
     override val moves: Int,
-    override val board: IBoard,
-    override val players: List[IPlayer],
+    override val board: Board,
+    override val players: List[Player],
     override val rolled: Int = 0,
     override val selectedFigure: Int = 0
-) extends IManager {
+) extends IManager
+    with Injectable {
 
   override val state: State = State.Running
 
@@ -29,9 +31,9 @@ case class RunningState(
     controller.enqueueEvent(Event.ChangeSelectedFigureEvent(selected))
     copy(selectedFigure = selected)
   }
-
   override def playDice(): Try[IManager] = Try {
-    val newRolled = Dice.roll()
+    val dice = inject[Dice.type]
+    val newRolled = dice.roll()
     controller.enqueueEvent(Event.PlayDiceEvent(newRolled))
     val nextFigure = getNextMovableFigure(newRolled)
     copy(
@@ -167,7 +169,7 @@ case class RunningState(
     players.headOption.map(_.figures.size).getOrElse(0)
   override def getBoardSize: Int = board.size
   override def getCurrentPlayer: Int = moves % players.size
-  override def getPlayers: List[IPlayer] = players
+  override def getPlayers: List[Player] = players
 
   private def getNextMovableFigure(rolledValue: Int = rolled): Int =
     players(getCurrentPlayer).figures.zipWithIndex

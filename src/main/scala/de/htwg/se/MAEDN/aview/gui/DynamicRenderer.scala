@@ -371,7 +371,7 @@ object DynamicRenderer {
   /** Renders a start field grid for a specific player
     */
   private def renderStartFieldGrid(
-      player: IPlayer,
+      player: Player,
       gridPane: GridPane,
       selectedFigure: Int,
       isCurrentPlayer: Boolean
@@ -402,7 +402,7 @@ object DynamicRenderer {
   /** Renders a goal path VBox for a specific player
     */
   private def renderGoalPathVBox(
-      player: IPlayer,
+      player: Player,
       vbox: VBox,
       boardSize: Int,
       selectedFigure: Int,
@@ -433,7 +433,7 @@ object DynamicRenderer {
   /** Renders a goal path GridPane for a specific player (horizontal layout)
     */
   private def renderGoalPathGridPane(
-      player: IPlayer,
+      player: Player,
       gridPane: GridPane,
       boardSize: Int,
       selectedFigure: Int,
@@ -469,7 +469,7 @@ object DynamicRenderer {
   /** Renders a goal path VBox with horizontal arrangement
     */
   private def renderGoalPathVBoxHorizontal(
-      player: IPlayer,
+      player: Player,
       vbox: VBox,
       boardSize: Int,
       selectedFigure: Int,

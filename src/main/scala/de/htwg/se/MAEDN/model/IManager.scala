@@ -1,7 +1,7 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.controller.IController
-import de.htwg.se.MAEDN.model.StatesImp.{MenuState, RunningState}
+import de.htwg.se.MAEDN.model.statesImp.{MenuState, RunningState}
 import de.htwg.se.MAEDN.util.{Color, PlayerFactory}
 
 import scala.util.Try
@@ -9,8 +9,8 @@ import scala.util.Try
 trait IManager extends IState with IOriginator {
 
   val moves: Int = 0
-  val board: IBoard = IBoard(8)
-  val players: List[IPlayer] = PlayerFactory(2, 4)
+  val board: Board = Board(8)
+  val players: List[Player] = PlayerFactory(2, 4)
   val selectedFigure: Int = 0
 
   def increaseBoardSize(): Try[IManager] = Try(this)
@@ -31,15 +31,16 @@ trait IManager extends IState with IOriginator {
   def getFigureCount: Int = players.head.figures.size
   def getBoardSize: Int = board.size
   def getCurrentPlayer: Int = moves % players.size
-  def getPlayers: List[IPlayer] = players
+  def getPlayers: List[Player] = players
 }
 
 object IManager {
   def apply(controller: IController): IManager = {
+    // Create an initial MenuState for the game
     MenuState(
       controller,
       0,
-      IBoard(8),
+      Board(8),
       PlayerFactory(2, 4)
     )
   }
@@ -47,11 +48,12 @@ object IManager {
   def createRunningState(
       controller: IController,
       moves: Int,
-      board: IBoard,
-      players: List[IPlayer],
+      board: Board,
+      players: List[Player],
       rolled: Int = 0,
       selectedFigure: Int = 0
   ): IManager = {
+    // Create a running state for the game
     RunningState(controller, moves, board, players, rolled, selectedFigure)
   }
 }

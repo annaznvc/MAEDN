@@ -1,7 +1,7 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.controller.IController
-import de.htwg.se.MAEDN.model.GameDataImp.GameData
+import de.htwg.se.MAEDN.model.gameDataImp.GameData
 
 import scala.util.Try
 
@@ -47,8 +47,8 @@ object IMemento {
     */
   def apply(
       moves: Int,
-      board: IBoard,
-      players: List[IPlayer],
+      board: Board,
+      players: List[Player],
       selectedFigure: Int,
       rolled: Int
   ) = {

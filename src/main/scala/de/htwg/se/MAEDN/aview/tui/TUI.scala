@@ -4,12 +4,12 @@ import org.jline.terminal.{TerminalBuilder, Terminal}
 import scala.io.AnsiColor.{RED, RESET, GREEN, YELLOW}
 
 import de.htwg.se.MAEDN.util.{Event, Observer}
-import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.controller.command._
+import de.htwg.se.MAEDN.module.Injectable
 
-class TUI(controller: IController) extends Observer {
+class TUI(controller: IController) extends Observer with Injectable {
 
   var continue = true
   controller.add(this)
@@ -19,7 +19,6 @@ class TUI(controller: IController) extends Observer {
     terminal.writer().println(s)
     terminal.flush()
   }
-
   val terminal: Terminal = TerminalBuilder.builder().system(true).build()
   val inputManager = InputManager(controller, terminal)
 

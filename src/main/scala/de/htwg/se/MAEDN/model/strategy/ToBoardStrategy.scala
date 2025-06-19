@@ -1,19 +1,20 @@
-package de.htwg.se.MAEDN.model.StrategyImp
+package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{IBoard, IMoveStrategy, IFigure, Collision}
+import de.htwg.se.MAEDN.model.{Board, MoveStrategy, Figure, Collision}
 import de.htwg.se.MAEDN.util.Position
+import de.htwg.se.MAEDN.module.Injectable
 
 /** The OnBoardStrategy is responsible for moving a figure from home to the
   * start position when a 6 is rolled. It is used when the figure is not on the
   * board.
   */
-class ToBoardStrategy extends IMoveStrategy {
+class ToBoardStrategy extends MoveStrategy with Injectable {
   override def moveFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
-  ): List[IFigure] = {
+  ): List[Figure] = {
     if (!canMove(figure, figures, size, rolled)) {
       figures
     } else {
@@ -29,8 +30,8 @@ class ToBoardStrategy extends IMoveStrategy {
   }
 
   override def canMove(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
   ): Boolean = {

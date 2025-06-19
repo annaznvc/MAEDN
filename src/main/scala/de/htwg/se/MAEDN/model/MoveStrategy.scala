@@ -1,42 +1,43 @@
 package de.htwg.se.MAEDN.model
 
-import de.htwg.se.MAEDN.model.IFigure
-import de.htwg.se.MAEDN.model.StrategyImp.{
+import de.htwg.se.MAEDN.model.Figure
+import de.htwg.se.MAEDN.model.strategy.{
   KickFigureStrategy,
   NormalMoveStrategy,
   ToBoardStrategy
 }
+import de.htwg.se.MAEDN.module.DependencyInjector
 
-trait IMoveStrategy {
+trait MoveStrategy {
   def moveFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
-  ): List[IFigure]
+  ): List[Figure]
 
   def canMove(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
   ): Boolean
 
-  def isOnGoal(figure: IFigure, goalCount: Int, size: Int): Boolean =
+  def isOnGoal(figure: Figure, goalCount: Int, size: Int): Boolean =
     figure.index >= size * 4 - goalCount
 
   def collidingFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int
-  ): Option[IFigure] = {
+  ): Option[Figure] = {
     val adjustedIndex = figure.adjustedIndex(size)
     figures.find(f => f.adjustedIndex(size) == adjustedIndex && f != figure)
   }
 
   def isOnLastPossibleField(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       goalCount: Int,
       size: Int
   ): Boolean = {
@@ -62,18 +63,18 @@ trait IMoveStrategy {
   }
 }
 
-object IMoveStrategy {
-  def createKickFigureStrategy(): IMoveStrategy = {
-    new KickFigureStrategy()
+object MoveStrategy {
+  def createKickFigureStrategy(): MoveStrategy = {
+    DependencyInjector.getInstance[KickFigureStrategy]
   }
-  def createToBoardStrategy(): IMoveStrategy = {
-    new ToBoardStrategy()
+  def createToBoardStrategy(): MoveStrategy = {
+    DependencyInjector.getInstance[ToBoardStrategy]
   }
-  def createNormalMoveStrategy(): IMoveStrategy = {
-    new NormalMoveStrategy()
+  def createNormalMoveStrategy(): MoveStrategy = {
+    DependencyInjector.getInstance[NormalMoveStrategy]
   }
 
-  def apply(): IMoveStrategy = {
-    new NormalMoveStrategy()
+  def apply(): MoveStrategy = {
+    DependencyInjector.getInstance[NormalMoveStrategy]
   }
 }

@@ -28,7 +28,7 @@ trait IState {
   def playNext(): Try[IManager]
   def moveFigure(): Try[IManager]
 
-  def getPlayers: List[IPlayer]
+  def getPlayers: List[Player]
   def getPlayerCount: Int
   def getFigureCount: Int
   def getBoardSize: Int
