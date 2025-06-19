@@ -7,7 +7,7 @@ import org.jline.terminal.impl.DumbTerminal
 import org.jline.keymap.{BindingReader, KeyMap}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.charset.StandardCharsets
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.model.Board

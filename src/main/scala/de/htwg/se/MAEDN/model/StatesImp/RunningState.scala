@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.model.statesImp
 
-import de.htwg.se.MAEDN.model.{IManager, Board, State, IMemento, Player}
+import de.htwg.se.MAEDN.model.{IManager, Board, State, IMemento, Player, Figure}
 import de.htwg.se.MAEDN.util.{Event, Dice}
 import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.module.Injectable
@@ -13,11 +13,10 @@ case class RunningState(
     override val board: Board,
     override val players: List[Player],
     override val rolled: Int = 0,
-    override val selectedFigure: Int = 0
+    override val selectedFigure: Int = 0,
+    override val state: State = State.Running
 ) extends IManager
     with Injectable {
-
-  override val state: State = State.Running
 
   override def moveUp(): Try[IManager] = Try {
     val selected = (selectedFigure + 1) % players.head.figures.size
@@ -80,72 +79,97 @@ case class RunningState(
   }
 
   override def moveFigure(): Try[IManager] = Try {
-    val currentFigures = players(getCurrentPlayer).figures
-    val movableIndices = currentFigures.zipWithIndex.collect {
-      case (figure, idx)
-          if board.canFigureMove(figure, players.flatMap(_.figures), rolled) =>
-        idx
-    }
+    val currentPlayer = getCurrentPlayer
+    val currentFigures = players(currentPlayer).figures
+    val allFigures = players.flatMap(_.figures)
+    val movableIndices = getMovableIndices(currentFigures, allFigures)
+
     if (movableIndices.isEmpty) {
-      controller.enqueueEvent(
-        Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
-      )
-      copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
+      moveToNextPlayer()
     } else {
-      val selectedIdx =
-        if (movableIndices.size == 1) movableIndices.head else selectedFigure
+      val selectedIdx = selectFigureIndex(movableIndices)
       val selectedFig = currentFigures(selectedIdx)
-      if (
-        !board.canFigureMove(selectedFig, players.flatMap(_.figures), rolled)
-      ) {
-        if (movableIndices.isEmpty) {
-          controller.enqueueEvent(
-            Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
-          )
-          copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
-        } else {
-          copy(selectedFigure = movableIndices.head)
-        }
+
+      if (!board.canFigureMove(selectedFig, allFigures, rolled)) {
+        handleInvalidSelection(movableIndices)
       } else {
-        val figures = players.flatMap(_.figures)
-        val newFigures = board.moveFigure(selectedFig, figures, rolled)
-        if (newFigures == figures) {
-          if (movableIndices.isEmpty) {
-            controller.enqueueEvent(
-              Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
-            )
-            copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
-          } else {
-            copy(selectedFigure = movableIndices.head)
-          }
-        } else {
-          controller.enqueueEvent(Event.MoveFigureEvent(selectedFig.id))
-          val updatedPlayers = players.map { player =>
-            player.copy(figures = newFigures.filter(_.owner.id == player.id))
-          }
-          // Check for win condition after successful move
-          val currentPlayerId = getCurrentPlayer
-          val newState = copy(
-            players = updatedPlayers,
-            rolled = if (rolled == 6) 0 else -1,
-            selectedFigure = 0
-          )
-
-          // Check win condition using the updated players
-          val updatedPlayer = updatedPlayers(currentPlayerId)
-          val boardSize = getBoardSize
-          if (
-            updatedPlayer.figures.nonEmpty && updatedPlayer.figures.forall(
-              _.isOnGoal(boardSize)
-            )
-          ) {
-            controller.enqueueEvent(Event.WinEvent(currentPlayerId))
-          }
-
-          newState
-        }
+        executeMove(selectedFig, allFigures, currentPlayer)
       }
     }
+  }
+
+  private def getMovableIndices(
+      figures: List[Figure],
+      allFigures: List[Figure]
+  ): List[Int] = {
+    figures.zipWithIndex.collect {
+      case (figure, idx) if board.canFigureMove(figure, allFigures, rolled) =>
+        idx
+    }
+  }
+
+  private def selectFigureIndex(movableIndices: List[Int]): Int = {
+    if (movableIndices.size == 1) movableIndices.head else selectedFigure
+  }
+
+  private def handleInvalidSelection(movableIndices: List[Int]): IManager = {
+    if (movableIndices.isEmpty) moveToNextPlayer()
+    else copy(selectedFigure = movableIndices.head)
+  }
+  private def executeMove(
+      selectedFig: Figure,
+      allFigures: List[Figure],
+      currentPlayer: Int
+  ): IManager = {
+    val newFigures = board.moveFigure(selectedFig, allFigures, rolled)
+
+    if (newFigures == allFigures) {
+      copy(selectedFigure =
+        getMovableIndices(players(currentPlayer).figures, allFigures).headOption
+          .getOrElse(0)
+      )
+    } else {
+      controller.enqueueEvent(Event.MoveFigureEvent(selectedFig.id))
+      val updatedPlayers = updatePlayersWithNewFigures(newFigures)
+      val newState = createNewState(updatedPlayers)
+
+      // Check if player has won (all figures reached the end)
+      val playerWon = checkWinCondition(updatedPlayers(currentPlayer))
+      if (playerWon) {
+        cleanupSaveFiles()
+        controller.enqueueEvent(Event.WinEvent(currentPlayer))
+        return createNewState(updatedPlayers, State.GameOver)
+      }
+
+      newState
+    }
+  }
+
+  private def moveToNextPlayer(): IManager = {
+    controller.enqueueEvent(
+      Event.PlayNextEvent((getCurrentPlayer + 1) % players.size)
+    )
+    copy(rolled = 0, moves = moves + 1, selectedFigure = 0)
+  }
+
+  private def updatePlayersWithNewFigures(
+      newFigures: List[Figure]
+  ): List[Player] = {
+    players.map { player =>
+      player.copy(figures = newFigures.filter(_.owner.id == player.id))
+    }
+  }
+
+  private def createNewState(
+      updatedPlayers: List[Player],
+      state: State = State.Running
+  ): IManager = {
+    copy(
+      players = updatedPlayers,
+      rolled = if (rolled == 6) 0 else -1,
+      selectedFigure = 0,
+      state = state
+    )
   }
 
   override def quitGame(): Try[IManager] = Try {
@@ -178,4 +202,24 @@ case class RunningState(
       }
       .map(_._2)
       .getOrElse(-1)
+
+  /** Check if a player has won the game (all figures have reached the end) */
+  private def checkWinCondition(player: Player): Boolean = {
+    // Assuming figures with index >= board.size * 4 have reached the end
+    // This logic may need to be adjusted based on your game's specific win condition
+    player.figures.forall(_.index >= board.size * 4)
+  }
+
+  /** Clean up save files when game is completed */
+  private def cleanupSaveFiles(): Unit = {
+    val cleanupResult = Try {
+      val fileIO = inject[de.htwg.se.MAEDN.util.FileIO]
+      // Delete autosave file since game is completed
+      fileIO.deleteSaveFile("autosave.enc")
+      fileIO.deleteSaveFile("autosave.json")
+      fileIO.deleteSaveFile("autosave.xml")
+    }
+    // Silently continue if cleanup fails
+    cleanupResult.recover { case _ => () }
+  }
 }

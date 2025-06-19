@@ -4,6 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util._
+import KickFigureStrategy
 
 class KickFigureStrategySpec extends AnyWordSpec with Matchers {
 

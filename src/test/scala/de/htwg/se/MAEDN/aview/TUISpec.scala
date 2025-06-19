@@ -2,7 +2,7 @@ package de.htwg.se.MAEDN.aview
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.util.Event
 import de.htwg.se.MAEDN.model.states._
 import de.htwg.se.MAEDN.util.Color

@@ -3,13 +3,15 @@ package de.htwg.se.MAEDN.module
 import com.google.inject.AbstractModule
 import com.google.inject.Singleton
 import com.google.inject.Provides
+import org.jline.terminal.Terminal
 
-import de.htwg.se.MAEDN.controller.{IController, Controller}
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.model.{IManager, Board, Player}
 import de.htwg.se.MAEDN.model.statesImp.MenuState
 import de.htwg.se.MAEDN.aview.tui.{TUI, InputManager}
 import de.htwg.se.MAEDN.aview.gui.{GUI, ActionManager}
-import de.htwg.se.MAEDN.util.{PlayerFactory, Dice}
+import de.htwg.se.MAEDN.util.{PlayerFactory, Dice, FileIO}
 import de.htwg.se.MAEDN.model.strategy.{
   ToBoardStrategy,
   NormalMoveStrategy,
@@ -45,11 +47,12 @@ class MAEDNModule extends AbstractModule {
     )
   }
 
-  /** Provides the TUI (Text User Interface) with injected controller
+  /** Provides the TUI (Text User Interface) with injected controller and
+    * terminal
     */
   @Provides
-  def provideTUI(controller: IController): TUI = {
-    new TUI(controller)
+  def provideTUI(controller: IController, terminal: Terminal): TUI = {
+    new TUI(controller, terminal)
   }
 
   /** Provides the GUI (Graphical User Interface) with injected controller
@@ -67,7 +70,7 @@ class MAEDNModule extends AbstractModule {
       toBoardStrategy: ToBoardStrategy,
       kickFigureStrategy: KickFigureStrategy
   ): Board = {
-    new Board(11, moveStrategy, toBoardStrategy, kickFigureStrategy)
+    new Board(8, moveStrategy, toBoardStrategy, kickFigureStrategy)
   }
 
   /** Provides access to the Dice object for the game
@@ -82,17 +85,25 @@ class MAEDNModule extends AbstractModule {
     */
   @Provides
   def providePlayers(): List[Player] = {
-    PlayerFactory(4, 4) // Use default values instead of injected parameters
+    PlayerFactory(2, 4) // Use default values instead of injected parameters
+  }
+
+  /** Provides a shared terminal instance for TUI and InputManager
+    */
+  @Provides
+  @Singleton
+  def provideTerminal(): Terminal = {
+    import org.jline.terminal.TerminalBuilder
+    TerminalBuilder.builder().system(true).build()
   }
 
   /** Provides the InputManager with injected controller and terminal
     */
   @Provides
-  def provideInputManager(controller: IController): InputManager = {
-    // For now, we'll need to get the terminal from somewhere - this is a design consideration
-    // In a full DI setup, Terminal would also be injected
-    import org.jline.terminal.TerminalBuilder
-    val terminal = TerminalBuilder.builder().system(true).build()
+  def provideInputManager(
+      controller: IController,
+      terminal: Terminal
+  ): InputManager = {
     new InputManager(controller, terminal)
   }
 
@@ -163,10 +174,12 @@ class MAEDNModule extends AbstractModule {
   ): DecreaseBoardSizeCommand = {
     DecreaseBoardSizeCommand(controller)
   }
-
   @Provides
-  def provideQuitGameCommand(controller: IController): QuitGameCommand = {
-    QuitGameCommand(controller)
+  def provideQuitGameCommand(
+      controller: IController,
+      fileIO: FileIO
+  ): QuitGameCommand = {
+    QuitGameCommand(controller, fileIO)
   }
 
   @Provides
@@ -182,6 +195,24 @@ class MAEDNModule extends AbstractModule {
   @Provides
   def provideRedoCommand(controller: IController): RedoCommand = {
     RedoCommand(controller)
+  }
+
+  /** Provides FileIO instance for save/load operations
+    */
+  @Provides
+  @Singleton
+  def provideFileIO(): FileIO = {
+    new FileIO()
+  }
+
+  /** Provides ContinueGameCommand for continuing a saved game
+    */
+  @Provides
+  def provideContinueGameCommand(
+      controller: IController,
+      fileIO: FileIO
+  ): ContinueGameCommand = {
+    ContinueGameCommand(controller, fileIO)
   }
 }
 

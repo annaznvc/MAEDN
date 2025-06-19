@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.model
 
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.util.Color
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec

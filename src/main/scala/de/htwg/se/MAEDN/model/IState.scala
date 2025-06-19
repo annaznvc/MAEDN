@@ -6,7 +6,7 @@ import de.htwg.se.MAEDN.model.IManager
 import scala.util.Try
 
 enum State {
-  case Menu, Config, Running
+  case Menu, Config, Running, GameOver
 }
 
 trait IState {

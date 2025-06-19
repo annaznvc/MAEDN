@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.controller.command
 
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.model.states.RunningState
 import de.htwg.se.MAEDN.util._

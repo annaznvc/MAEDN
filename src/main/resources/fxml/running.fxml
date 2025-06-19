@@ -13,7 +13,7 @@
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane stylesheets="@../css/design.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <style>
       -fx-background-color: linear-gradient(to bottom right, #f4e4bc, #e8d5a3);
     </style>
@@ -68,9 +68,7 @@
                          -fx-background-color: #FFFACD;
                          -fx-background-radius: 8;
                          -fx-border-color: #8B4513;
-                         -fx-border-radius: 8;
-                         -fx-border-width: 2;
-                        </style>
+                         -fx-border-radius: 8;-fx-border-width: 2; -fx-text-fill: #845629;</style>
                   <VBox.margin>
                      <Insets top="10.0" />
                   </VBox.margin>

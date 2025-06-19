@@ -4,6 +4,7 @@ import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.Color
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
+import NormalMoveStrategy
 
 class NormalMoveStrategySpec extends AnyWordSpec with Matchers {
 

@@ -10,12 +10,13 @@ object TextDisplay {
   def clearTerminal(): String = "\u001b[2J\u001b[H"
 
   /** Renders the cover with the game title in state-specific color */
-  def printCover(menuState: IState): String = {
+  def printCover(menuState: IState, hasSaveFiles: Boolean = true): String = {
     val title = "Mensch ärger dich nicht"
     val styledTitle = menuState.state match {
-      case State.Menu    => s"${RED}$title${RESET}"
-      case State.Config  => s"${YELLOW}$title${RESET}"
-      case State.Running => s"${GREEN}$title${RESET}"
+      case State.Menu     => s"${RED}$title${RESET}"
+      case State.Config   => s"${YELLOW}$title${RESET}"
+      case State.Running  => s"${GREEN}$title${RESET}"
+      case State.GameOver => s"${BLUE}$title${RESET}"
     }
     val baseInfo = Seq(
       s"${menuState.moves} moves",
@@ -23,7 +24,20 @@ object TextDisplay {
       s"${menuState.getBoardSize}x${menuState.getBoardSize} board",
       s"${menuState.getFigureCount} figures"
     )
-    val runningInfo = menuState.state match {
+
+    val menuInfo = menuState.state match {
+      case State.Menu =>
+        val continueOption = if (hasSaveFiles) {
+          s"${CYAN}Press 'c' for Continue${RESET}"
+        } else {
+          s""
+        }
+        Seq(
+          "",
+          if (continueOption.nonEmpty) continueOption else "",
+          s"${GREEN}Press 'n' for New Game${RESET}",
+          s"${RED}Press 'q' for Quit${RESET}"
+        )
       case State.Running =>
         Seq(
           s"Current Player: ${menuState.getCurrentPlayer + 1}",
@@ -32,7 +46,7 @@ object TextDisplay {
         )
       case _ => Seq.empty
     }
-    (Seq(styledTitle) ++ baseInfo ++ runningInfo).mkString("\n") + "\n"
+    (Seq(styledTitle) ++ baseInfo ++ menuInfo).mkString("\n") + "\n"
   }
 
   /** Renders the game board: home benches, main track, and goal lanes */
@@ -158,7 +172,8 @@ object TextDisplay {
          |             |              |
         ${CYAN}\\/ 's'${RESET}       ${GREEN}\\/'d'${RESET}         ${YELLOW}\\/'f'${RESET}
 
-    ${BOLD}Press [Space] to start a new game${RESET}
+    ${BOLD}Press n to start a new game${RESET}
+    ${BOLD}Press 'q' to go back to menu${RESET}
   """.stripMargin
   }
 }

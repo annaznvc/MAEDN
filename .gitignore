@@ -35,3 +35,6 @@ metals.sbt
 .scala-build/
 
 src/main/scala/.scala-build/
+
+# Save files
+saves/

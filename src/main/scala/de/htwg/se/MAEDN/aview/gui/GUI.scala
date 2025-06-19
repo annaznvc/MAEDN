@@ -61,7 +61,6 @@ class GUI(controller: IController)
     switchToScene(State.Menu)
     stage.show()
   }
-
   def switchToScene(state: State): Unit = {
     val sceneContent = sceneCache.getOrElse(state, createSceneContent(state))
     sceneCache += (state -> sceneContent)
@@ -77,13 +76,19 @@ class GUI(controller: IController)
       if (state == State.Running) {
         updateRender()
       }
+
+      // Update continue button state for menu
+      if (state == State.Menu) {
+        updateContinueButtonState()
+      }
     }
   }
   def createSceneContent(state: State): Parent = {
     val sceneId = state match {
-      case State.Menu    => "menu"
-      case State.Config  => "config"
-      case State.Running => "running"
+      case State.Menu   => "menu"
+      case State.Config => "config"
+      case State.Running | State.GameOver =>
+        "running"
     }
 
     val fxmlPath = s"/fxml/${sceneId}.fxml"
@@ -175,6 +180,16 @@ class GUI(controller: IController)
     }
   }
 
+  /** Updates the continue button state based on available save files */
+  def updateContinueButtonState(): Unit = {
+    Platform.runLater {
+      Option(currentSceneContent.lookup("#continueButton")).foreach { node =>
+        val continueButton = node.asInstanceOf[javafx.scene.control.Button]
+        continueButton.setDisable(!actionManager.hasSaveFiles())
+      }
+    }
+  }
+
   def showStatusMessage(message: String): Unit = {
     // Find and update status text in footer using ScalaFX delegate properties
     // The lookup returns a JavaFX Node which we need to cast
@@ -219,7 +234,7 @@ class GUI(controller: IController)
 
         val winLabel = new scalafx.scene.control.Label {
           text =
-            s"🎉 Congratulations! 🎉\n\n$playerName ($playerColor) has won the game!\n\nPress ENTER to return to the main menu."
+            s"🎉 Congratulations! 🎉\n\n$playerName ($playerColor) has won the game!\n\nPress Q to return to the main menu."
           style = "-fx-font-size: 16; -fx-text-alignment: center;"
           wrapText = true
         }
@@ -228,15 +243,6 @@ class GUI(controller: IController)
       }
 
       children = contentPane
-
-      // Handle key events to close overlay
-      onKeyPressed = (event: KeyEvent) => {
-        import javafx.scene.input.KeyCode
-        if (event.getCode == KeyCode.ENTER || event.getCode == KeyCode.ESCAPE) {
-          hideWinOverlay()
-          switchToScene(State.Menu)
-        }
-      }
 
       focusTraversable = true
     }

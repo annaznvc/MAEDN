@@ -2,6 +2,7 @@ package de.htwg.se.MAEDN.aview.tui
 
 import org.jline.terminal.{TerminalBuilder, Terminal}
 import scala.io.AnsiColor.{RED, RESET, GREEN, YELLOW}
+import scala.util.{Success, Failure}
 
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.model.State
@@ -9,8 +10,9 @@ import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.module.Injectable
 
-class TUI(controller: IController) extends Observer with Injectable {
-
+class TUI(controller: IController, terminal: Terminal)
+    extends Observer
+    with Injectable {
   var continue = true
   controller.add(this)
 
@@ -19,12 +21,10 @@ class TUI(controller: IController) extends Observer with Injectable {
     terminal.writer().println(s)
     terminal.flush()
   }
-  val terminal: Terminal = TerminalBuilder.builder().system(true).build()
-  val inputManager = InputManager(controller, terminal)
-
+  val inputManager = inject[InputManager]
   def run(): Unit = {
     writeline(TextDisplay.clearTerminal())
-    writeline(TextDisplay.printCover(controller.manager))
+    writeline(TextDisplay.printCover(controller.manager, hasSaveFiles()))
     update()
   }
 
@@ -45,18 +45,20 @@ class TUI(controller: IController) extends Observer with Injectable {
 
   // * OUTPUT
   override def processEvent(event: Event): Unit = {
-    event match {
-      // ----------------------------------------------------------------------
+    event match { // ----------------------------------------------------------------------
       case Event.StartGameEvent | Event.MoveFigureEvent(_) |
           Event.ChangeSelectedFigureEvent(_) =>
         writeline(TextDisplay.clearTerminal())
-        printBoard(TextDisplay.printCover(controller.manager), "")
+        printBoard(
+          TextDisplay.printCover(controller.manager, hasSaveFiles()),
+          ""
+        )
 
       // ----------------------------------------------------------------------
       case Event.ConfigEvent =>
         val manager = controller.manager
         writeline(TextDisplay.clearTerminal())
-        writeline(TextDisplay.printCover(manager))
+        writeline(TextDisplay.printCover(manager, hasSaveFiles()))
         writeline(
           TextDisplay.printConfig(
             manager.getPlayerCount,
@@ -72,19 +74,22 @@ class TUI(controller: IController) extends Observer with Injectable {
             "You rolled a 6! Use 'w'/'s' to select a figure and press 'm' to move."
           else
             s"You rolled a $rolled!"
-        printBoard(TextDisplay.printCover(controller.manager), afterMessage)
+        printBoard(
+          TextDisplay.printCover(controller.manager, hasSaveFiles()),
+          afterMessage
+        )
       // ----------------------------------------------------------------------
       case Event.PlayNextEvent(id) =>
         writeline(TextDisplay.clearTerminal())
         controller.manager.state match {
           case State.Running =>
             printBoard(
-              TextDisplay.printCover(controller.manager),
+              TextDisplay.printCover(controller.manager, hasSaveFiles()),
               s"Player ${id + 1}'s turn!"
             )
           case _ =>
             printBoard(
-              TextDisplay.printCover(controller.manager),
+              TextDisplay.printCover(controller.manager, hasSaveFiles()),
               s"Player ${id + 1}'s turn!"
             )
         }
@@ -94,21 +99,27 @@ class TUI(controller: IController) extends Observer with Injectable {
         controller.manager.state match {
           case State.Running =>
             printBoard(
-              TextDisplay.printCover(controller.manager),
+              TextDisplay.printCover(controller.manager, hasSaveFiles()),
               s"${event.toString} executed!"
             )
           case _ =>
-            printBoard(TextDisplay.printCover(controller.manager), "")
+            printBoard(
+              TextDisplay.printCover(controller.manager, hasSaveFiles()),
+              ""
+            )
         } // ----------------------------------------------------------------------
       case Event.BackToMenuEvent =>
         writeline(TextDisplay.clearTerminal())
-        writeline(TextDisplay.printCover(controller.manager))
+        writeline(TextDisplay.printCover(controller.manager, hasSaveFiles()))
       // ----------------------------------------------------------------------
       case Event.WinEvent(playerId) =>
         writeline(TextDisplay.clearTerminal())
         val playerName = s"Player ${playerId + 1}"
         val winMessage = s"🎉 ${GREEN}$playerName has won the game!${RESET} 🎉"
-        printBoard(TextDisplay.printCover(controller.manager), winMessage)
+        printBoard(
+          TextDisplay.printCover(controller.manager, hasSaveFiles()),
+          winMessage
+        )
         writeline("")
         writeline(
           s"${YELLOW}Congratulations! Press any key to return to menu...${RESET}"
@@ -117,7 +128,7 @@ class TUI(controller: IController) extends Observer with Injectable {
       case Event.ErrorEvent(message) =>
         writeline(TextDisplay.clearTerminal())
         printBoard(
-          TextDisplay.printCover(controller.manager),
+          TextDisplay.printCover(controller.manager, hasSaveFiles()),
           s"Error: ${RED}$message${RESET}"
         )
       // ----------------------------------------------------------------------
@@ -127,6 +138,19 @@ class TUI(controller: IController) extends Observer with Injectable {
       // ----------------------------------------------------------------------
       case _ =>
         writeline("") // No-op fallback
+    }
+  }
+
+  /** Checks if save files exist for continue functionality */
+  def hasSaveFiles(): Boolean = {
+    try {
+      val fileIO = inject[de.htwg.se.MAEDN.util.FileIO]
+      fileIO.listSaveFiles(Some(de.htwg.se.MAEDN.util.FileFormat.JSON)) match {
+        case Success(files) => files.nonEmpty
+        case Failure(_)     => false
+      }
+    } catch {
+      case _: Exception => false
     }
   }
 

@@ -7,6 +7,7 @@ import de.htwg.se.MAEDN.module.Injectable
 import javafx.event.ActionEvent
 import javafx.scene.input.{KeyCode}
 import javafx.scene.input.KeyEvent
+import scala.util.{Try, Success, Failure}
 
 import javafx.fxml.FXML
 
@@ -80,6 +81,23 @@ class ActionManager(controller: IController) extends Injectable {
     controller.executeCommand(inject[StartGameCommand])
   }
 
+  @FXML
+  def onContinueGame(): Unit = {
+    controller.executeCommand(inject[ContinueGameCommand])
+  }
+
+  /** Checks if save files exist for enabling/disabling continue button */
+  def hasSaveFiles(): Boolean = {
+    val result = Try {
+      val fileIO = inject[de.htwg.se.MAEDN.util.FileIO]
+      fileIO.listSaveFiles() match {
+        case Success(files) => files.nonEmpty
+        case Failure(_)     => false
+      }
+    }
+    result.getOrElse(false)
+  }
+
   // Handle keyboard shortcuts
   def handleKeyEvent(event: KeyEvent): Unit = {
     event.getCode match {
@@ -94,6 +112,7 @@ class ActionManager(controller: IController) extends Injectable {
       case KeyCode.N => onStartGame()
       case KeyCode.U => onUndo()
       case KeyCode.I => onRedo()
+      case KeyCode.C => onContinueGame()
       case _         => // No action for other keys
     }
     event.consume()
