@@ -23,7 +23,7 @@ case class MenuState(
     controller.enqueueEvent(
       Event.ConfigEvent
     ) // Send event to controller
-    ConfigState(controller, moves, board, players)
+    ConfigState(controller, 0, board, players, 0)
   }
 
   override def quitGame(): Try[IManager] = Try {

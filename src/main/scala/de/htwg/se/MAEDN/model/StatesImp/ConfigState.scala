@@ -17,14 +17,13 @@ case class ConfigState(
     with Injectable {
 
   override val state: State = State.Config
-
   override def startGame(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.StartGameEvent)
     RunningState(
       controller,
-      moves,
-      board,
-      players,
+      0,
+      Board(board.size),
+      PlayerFactory(players.size, players.head.figures.size),
       0,
       0
     )

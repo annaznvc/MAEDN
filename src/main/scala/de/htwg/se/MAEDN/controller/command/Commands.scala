@@ -3,7 +3,8 @@ package de.htwg.se.MAEDN.controller.command
 import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.model.IManager
 import de.htwg.se.MAEDN.model.State
-import de.htwg.se.MAEDN.util.Event
+import de.htwg.se.MAEDN.util.{Event, FileIO, FileFormat}
+import de.htwg.se.MAEDN.model.gameDataImp.GameData
 
 import scala.util.{Try, Success, Failure}
 
@@ -49,12 +50,36 @@ case class PlayNextCommand(controller: IController) extends Command {
   }
 }
 
-case class QuitGameCommand(controller: IController) extends Command {
+case class QuitGameCommand(controller: IController, fileIO: FileIO)
+    extends Command {
   override def execute(): Try[IManager] = {
-    controller.manager.quitGame()
+    controller.manager.state match {
+      case State.Running =>
+        // Auto-save if in running state
+        controller.manager.createMemento.foreach { memento =>
+          val autoSaveResult = Try {
+            memento match {
+              case gameData: GameData =>
+                fileIO.save(
+                  gameData,
+                  "autosave",
+                  FileFormat.JSON,
+                  encrypt = false
+                ) match {
+                  case Success(_) => println("Game auto-saved before quitting")
+                  case Failure(_) => println("Failed to auto-save game")
+                }
+              case _ => // Do nothing for other memento types
+            }
+          }
+          // Silently continue if auto-save fails
+          autoSaveResult.recover { case _ => () }
+        }
+        controller.manager.quitGame()
+      case _ => controller.manager.quitGame()
+    }
   }
 }
-
 case class StartGameCommand(controller: IController) extends Command {
   override def execute(): Try[IManager] = {
     controller.manager.startGame()
@@ -103,4 +128,60 @@ case class RedoCommand(controller: IController) extends Command {
         Success(controller.manager)
     }
   }
+}
+
+/** Command to continue from the most recent save file.
+  *
+  * This command looks for the most recent save file, loads it, and transitions
+  * from menu state directly to running state.
+  */
+case class ContinueGameCommand(
+    controller: IController,
+    fileIO: FileIO
+) extends Command {
+  override def execute(): Try[IManager] = {
+    fileIO.listSaveFiles() match {
+      case Success(files) if files.nonEmpty =>
+        // Get the most recent save file (assuming files are sorted)
+        val latestSave = files.head
+          .stripSuffix(".enc")
+          .stripSuffix(".json")
+          .stripSuffix(".xml")
+        fileIO.load(latestSave, GameData) match {
+          case Success(gameData) =>
+            gameData.restoreManager(controller) match {
+              case Success(restoredManager) =>
+                controller.enqueueEvent(Event.StartGameEvent)
+                controller.manager = restoredManager
+                Success(restoredManager)
+              case Failure(exception) =>
+                Failure(
+                  new RuntimeException(
+                    s"Failed to restore game state: ${exception.getMessage}",
+                    exception
+                  )
+                )
+            }
+          case Failure(exception) =>
+            Failure(
+              new RuntimeException(
+                s"Failed to load game from file: ${exception.getMessage}",
+                exception
+              )
+            )
+        }
+      case Success(_) =>
+        Failure(new RuntimeException("No save files found to continue from"))
+      case Failure(exception) =>
+        Failure(
+          new RuntimeException(
+            s"Failed to check save files: ${exception.getMessage}",
+            exception
+          )
+        )
+    }
+  }
+
+  override def isNormal: Boolean =
+    false // Loading doesn't affect undo/redo stack
 }

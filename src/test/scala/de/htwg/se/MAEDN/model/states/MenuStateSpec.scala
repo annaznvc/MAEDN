@@ -1,6 +1,6 @@
 package de.htwg.se.MAEDN.model.states
 
-import de.htwg.se.MAEDN.controller.Controller
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.Event
 import org.scalatest.wordspec.AnyWordSpec

@@ -5,12 +5,12 @@ import org.scalatest.matchers.should.Matchers
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.model.states._
 import de.htwg.se.MAEDN.util._
-import de.htwg.se.MAEDN.controller._
 import de.htwg.se.MAEDN.util.Color
 import de.htwg.se.MAEDN.aview.TextDisplay
 import scala.io.AnsiColor
 import de.htwg.se.MAEDN.model.PlayerFactory
 import de.htwg.se.MAEDN.model.Board
+import de.htwg.se.MAEDN.controller.controllerImp.Controller
 
 class TextDisplaySpec extends AnyWordSpec with Matchers {
 

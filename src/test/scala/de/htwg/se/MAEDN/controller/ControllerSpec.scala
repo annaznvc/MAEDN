@@ -9,6 +9,7 @@ import org.scalatest.concurrent.Eventually
 
 import scala.util.{Success, Failure, Try}
 import scala.concurrent.duration.*
+import controllerImp.Controller
 
 class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
 

@@ -10,7 +10,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-
 <FlowPane alignment="CENTER" styleClass="background" stylesheets="@../css/design.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
 
@@ -47,9 +46,9 @@
 
                         <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="0" GridPane.rowIndex="1">
                      <children>
-                        <Button fx:id="increasePlayerBtn" mnemonicParsing="false" onAction="#onMoveUp" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ 'W'" />
+                        <Button fx:id="increasePlayerBtn" mnemonicParsing="false" onAction="#onMoveUp" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ W" />
                         <Label fx:id="playerCountLabel" alignment="CENTER" prefWidth="80.0" style="-fx-text-fill: #8B5A2B; -fx-font-size: 28px; -fx-font-weight: bold; -fx-background-color: rgba(245, 245, 220, 0.9); -fx-background-radius: 10px; -fx-padding: 10px; -fx-border-color: rgba(139, 90, 43, 0.9); -fx-border-width: 2px; -fx-border-radius: 10px;" text="2" />
-                        <Button fx:id="decreasePlayerBtn" mnemonicParsing="false" onAction="#onMoveDown" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ 'S'" />
+                        <Button fx:id="decreasePlayerBtn" mnemonicParsing="false" onAction="#onMoveDown" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ S" />
                      </children>
                      <GridPane.margin>
                         <Insets top="120.0" />
@@ -65,9 +64,9 @@
 
                         <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                      <children>
-                        <Button fx:id="increaseFiguresBtn" mnemonicParsing="false" onAction="#onIncreaseFigures" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ 'E'" />
+                        <Button fx:id="increaseFiguresBtn" mnemonicParsing="false" onAction="#onIncreaseFigures" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ E" />
                         <Label fx:id="figureCountLabel" alignment="CENTER" prefWidth="80.0" style="-fx-text-fill: #8B5A2B; -fx-font-size: 28px; -fx-font-weight: bold; -fx-background-color: rgba(245, 245, 220, 0.9); -fx-background-radius: 10px; -fx-padding: 10px; -fx-border-color: rgba(139, 90, 43, 0.9); -fx-border-width: 2px; -fx-border-radius: 10px;" text="4" />
-                        <Button fx:id="decreaseFiguresBtn" mnemonicParsing="false" onAction="#onDecreaseFigures" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ 'D'" />
+                        <Button fx:id="decreaseFiguresBtn" mnemonicParsing="false" onAction="#onDecreaseFigures" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ D" />
                      </children>
                      <GridPane.margin>
                         <Insets top="120.0" />
@@ -83,9 +82,9 @@
 
                         <VBox alignment="CENTER" spacing="10.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                      <children>
-                        <Button fx:id="increaseBoardBtn" mnemonicParsing="false" onAction="#onIncreaseBoardSize" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ 'R'" />
+                        <Button fx:id="increaseBoardBtn" mnemonicParsing="false" onAction="#onIncreaseBoardSize" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▲ R" />
                         <Label fx:id="boardSizeLabel" alignment="CENTER" prefWidth="80.0" style="-fx-text-fill: #8B5A2B; -fx-font-size: 28px; -fx-font-weight: bold; -fx-background-color: rgba(245, 245, 220, 0.9); -fx-background-radius: 10px; -fx-padding: 10px; -fx-border-color: rgba(139, 90, 43, 0.9); -fx-border-width: 2px; -fx-border-radius: 10px;" text="8" />
-                        <Button fx:id="decreaseBoardBtn" mnemonicParsing="false" onAction="#onDecreaseBoardSize" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ 'F'" />
+                        <Button fx:id="decreaseBoardBtn" mnemonicParsing="false" onAction="#onDecreaseBoardSize" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-weight: bold; -fx-background-radius: 8px;" text="▼ F" />
                      </children>
                      <GridPane.margin>
                         <Insets top="120.0" />
@@ -100,12 +99,12 @@
                   <!-- Action Buttons -->
             <HBox alignment="CENTER" spacing="30.0">
                <children>
-                  <Button fx:id="backBtn" mnemonicParsing="false" onAction="#onBackToMenu" prefHeight="45.0" prefWidth="180.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10px;" text="◄ Back (Q)">
+                  <Button fx:id="backBtn" mnemonicParsing="false" onAction="#onBackToMenu" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10px;" text="◄ Back (Q)">
                      <HBox.margin>
                         <Insets />
                      </HBox.margin>
                   </Button>
-                  <Button fx:id="startBtn" mnemonicParsing="false" onAction="#onStartGame" prefHeight="45.0" prefWidth="180.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10px;" text="Start Game (N) ►" />
+                  <Button fx:id="startBtn" mnemonicParsing="false" onAction="#onStartGame" prefHeight="45.0" prefWidth="200.0" style="-fx-background-color: rgba(139, 90, 43, 0.9); -fx-text-fill: #F5F5DC; -fx-font-size: 16px; -fx-font-weight: bold; -fx-background-radius: 10px;" text="Start Game (N) ►" />
                </children>
                <padding>
                   <Insets top="10.0" />
