@@ -1,15 +1,16 @@
-package de.htwg.se.MAEDN.model.StrategyImp
+package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{IBoard, IFigure, IMoveStrategy, Collision}
+import de.htwg.se.MAEDN.model.{Board, Figure, MoveStrategy, Collision}
 import de.htwg.se.MAEDN.util.Position
+import de.htwg.se.MAEDN.module.Injectable
 
-class NormalMoveStrategy extends IMoveStrategy {
+class NormalMoveStrategy extends MoveStrategy with Injectable {
   override def moveFigure(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
-  ): List[IFigure] = {
+  ): List[Figure] = {
     val newPos = figure.newAdjustedIndex(size, rolled)
     val ownCollision = figures.exists(f =>
       f != figure && f.owner.color == figure.owner.color && f.adjustedIndex(
@@ -25,8 +26,8 @@ class NormalMoveStrategy extends IMoveStrategy {
   }
 
   override def canMove(
-      figure: IFigure,
-      figures: List[IFigure],
+      figure: Figure,
+      figures: List[Figure],
       size: Int,
       rolled: Int
   ): Boolean = {

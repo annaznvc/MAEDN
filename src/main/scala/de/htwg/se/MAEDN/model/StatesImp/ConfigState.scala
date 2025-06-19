@@ -1,18 +1,20 @@
-package de.htwg.se.MAEDN.model.StatesImp
+package de.htwg.se.MAEDN.model.statesImp
 
 import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.{Event, Color, PlayerFactory}
 import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.module.Injectable
 
 import scala.util.Try
 
 case class ConfigState(
     override val controller: IController,
     override val moves: Int,
-    override val board: IBoard,
-    override val players: List[IPlayer],
+    override val board: Board,
+    override val players: List[Player],
     override val rolled: Int = 0
-) extends IManager {
+) extends IManager
+    with Injectable {
 
   override val state: State = State.Config
 
@@ -35,12 +37,12 @@ case class ConfigState(
 
   override def increaseBoardSize(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    copy(board = IBoard(Math.min(12, getBoardSize + 1)))
+    copy(board = Board(Math.min(12, getBoardSize + 1)))
   }
 
   override def decreaseBoardSize(): Try[IManager] = Try {
     controller.eventQueue.enqueue(Event.ConfigEvent)
-    copy(board = IBoard(Math.max(8, getBoardSize - 1)))
+    copy(board = Board(Math.max(8, getBoardSize - 1)))
   }
 
   override def increaseFigures(): Try[IManager] = Try {
@@ -93,7 +95,7 @@ case class ConfigState(
     players.headOption.map(_.figures.size).getOrElse(0)
   override def getBoardSize: Int = board.size
   override def getCurrentPlayer: Int = 0
-  override def getPlayers: List[IPlayer] = players
+  override def getPlayers: List[Player] = players
   override def createMemento: Option[IMemento] = None
   override val selectedFigure: Int = 0
 

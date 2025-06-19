@@ -1,13 +1,12 @@
 // filepath: d:\AIN3\SE\MAEDN\src\main\scala\de\htwg\se\MAEDN\aview\gui\GUI.scala
 package de.htwg.se.MAEDN.aview.gui
 
-import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.controller.IController
-import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.model.State
 import de.htwg.se.MAEDN.util.{Event, Observer}
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.aview.gui.DynamicRenderer
+import de.htwg.se.MAEDN.module.Injectable
 
 import javafx.scene.input.KeyEvent
 import javafx.fxml.FXMLLoader
@@ -28,11 +27,14 @@ import scalafx.Includes._
 import scalafx.scene.Node
 import scala.collection.mutable.Map
 
-class GUI(controller: IController) extends JFXApp3 with Observer {
+class GUI(controller: IController)
+    extends JFXApp3
+    with Observer
+    with Injectable {
 
   controller.add(this)
 
-  val actionManager = new ActionManager(controller)
+  val actionManager = inject[ActionManager]
   var currentSceneContent: Parent = uninitialized
   var sceneCache: Map[State, Parent] =
     Map.empty

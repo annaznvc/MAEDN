@@ -1,14 +1,14 @@
-package de.htwg.se.MAEDN.model.GameDataImp
+package de.htwg.se.MAEDN.model.gameDataImp
 
-import de.htwg.se.MAEDN.model.{IMemento, IManager, IPlayer, IBoard}
+import de.htwg.se.MAEDN.model.{IMemento, IManager, Player, Board}
 import de.htwg.se.MAEDN.controller.IController
 
 import scala.util.{Try, Success, Failure}
 
 case class GameData(
     moves: Int,
-    board: IBoard,
-    players: List[IPlayer],
+    board: Board,
+    players: List[Player],
     selectedFigure: Int,
     rolled: Int
 ) extends IMemento {

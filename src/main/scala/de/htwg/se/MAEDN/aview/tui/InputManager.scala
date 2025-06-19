@@ -6,24 +6,26 @@ import de.htwg.se.MAEDN.controller.Controller
 import de.htwg.se.MAEDN.controller.command._
 import de.htwg.se.MAEDN.controller.IController
 import de.htwg.se.MAEDN.model.IManager
+import de.htwg.se.MAEDN.module.Injectable
 
-class InputManager(val controller: IController, val terminal: Terminal) {
+class InputManager(val controller: IController, val terminal: Terminal)
+    extends Injectable {
 
   private val bindingReader = new BindingReader(terminal.reader())
   private val keyMap = new KeyMap[Command]()
 
-  // Tasten direkt an Command-Objekte binden
-  keyMap.bind(PlayNextCommand(controller), "x")
-  keyMap.bind(MoveUpCommand(controller), "w")
-  keyMap.bind(MoveDownCommand(controller), "s")
-  keyMap.bind(IncreaseFiguresCommand(controller), "e")
-  keyMap.bind(DecreaseFiguresCommand(controller), "d")
-  keyMap.bind(IncreaseBoardSizeCommand(controller), "r")
-  keyMap.bind(DecreaseBoardSizeCommand(controller), "f")
-  keyMap.bind(QuitGameCommand(controller), "q")
-  keyMap.bind(StartGameCommand(controller), "n")
-  keyMap.bind(UndoCommand(controller), "u")
-  keyMap.bind(RedoCommand(controller), "i")
+  // Using injector to create Command objects instead of direct instantiation
+  keyMap.bind(inject[PlayNextCommand], "x")
+  keyMap.bind(inject[MoveUpCommand], "w")
+  keyMap.bind(inject[MoveDownCommand], "s")
+  keyMap.bind(inject[IncreaseFiguresCommand], "e")
+  keyMap.bind(inject[DecreaseFiguresCommand], "d")
+  keyMap.bind(inject[IncreaseBoardSizeCommand], "r")
+  keyMap.bind(inject[DecreaseBoardSizeCommand], "f")
+  keyMap.bind(inject[QuitGameCommand], "q")
+  keyMap.bind(inject[StartGameCommand], "n")
+  keyMap.bind(inject[UndoCommand], "u")
+  keyMap.bind(inject[RedoCommand], "i")
 
   // ESC bleibt direkt verarbeitet – das ist kein Command
   private val ESC = "\u001b"

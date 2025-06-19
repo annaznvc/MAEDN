@@ -6,8 +6,11 @@ import scala.util.{Success, Failure}
 import de.htwg.se.MAEDN.controller.command.{Command, UndoCommand, RedoCommand}
 import de.htwg.se.MAEDN.model.{IManager, IMemento}
 import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.module.Injectable
 
-class Controller extends Observable with IController {
+class Controller extends Observable with IController with Injectable {
+  // Initialize with default manager from IManager companion object
+  // This will be replaced by Guice-injected manager if needed
   var manager: IManager = IManager(this)
 
   val undoStack = Stack[IMemento]()
