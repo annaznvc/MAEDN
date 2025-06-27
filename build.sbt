@@ -28,5 +28,20 @@ lazy val root = (project in file("."))
       ) ++ Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
         .map(m => "org.openjfx" % s"javafx-$m" % "23" classifier osName)
     },
-    fork := true
+    fork := true,
+    // Assembly configuration
+    assembly / mainClass := Some("de.htwg.se.MAEDN.App"),
+    assembly / assemblyJarName := "maedn-game.jar",
+    // Merge strategy for assembly
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", xs @ _*)  => MergeStrategy.discard
+      case PathList("module-info.class")  => MergeStrategy.discard
+      case "application.conf"             => MergeStrategy.concat
+      case "reference.conf"               => MergeStrategy.concat
+      case x if x.endsWith(".class")      => MergeStrategy.first
+      case x if x.endsWith(".properties") => MergeStrategy.first
+      case x if x.endsWith(".xml")        => MergeStrategy.first
+      case x if x.endsWith(".txt")        => MergeStrategy.first
+      case x                              => MergeStrategy.first
+    }
   )
