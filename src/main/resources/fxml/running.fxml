@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <BorderPane stylesheets="@../css/design.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <style>
@@ -243,13 +244,13 @@
               -fx-border-width: 4;
               -fx-effect: dropshadow(gaussian, rgba(139,69,19,0.2), 8, 0, 0, 8);
                 </style>
-   
+
                 <!-- Hauptspielfeld Grid - nimmt maximalen verfügbaren Platz ein -->
                 <GridPane fx:id="gameBoardGridPane" alignment="CENTER" maxHeight="Infinity" maxWidth="Infinity">
                     <padding>
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                     </padding>
-   
+
                     <columnConstraints>
                         <ColumnConstraints percentWidth="7.7" />
                         <ColumnConstraints percentWidth="7.7" />
@@ -392,98 +393,38 @@
           -fx-border-width: 2;
           -fx-padding: 10;
             </style>
-
-            <!-- Spieler 1 - Rot -->
-            <HBox fx:id="redStatusHBox" alignment="CENTER" spacing="8">
-                <Circle fill="#FF6B6B" radius="12" />
-                <VBox>
-                    <Label text="Spieler 1">
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="• Würfeln (X)">
                         <font>
-                            <Font name="Serif Bold" size="12" />
+                            <Font name="Serif Bold" size="14" />
                         </font>
                         <style>
-                      -fx-text-fill: #8B4513;
+                     -fx-text-fill: #8B4513;
                         </style>
-                    </Label>
-                    <Label fx:id="redPlayerStatusLabel" text="0/4 im Ziel">
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="• Figur Ändern (W/S)" textAlignment="CENTER">
                         <font>
-                            <Font name="Serif Italic" size="10" />
+                            <Font name="Serif Bold" size="14" />
                         </font>
                         <style>
-                      -fx-text-fill: #A0522D;
+                     -fx-text-fill: #8B4513;
                         </style>
-                    </Label>
-                </VBox>
-            </HBox>
-
-            <!-- Spieler 2 - Blau -->
-            <HBox fx:id="blueStatusHBox" alignment="CENTER" spacing="8">
-                <Circle fill="#4ECDC4" radius="12" />
-                <VBox>
-                    <Label text="Spieler 2">
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="• Redo und Undo (R/U)">
                         <font>
-                            <Font name="Serif Bold" size="12" />
+                            <Font name="Serif Bold" size="14" />
                         </font>
                         <style>
-                      -fx-text-fill: #8B4513;
+                     -fx-text-fill: #8B4513;
                         </style>
-                    </Label>
-                    <Label fx:id="bluePlayerStatusLabel" text="0/4 im Ziel">
+                  </Text>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="• Verlassen (Q)">
                         <font>
-                            <Font name="Serif Italic" size="10" />
+                            <Font name="Serif Bold" size="14" />
                         </font>
                         <style>
-                      -fx-text-fill: #A0522D;
+                     -fx-text-fill: #8B4513;
                         </style>
-                    </Label>
-                </VBox>
-            </HBox>
-
-            <!-- Spieler 3 - Grün -->
-            <HBox fx:id="greenStatusHBox" alignment="CENTER" spacing="8">
-                <Circle fill="#95E1A3" radius="12" />
-                <VBox>
-                    <Label text="Spieler 3">
-                        <font>
-                            <Font name="Serif Bold" size="12" />
-                        </font>
-                        <style>
-                      -fx-text-fill: #8B4513;
-                        </style>
-                    </Label>
-                    <Label fx:id="greenPlayerStatusLabel" text="0/4 im Ziel">
-                        <font>
-                            <Font name="Serif Italic" size="10" />
-                        </font>
-                        <style>
-                      -fx-text-fill: #A0522D;
-                        </style>
-                    </Label>
-                </VBox>
-            </HBox>
-
-            <!-- Spieler 4 - Gelb -->
-            <HBox fx:id="yellowStatusHBox" alignment="CENTER" spacing="8">
-                <Circle fill="#FFE66D" radius="12" />
-                <VBox>
-                    <Label text="Spieler 4">
-                        <font>
-                            <Font name="Serif Bold" size="12" />
-                        </font>
-                        <style>
-                      -fx-text-fill: #8B4513;
-                        </style>
-                    </Label>
-                    <Label fx:id="yellowPlayerStatusLabel" text="0/4 im Ziel">
-                        <font>
-                            <Font name="Serif Italic" size="10" />
-                        </font>
-                        <style>
-                      -fx-text-fill: #A0522D;
-                        </style>
-                    </Label>
-                </VBox>
-            </HBox>
+                  </Text>
         </HBox>
     </bottom>
 </BorderPane>

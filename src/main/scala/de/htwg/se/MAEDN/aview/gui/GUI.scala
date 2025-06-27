@@ -48,7 +48,7 @@ class GUI(controller: IController)
       title = "Mensch aergere Dich Nicht"
       fullScreen = true
       fullScreenExitHint = ""
-      resizable = false
+      resizable = true
       scene = new Scene(rootPane, 800, 600) {
         rootPane.setFocusTraversable(false)
         onKeyPressed = (event: KeyEvent) => {

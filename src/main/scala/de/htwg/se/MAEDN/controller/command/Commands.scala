@@ -64,7 +64,7 @@ case class QuitGameCommand(controller: IController, fileIO: FileIO)
                   gameData,
                   "autosave",
                   FileFormat.JSON,
-                  encrypt = false
+                  encrypt = true
                 ) match {
                   case Success(_) => println("Game auto-saved before quitting")
                   case Failure(_) => println("Failed to auto-save game")
