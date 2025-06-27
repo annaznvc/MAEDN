@@ -1,0 +1,66 @@
+# Docker ignore file for MAEDN project
+
+# Build outputs
+target/
+*.jar
+*.class
+*.log
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.metals/
+.bloop/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# SBT
+.sbt/
+boot/
+
+# Scala
+*.sc
+
+# Test results
+test-reports/
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Log files
+logs/
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Documentation build
+docs/_build/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# README and docs
+README.md
+*.md
+
+# GitHub workflows
+.github/
