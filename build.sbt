@@ -1,52 +1,76 @@
-val scalaV = "3.5.1"
+name: Scala CI with Coverage
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-lazy val root = (project in file("."))
-  .settings(
-    name := "MAEDN",
-    version := "0.1.0-SNAPSHOT",
-    scalaVersion := scalaV,
-    libraryDependencies ++= {
-      lazy val osName = System.getProperty("os.name") match {
-        case n if n.startsWith("Linux")   => "linux"
-        case n if n.startsWith("Mac")     => "mac"
-        case n if n.startsWith("Windows") => "win"
-        case _ => throw new Exception("Unknown platform!")
-      }
-      Seq(
-        "org.scalameta" %% "munit" % "1.0.0" % Test,
-        "org.scalactic" %% "scalactic" % "3.2.10",
-        "org.scalatest" %% "scalatest" % "3.2.10" % Test,
-        "org.scalatestplus" %% "mockito-3-4" % "3.2.9.0" % Test,
-        "org.jline" % "jline" % "3.27.1",
-        "org.scalafx" %% "scalafx" % "21.0.0-R32",
-        "org.scalafx" %% "scalafx-extras" % "0.10.1",
-        "com.google.inject" % "guice" % "5.1.0",
-        "net.codingwell" %% "scala-guice" % "7.0.0",
-        "org.playframework" %% "play-json" % "3.0.4",
-        "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
-        "com.spotify" % "docker-client" % "8.16.0"
-      ) ++ Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
-        .map(m => "org.openjfx" % s"javafx-$m" % "23" classifier osName)
-    },
-    fork := true,
-
-    // Coverage configuration - NUR EINMAL definieren!
-    coverageExcludedPackages := "de.htwg.se.MAEDN.aview.gui;de.htwg.se.MAEDN.aview.tui",
-    coverageExcludedFiles := ".*GUI\\.scala;.*TUI\\.scala;.*gui.*GUI\\.scala;.*tui.*TUI\\.scala",
-
-    // Assembly configuration
-    assembly / mainClass := Some("de.htwg.se.MAEDN.App"),
-    assembly / assemblyJarName := "maedn-game.jar",
-    // Merge strategy for assembly
-    assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", xs @ _*)  => MergeStrategy.discard
-      case PathList("module-info.class")  => MergeStrategy.discard
-      case "application.conf"             => MergeStrategy.concat
-      case "reference.conf"               => MergeStrategy.concat
-      case x if x.endsWith(".class")      => MergeStrategy.first
-      case x if x.endsWith(".properties") => MergeStrategy.first
-      case x if x.endsWith(".xml")        => MergeStrategy.first
-      case x if x.endsWith(".txt")        => MergeStrategy.first
-      case x                              => MergeStrategy.first
-    }
-  )
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check out the repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        
+    - name: Set up sbt
+      uses: coursier/setup-action@v1
+      with:
+        apps: sbt
+        
+    - name: Cache sbt dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.ivy2/cache
+          ~/.sbt
+          ~/.coursier
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('**/project/build.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-sbt-
+          
+    - name: Set up virtual display for JavaFX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb
+        export DISPLAY=:99
+        Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        sleep 3
+        
+    - name: Run Tests with Coverage
+      run: |
+        export DISPLAY=:99
+        sbt -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw clean coverage test
+        sbt coverageReport
+        sbt coverageAggregate
+      env:
+        DISPLAY: :99
+        
+    - name: Upload Coverage Report
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: target/scala-*/scoverage-report
+        
+    - name: Upload Coverage Report to Coveralls
+      if: success()
+      run: sbt coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        
+    - name: Upload Coverage to Codecov
+      if: success()
+      uses: codecov/codecov-action@v3
+      with:
+        files: target/scala-*/scoverage-report/scoverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: false
