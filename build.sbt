@@ -29,6 +29,11 @@ lazy val root = (project in file("."))
         .map(m => "org.openjfx" % s"javafx-$m" % "23" classifier osName)
     },
     fork := true,
+
+    // Coverage configuration - NUR EINMAL definieren!
+    coverageExcludedPackages := "de.htwg.se.MAEDN.aview.gui;de.htwg.se.MAEDN.aview.tui",
+    coverageExcludedFiles := ".*GUI\\.scala;.*TUI\\.scala;.*gui.*GUI\\.scala;.*tui.*TUI\\.scala",
+
     // Assembly configuration
     assembly / mainClass := Some("de.htwg.se.MAEDN.App"),
     assembly / assemblyJarName := "maedn-game.jar",

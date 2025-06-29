@@ -16,7 +16,7 @@ class TUI(controller: IController, terminal: Terminal)
   var continue = true
   controller.add(this)
 
-  // war mal private def writeline(s: String): Unit = {
+  // war mal protected def writeline(s: String): Unit = {
   protected def writeline(s: String): Unit = {
     terminal.writer().println(s)
     terminal.flush()
@@ -154,7 +154,7 @@ class TUI(controller: IController, terminal: Terminal)
     }
   }
 
-  private def printBoard(
+  protected def printBoard(
       beforeMessage: String,
       afterMessage: String
   ): String = {
@@ -169,7 +169,7 @@ class TUI(controller: IController, terminal: Terminal)
     message
   }
 
-  private def quit(): Unit = {
+  protected def quit(): Unit = {
     writeline(TextDisplay.clearTerminal())
     writeline("Exiting...")
     terminal.close()

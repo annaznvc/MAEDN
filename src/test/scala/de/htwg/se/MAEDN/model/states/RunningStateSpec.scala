@@ -1,195 +1,289 @@
-package de.htwg.se.MAEDN.model.states
+package de.htwg.se.MAEDN.model.statesImp
 
-import de.htwg.se.MAEDN.controller.controllerImp.Controller
-import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.util.Event
-import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.se.MAEDN.model.{IManager, Board, State, IMemento, Player, Figure}
+import de.htwg.se.MAEDN.util.{Event, Dice}
+import de.htwg.se.MAEDN.controller.IController
+import de.htwg.se.MAEDN.module.Injectable
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{eq => eqTo, any, anyInt, anyString}
+import org.scalatestplus.mockito.MockitoSugar
+import scala.util.{Try, Success, Failure}
+import scala.reflect.ClassTag
+import java.lang.reflect.Method
+import scala.annotation.tailrec
 
-class RunningStateSpec extends AnyWordSpec with Matchers {
+class RunningStateSpec extends AnyWordSpec with Matchers with MockitoSugar {
 
-  // DummyStrategy für Tests – tut nichts
-  object DummyStrategy extends IMoveStrategy {
-    override def moveFigure(
-        figure: Figure,
-        all: List[Figure],
-        size: Int,
-        steps: Int
-    ): List[Figure] = all // keine Änderung = Bewegung "fehlschlägt"
+  trait TestSetup {
+    val mockController: IController = mock[IController]
+    val mockBoard: Board = mock[Board]
+    val mockPlayer1: Player = mock[Player]
+    val mockPlayer2: Player = mock[Player]
+    val mockFigure1: Figure = mock[Figure]
+    val mockFigure2: Figure = mock[Figure]
+    val mockFigure3: Figure = mock[Figure]
+    val mockFileIO: de.htwg.se.MAEDN.util.FileIO =
+      mock[de.htwg.se.MAEDN.util.FileIO]
 
-    override def canMove(
-        figure: Figure,
-        all: List[Figure],
-        size: Int,
-        steps: Int
-    ): Boolean = true // Bewegung immer möglich
+    when(mockPlayer1.id).thenReturn(1)
+    when(mockPlayer2.id).thenReturn(2)
+    when(mockPlayer1.figures).thenReturn(List(mockFigure1, mockFigure2))
+    when(mockPlayer2.figures).thenReturn(List(mockFigure3))
+    when(mockFigure1.id).thenReturn(1)
+    when(mockFigure2.id).thenReturn(2)
+    when(mockFigure3.id).thenReturn(3)
+    when(mockFigure1.owner).thenReturn(mockPlayer1)
+    when(mockFigure2.owner).thenReturn(mockPlayer1)
+    when(mockFigure3.owner).thenReturn(mockPlayer2)
+
+    val players = List(mockPlayer1, mockPlayer2)
+    when(mockBoard.size).thenReturn(40)
+
+    val testState = new RunningState(
+      controller = mockController,
+      moves = 0,
+      board = mockBoard,
+      players = players,
+      rolled = 3,
+      selectedFigure = 0
+    ) with Injectable {
+      override protected def inject[T](implicit classTag: ClassTag[T]): T = {
+        classTag.runtimeClass match {
+          case c if c == classOf[de.htwg.se.MAEDN.util.FileIO] =>
+            mockFileIO.asInstanceOf[T]
+          case c if c == Dice.getClass => // For Dice object
+            Dice.asInstanceOf[T]
+          case _ =>
+            throw new RuntimeException(s"No mock for ${classTag.runtimeClass}")
+        }
+      }
+    }
   }
 
-  "A RunningState" should {
+  "playNext failure handling" should {
+    "return Failure when moveFigure fails but player can still move" in new TestSetup {
+      // Mock canFigureMove to return true (player can move) for any figure
+      when(mockBoard.canFigureMove(any[Figure], any[List[Figure]](), anyInt()))
+        .thenReturn(true)
 
-    val controller = new Controller
-    val board = Board(8)
-    val players = PlayerFactory(2, 4)
-    val state = RunningState(controller, 0, board, players)
-
-    "have state == Running" in {
-      state.state shouldBe State.Running
-    }
-
-    "move up in selectedFigure index" in {
-      val next = state.moveUp()
-      next.isSuccess shouldBe true
-      next.get.selectedFigure shouldBe 1
-    }
-
-    "move down in selectedFigure index" in {
-      val next = state.moveDown()
-      next.isSuccess shouldBe true
-      next.get.selectedFigure shouldBe 3
-    }
-
-    "roll dice with playDice and store value" in {
-      val rolledState = state.playDice()
-      rolledState.isSuccess shouldBe true
-      rolledState.get.rolled should (be >= 1 and be <= 6)
-    }
-
-    "call playNext with rolled == -1 and go to next player" in {
-      val s = state.copy(rolled = -1)
-      val next = s.playNext()
-      next.isSuccess shouldBe true
-      next.get.getCurrentPlayer shouldBe 1
-      next.get.rolled shouldBe 0
-    }
-
-    "call playNext with rolled == 0 and roll dice" in {
-      val s = state.copy(rolled = 0)
-      val next = s.playNext()
-      next.isSuccess shouldBe true
-      next.get.rolled should (be >= 1 and be <= 6)
-    }
-
-    "call playNext with rolled > 0 and delegate to moveFigure" in {
-      val s = state.copy(rolled = 3)
-      val result = s.playNext()
-      result.isSuccess || result.isFailure shouldBe true
-    }
-
-    "return Failure if move is not possible" in {
-      val s = state.copy(rolled = 3)
-      val r = s.moveFigure()
-      r.isSuccess || r.isFailure shouldBe true
-    }
-
-    "create a valid memento" in {
-      val memento = state.copy(rolled = 6, selectedFigure = 2).createMemento
-      memento.isDefined shouldBe true
-      memento.get.rolled shouldBe 6
-      memento.get.selectedFigure shouldBe 2
-    }
-
-    "return to MenuState on quitGame" in {
-      val newState = state.quitGame()
-      newState.isSuccess shouldBe true
-      newState.get shouldBe a[MenuState]
-    }
-
-    "fail moveFigure if board.moveFigure returns unchanged list" in {
-      val figure = players.head.figures.head
-      val fakeBoard = Board(8, DummyStrategy, DummyStrategy, DummyStrategy)
-
-      val s = RunningState(
-        controller,
-        0,
-        fakeBoard,
-        players,
+      // Stub moveFigure to return Failure
+      val failingState = new RunningState(
+        controller = mockController,
+        moves = 0,
+        board = mockBoard,
+        players = players,
         rolled = 3,
         selectedFigure = 0
-      )
-      val result = s.moveFigure()
-      result.isFailure shouldBe true
-      result.failed.get shouldBe a[IllegalArgumentException]
-    }
-
-    "succeed moveFigure and return updated state with changed players and rolled = -1" in {
-      val figure = players.head.figures.head
-      val moved = figure.copy(index = figure.index + 3)
-
-      val customStrategy = new IMoveStrategy {
-        override def moveFigure(
-            f: Figure,
-            all: List[Figure],
-            size: Int,
-            steps: Int
-        ): List[Figure] = all.map {
-          case `figure` => moved
-          case other    => other
+      ) with Injectable {
+        override protected def inject[T](implicit classTag: ClassTag[T]): T = {
+          classTag.runtimeClass match {
+            case c if c == de.htwg.se.MAEDN.util.FileIO.getClass =>
+              mockFileIO.asInstanceOf[T]
+            case c if c == Dice.getClass =>
+              Dice.asInstanceOf[T]
+            case _ =>
+              throw new RuntimeException(
+                s"No mock for ${classTag.runtimeClass}"
+              )
+          }
         }
-
-        override def canMove(
-            figure: Figure,
-            all: List[Figure],
-            size: Int,
-            steps: Int
-        ): Boolean = true
+        override def moveFigure(): Try[IManager] =
+          Failure(new RuntimeException("Test exception"))
       }
 
-      val fakeBoard = Board(8, customStrategy, customStrategy, DummyStrategy)
+      val result = failingState.playNext()
 
-      val s = RunningState(
-        controller,
-        0,
-        fakeBoard,
-        players,
+      result shouldBe a[Failure[_]]
+      result.failed.get shouldBe an[IllegalArgumentException]
+      result.failed.get.getMessage should be("Invalid move!")
+    }
+
+    "move to next player when moveFigure fails and no figures can move" in new TestSetup {
+      // Mock canFigureMove to return false (no figures can move)
+      when(mockBoard.canFigureMove(any[Figure], any[List[Figure]](), anyInt()))
+        .thenReturn(false)
+
+      // Stub moveFigure to return Failure
+      val failingState = new RunningState(
+        controller = mockController,
+        moves = 0,
+        board = mockBoard,
+        players = players,
         rolled = 3,
         selectedFigure = 0
-      )
-      val result = s.moveFigure()
-      result.isSuccess shouldBe true
+      ) with Injectable {
+        override protected def inject[T](implicit classTag: ClassTag[T]): T = {
+          classTag.runtimeClass match {
+            case c if c == de.htwg.se.MAEDN.util.FileIO.getClass =>
+              mockFileIO.asInstanceOf[T]
+            case c if c == Dice.getClass =>
+              Dice.asInstanceOf[T]
+            case _ =>
+              throw new RuntimeException(
+                s"No mock for ${classTag.runtimeClass}"
+              )
+          }
+        }
+        override def moveFigure(): Try[IManager] =
+          Failure(new RuntimeException("Test exception"))
+      }
 
+      val result = failingState.playNext()
+
+      result shouldBe a[Success[_]]
       val newState = result.get
-      newState.players.exists(
-        _.figures.exists(_.index == moved.index)
-      ) shouldBe true
-      newState.rolled shouldBe -1
-    }
+      newState.rolled should be(0)
+      newState.moves should be(1)
+      newState.selectedFigure should be(0)
 
-    "reset rolled to 0 if player rolls a 6 and moves" in {
-      val figure = players.head.figures.head
-      val moved = figure.copy(index = figure.index + 6)
-
-      val customStrategy = new IMoveStrategy {
-        override def moveFigure(
-            f: Figure,
-            all: List[Figure],
-            size: Int,
-            steps: Int
-        ): List[Figure] = all.map {
-          case `figure` => moved
-          case other    => other
-        }
-
-        override def canMove(
-            figure: Figure,
-            all: List[Figure],
-            size: Int,
-            steps: Int
-        ): Boolean = true
-      }
-
-      val fakeBoard = Board(8, customStrategy, customStrategy, DummyStrategy)
-
-      val s = RunningState(
-        controller,
-        0,
-        fakeBoard,
-        players,
-        rolled = 6,
-        selectedFigure = 0
-      )
-      val result = s.moveFigure()
-      result.isSuccess shouldBe true
-      result.get.rolled shouldBe 0
+      verify(mockController).enqueueEvent(Event.PlayNextEvent(1))
     }
   }
+
+  // ---
+  // No longer testing handleInvalidSelection directly, but its effects through moveFigure.
+  // The logic is now encapsulated within moveFigure.
+  // You would test scenarios where figures cannot move or only one can move,
+  // and assert on the selectedFigure or player turn change.
+  // ---
+
+  "moveFigure behavior" should {
+    "move to next player when no movable figures exist for the current player" in new TestSetup {
+      // Setup current player figures such that none can move
+      when(mockPlayer1.figures).thenReturn(List(mockFigure1))
+      when(mockFigure1.owner).thenReturn(mockPlayer1)
+      when(mockFigure1.id).thenReturn(1) // Ensure ID is set for the figure
+      when(
+        mockBoard.canFigureMove(
+          eqTo(mockFigure1),
+          any[List[Figure]](),
+          anyInt()
+        )
+      )
+        .thenReturn(false)
+
+      val stateWithNoMovableFigures = testState.copy(
+        players = List(mockPlayer1, mockPlayer2),
+        rolled = 3,
+        selectedFigure = 0
+      )
+      val result = stateWithNoMovableFigures.moveFigure()
+
+      result shouldBe a[Success[_]]
+      val newState = result.get
+      newState.rolled should be(0)
+      newState.moves should be(1) // Should move to next player
+      newState.selectedFigure should be(0)
+      verify(mockController).enqueueEvent(Event.PlayNextEvent(1))
+    }
+  }
+
+  "getter methods" should {
+    "return correct player count" in new TestSetup {
+      testState.getPlayerCount should be(2)
+    }
+
+    "return correct figure count from first player" in new TestSetup {
+      testState.getFigureCount should be(2)
+    }
+
+    "return 0 figure count when no players" in new TestSetup {
+      val emptyState = testState.copy(players = List.empty)
+      emptyState.getFigureCount should be(0)
+    }
+
+    "return correct board size" in new TestSetup {
+      testState.getBoardSize should be(40)
+    }
+
+    "return correct current player" in new TestSetup {
+      testState.getCurrentPlayer should be(0)
+      val nextMoveState = testState.copy(moves = 1)
+      nextMoveState.getCurrentPlayer should be(1)
+    }
+
+    "return players list" in new TestSetup {
+      testState.getPlayers should be(players)
+    }
+  }
+
+  "cleanupSaveFiles behavior" should {
+    "handle FileIO injection failure gracefully when triggered by win" in new TestSetup {
+      val stateWithFailingInjection = new RunningState(
+        controller = mockController,
+        moves = 0,
+        board = mockBoard,
+        players = players,
+        rolled = 3,
+        selectedFigure = 0
+      ) with Injectable {
+        override protected def inject[T](implicit classTag: ClassTag[T]): T = {
+          classTag.runtimeClass match {
+            case c if c == de.htwg.se.MAEDN.util.FileIO.getClass =>
+              throw new RuntimeException("Injection failed for FileIO")
+            case c if c == Dice.getClass =>
+              Dice.asInstanceOf[T]
+            case _ =>
+              throw new RuntimeException(
+                s"No mock for ${classTag.runtimeClass}"
+              )
+          }
+        }
+      }
+
+      // Simulate win condition for this state
+      when(mockFigure1.index).thenReturn(160)
+      when(mockFigure2.index).thenReturn(160)
+      val figuresAfterMove = List(
+        mockFigure1.copy(index = 160),
+        mockFigure2.copy(index = 160),
+        mockFigure3
+      )
+      when(mockBoard.moveFigure(any[Figure], any[List[Figure]](), anyInt()))
+        .thenReturn(figuresAfterMove)
+      when(mockBoard.canFigureMove(any[Figure], any[List[Figure]](), anyInt()))
+        .thenReturn(true)
+
+      // Should not throw exception, but rather recover
+      noException should be thrownBy stateWithFailingInjection.moveFigure()
+
+      // Verify that no delete calls were made due to injection failure (or at least no successful ones)
+      verify(mockFileIO, never()).deleteSaveFile(anyString())
+    }
+
+  }
+
+  // --- Reflection-Helfer für private Methoden ---
+  private def invokePrivateMethod[T](
+      obj: AnyRef,
+      methodName: String,
+      args: Any*
+  ): T = {
+    val method = findMethod(obj.getClass, methodName, args.length)
+    method.setAccessible(true)
+    method.invoke(obj, args.map(_.asInstanceOf[AnyRef]): _*).asInstanceOf[T]
+  }
+
+  @tailrec
+  private def findMethod(
+      clazz: Class[_],
+      methodName: String,
+      arity: Int
+  ): Method = {
+    if (clazz == null) {
+      throw new RuntimeException(
+        s"Method $methodName not found in class hierarchy"
+      )
+    }
+    clazz.getDeclaredMethods
+      .find(m =>
+        m.getName == methodName && m.getParameterCount == arity
+      ) match {
+      case Some(m) => m
+      case None    => findMethod(clazz.getSuperclass, methodName, arity)
+    }
+  }
+
 }

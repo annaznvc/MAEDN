@@ -1,10 +1,11 @@
 package de.htwg.se.MAEDN.model.strategy
 
-import de.htwg.se.MAEDN.model.{Board, Figure, MoveStrategy, Collision}
+import de.htwg.se.MAEDN.model._
 import de.htwg.se.MAEDN.util.Position
-import de.htwg.se.MAEDN.module.Injectable
+import de.htwg.se.MAEDN.util.Color
+// import de.htwg.se.MAEDN.model.StrategyImp.KickFigureStrategy
 
-class NormalMoveStrategy extends MoveStrategy with Injectable {
+class NormalMoveStrategy extends MoveStrategy {
   override def moveFigure(
       figure: Figure,
       figures: List[Figure],

@@ -1,8 +1,8 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.controller.controllerImp.Controller
-import de.htwg.se.MAEDN.model.states.MenuState
-import de.htwg.se.MAEDN.model.states._
+import de.htwg.se.MAEDN.model.statesImp.MenuState
+import de.htwg.se.MAEDN.util.PlayerFactory
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -14,7 +14,7 @@ class ManagerSpec extends AnyWordSpec with Matchers {
     val defaultBoard = Board(8)
     val defaultPlayers = PlayerFactory(2, 4)
 
-    val manager: Manager = MenuState(
+    val manager: IManager = MenuState(
       controller,
       moves = 0,
       board = defaultBoard,
@@ -33,43 +33,18 @@ class ManagerSpec extends AnyWordSpec with Matchers {
       manager.getBoardSize shouldBe 8
     }
 
-    "calculate the current player based on moves" in {
-      val m0 = MenuState(
-        controller,
-        moves = 0,
-        board = defaultBoard,
-        players = defaultPlayers
-      )
-      val m1 = MenuState(
-        controller,
-        moves = 1,
-        board = defaultBoard,
-        players = defaultPlayers
-      )
-      val m2 = MenuState(
-        controller,
-        moves = 2,
-        board = defaultBoard,
-        players = defaultPlayers
-      )
-
-      m0.getCurrentPlayer shouldBe 0
-      m1.getCurrentPlayer shouldBe 1
-      m2.getCurrentPlayer shouldBe 0
-    }
-
     "return itself or a valid next state for default implementations" in {
-      manager.increaseBoardSize().get shouldBe a[Manager]
-      manager.decreaseBoardSize().get shouldBe a[Manager]
-      manager.increaseFigures().get shouldBe a[Manager]
-      manager.decreaseFigures().get shouldBe a[Manager]
-      manager.moveUp().get shouldBe a[Manager]
-      manager.moveDown().get shouldBe a[Manager]
-      manager.playDice().get shouldBe a[Manager]
-      manager.playNext().get shouldBe a[Manager]
-      manager.quitGame().get shouldBe a[Manager]
-      manager.startGame().get shouldBe a[Manager]
-      manager.moveFigure().get shouldBe a[Manager]
+      manager.increaseBoardSize().get shouldBe a[IManager]
+      manager.decreaseBoardSize().get shouldBe a[IManager]
+      manager.increaseFigures().get shouldBe a[IManager]
+      manager.decreaseFigures().get shouldBe a[IManager]
+      manager.moveUp().get shouldBe a[IManager]
+      manager.moveDown().get shouldBe a[IManager]
+      manager.playDice().get shouldBe a[IManager]
+      manager.playNext().get shouldBe a[IManager]
+      manager.quitGame().get shouldBe a[IManager]
+      manager.startGame().get shouldBe a[IManager]
+      manager.moveFigure().get shouldBe a[IManager]
     }
 
     "have no memento by default" in {
@@ -79,7 +54,7 @@ class ManagerSpec extends AnyWordSpec with Matchers {
 
   "A DummyManager using default Manager trait" should {
 
-    class DummyManager extends Manager {
+    class DummyManager extends IManager {
       override val controller: Controller = new Controller
       override val moves: Int = 0
       override val board: Board = Board(8)

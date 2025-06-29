@@ -1,6 +1,7 @@
 package de.htwg.se.MAEDN.model
 
 import de.htwg.se.MAEDN.util.Color
+import de.htwg.se.MAEDN.util.PlayerFactory
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 

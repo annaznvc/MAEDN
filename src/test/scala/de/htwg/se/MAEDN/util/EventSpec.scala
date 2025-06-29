@@ -15,32 +15,32 @@ class EventSpec extends AnyWordSpec with Matchers {
     }
 
     "have correct priority for game events" in {
-      Event.PlayNextEvent(1).priority shouldBe 1
-      Event.PlayDiceEvent(6).priority shouldBe 2
-      Event.MoveFigureEvent(0).priority shouldBe 3
-      Event.ChangeSelectedFigureEvent(42).priority shouldBe 4
-      Event.KickFigureEvent.priority shouldBe 5
+      Event.PlayNextEvent(1).priority shouldBe 2
+      Event.PlayDiceEvent(6).priority shouldBe 3
+      Event.MoveFigureEvent(0).priority shouldBe 4
+      Event.ChangeSelectedFigureEvent(42).priority shouldBe 5
+      Event.KickFigureEvent.priority shouldBe 6
     }
 
     "have correct priority for command events" in {
-      Event.UndoEvent.priority shouldBe 6
-      Event.RedoEvent.priority shouldBe 6
+      Event.UndoEvent.priority shouldBe 7
+      Event.RedoEvent.priority shouldBe 7
     }
 
     "have correct priority for error events" in {
-      Event.ErrorEvent("Something went wrong").priority shouldBe 7
+      Event.ErrorEvent("Something went wrong").priority shouldBe 8
     }
 
     "be comparable via priority ordering" in {
       val sorted = List(
-        Event.MoveFigureEvent(1), // 3
+        Event.MoveFigureEvent(1), // 4
         Event.StartGameEvent, // 0
-        Event.ErrorEvent("err"), // 7
-        Event.PlayNextEvent(9), // 1
-        Event.ChangeSelectedFigureEvent(5) // 4
+        Event.ErrorEvent("err"), // 8
+        Event.PlayNextEvent(9), // 2
+        Event.ChangeSelectedFigureEvent(5) // 5
       ).sorted(Observable.eventOrdering)
 
-      sorted.map(_.priority) shouldBe Seq(0, 1, 3, 4, 7)
+      sorted.map(_.priority) shouldBe Seq(0, 2, 4, 5, 8)
     }
   }
 }

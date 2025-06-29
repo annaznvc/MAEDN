@@ -1,8 +1,10 @@
 package de.htwg.se.MAEDN.controller
 
 import de.htwg.se.MAEDN.model._
-import de.htwg.se.MAEDN.controller.command.Command
+import de.htwg.se.MAEDN.model.gameDataImp.GameData
+import de.htwg.se.MAEDN.controller.command.{Command, QuitGameCommand}
 import de.htwg.se.MAEDN.util._
+import de.htwg.se.MAEDN.util.FileIO
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.concurrent.Eventually
@@ -31,7 +33,7 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
 
       controller.executeCommand(command)
 
-      controller.undoStack.top shouldBe initialMemento
+      (controller.undoStack.top eq initialMemento) shouldBe true
       controller.redoStack shouldBe empty
     }
 
@@ -67,20 +69,19 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
         captured shouldBe Some(Event.ErrorEvent("fail"))
       }
     }
+
     "update manager and notifyObservers on success" in {
       val controller = new Controller
       var wasNotified = false
 
       controller.add(new Observer {
-        override def processEvent(event: Event): Unit = {
+        override def processEvent(event: Event): Unit =
           if event == Event.StartGameEvent then wasNotified = true
-        }
       })
 
-      // 👉 Simuliere ein echtes Ereignis, das vom Observer verarbeitet werden kann
+      // Simuliere ein echtes Enqueue + notifyObservers
       controller.enqueueEvent(Event.StartGameEvent)
 
-      // 👉 Führe erfolgreichen Command aus (der ruft notifyObservers() auf)
       val command = new DummyCommand(
         isNormal = true,
         result = Success(new DummyManager(controller))
@@ -93,6 +94,50 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
       }
     }
 
+    // === Tests für QuitGameCommand bei State.GameOver ===
+
+       
+
+    "handle QuitGameCommand failure when game is over and enqueue error event" in {
+      val controller = new Controller
+      var captured: Option[Event] = None
+
+      controller.add(new Observer {
+        override def processEvent(e: Event): Unit = captured = Some(e)
+      })
+
+      val dummyFileIO = new FileIO {
+        override def save[T <: Serializable[T]](
+            data: T,
+            filename: String,
+            format: FileFormat,
+            encrypt: Boolean = false
+        ): Try[String] = Success("dummy/path")
+
+        override def load[T](
+            filename: String,
+            deserializer: Deserializable[T]
+        ): Try[T] = Failure(new RuntimeException("nicht benötigt"))
+
+        override def listSaveFiles(format: Option[FileFormat] = None): Try[List[String]] =
+          Success(Nil)
+      }
+
+      controller.manager = new DummyManager(controller) {
+        override val state: State = State.GameOver
+      }
+
+      class DummyQuitCommand(result: Try[IManager])
+          extends QuitGameCommand(controller, dummyFileIO) {
+        override def execute(): Try[IManager] = result
+      }
+
+      controller.executeCommand(new DummyQuitCommand(Failure(new RuntimeException("quit failed"))))
+
+      eventually {
+        captured shouldBe Some(Event.ErrorEvent("quit failed"))
+      }
+    }
   }
 
   // === Dummy-Implementierungen ===
@@ -108,7 +153,7 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
   class DummyManager(
       override val controller: Controller,
       memento: Option[GameData] = Some(dummyGameData)
-  ) extends Manager {
+  ) extends IManager {
     override val rolled: Int = 0
     override val state: State = State.Menu
     override def createMemento: Option[GameData] = memento
@@ -116,8 +161,8 @@ class ControllerSpec extends AnyWordSpec with Matchers with Eventually {
 
   class DummyCommand(
       override val isNormal: Boolean,
-      val result: Try[Manager]
+      val result: Try[IManager]
   ) extends Command {
-    override def execute(): Try[Manager] = result
+    override def execute(): Try[IManager] = result
   }
 }

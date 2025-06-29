@@ -71,7 +71,7 @@ object DependencyInjector {
       additionalModules: com.google.inject.Module*
   ): Injector = {
     val allModules = Seq(MAEDNModule()) ++ additionalModules
-    Guice.createInjector(allModules*)
+    Guice.createInjector(allModules *)
   }
 }
 
